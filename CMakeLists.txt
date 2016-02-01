@@ -5,6 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(PkgConfig REQUIRED)
 
+find_package(Eigen3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
@@ -14,6 +15,7 @@ pkg_search_module(FTGL REQUIRED ftgl)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
 
 include_directories(${OPENGL_INCLUDE_DIRS}
+                    ${EIGEN3_INCLUDE_DIR}
                     ${SDL_INCLUDE_DIR}
                     ${SDL_IMAGE_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
@@ -52,12 +54,14 @@ file(GLOB_RECURSE HEADERS src/*.hpp)
 
 add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} 
+                        ${EIGEN3_LIBRARIES} 
                         ${OPENGL_LIBRARIES} 
                         ${SDL_LIBRARY} 
                         ${SDL_IMAGE_LIBRARIES} 
                         ${Boost_LIBRARIES} 
                         ${FTGL_LIBRARIES}
                         ${JSONCPP_LIBRARIES})
+
 
 install(TARGETS ${PROJECT_NAME}
     ARCHIVE DESTINATION lib

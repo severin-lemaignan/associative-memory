@@ -23,7 +23,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "oroview.h"
+#include "memoryview.h"
 #include "macros.h"
 #include "graph.h"
 #include "edge.h"
@@ -49,7 +49,7 @@ void Graph::step(float dt) {
     }
 }
 
-void Graph::render(rendering_mode mode, OroView& env, bool debug) {
+void Graph::render(rendering_mode mode, MemoryView& env, bool debug) {
 
     // Renders edges
     BOOST_FOREACH(Edge& e, edges) {
@@ -72,7 +72,7 @@ Node& Graph::getNode(const string& id) {
     AliasMap::iterator it = aliases.find(hash_value(id));
 
     if (it == aliases.end())
-        throw OroViewException("Node " + id + " not found");
+        throw MemoryViewException("Node " + id + " not found");
 
     return *(it->second);
 
@@ -83,7 +83,7 @@ const Node& Graph::getConstNode(const string& id) const {
     AliasMap::const_iterator it = aliases.find(hash_value(id));
 
     if (it == aliases.end())
-        throw OroViewException("Node " + id + " not found");
+        throw MemoryViewException("Node " + id + " not found");
 
     return *(it->second);
 
@@ -384,7 +384,7 @@ vec2f Graph::project(float force, const vec2f& d) const {
     return res;
 }
 
-void Graph::saveToGraphViz(OroView& env) {
+void Graph::saveToGraphViz(MemoryView& env) {
 
     env.graphvizGraph << "strict digraph ontology {\n";
 

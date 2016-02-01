@@ -23,7 +23,7 @@
 
 #include <json/json.h>
 
-#include "oroview.h"
+#include "memoryview.h"
 
 #include "macros.h"
 #include "styles.h"
@@ -34,12 +34,12 @@
 
 using namespace std;
 
-OroView::OroView(const Json::Value& config):
+MemoryView::MemoryView(const Json::Value& config):
     config(config),
-    display_shadows(config.get("shadows", "true").asBool()),
-    display_labels(config.get("display_labels", "true").asBool()),
-    display_footer(config.get("display_footer", "true").asBool()),
-    only_labelled_nodes(config.get("only_labelled_nodes", "false").asBool())
+    display_shadows(config.get("shadows", true).asBool()),
+    display_labels(config.get("display_labels", true).asBool()),
+    display_footer(config.get("display_footer", true).asBool()),
+    only_labelled_nodes(config.get("only_labelled_nodes", false).asBool())
 {
 
 
@@ -104,7 +104,7 @@ OroView::OroView(const Json::Value& config):
     background_colour = BACKGROUND_COLOUR.truncate();
 }
 
-void OroView::stylesSetup(const Json::Value& config) {
+void MemoryView::stylesSetup(const Json::Value& config) {
 
     Json::Value colors = config["colours"];
 
@@ -134,7 +134,7 @@ void OroView::stylesSetup(const Json::Value& config) {
 
 }
 
-void OroView::physicsSetup(const Json::Value& config) {
+void MemoryView::physicsSetup(const Json::Value& config) {
 
     Json::Value physics = config["physics"];
 
@@ -157,7 +157,7 @@ void OroView::physicsSetup(const Json::Value& config) {
 
 }
 
-vec4f OroView::convertRGBA2Float(const Json::Value& color) {
+vec4f MemoryView::convertRGBA2Float(const Json::Value& color) {
     return vec4f(color[0u].asInt()/255.0,
                  color[1u].asInt()/255.0,
                  color[2u].asInt()/255.0,
@@ -165,7 +165,7 @@ vec4f OroView::convertRGBA2Float(const Json::Value& color) {
 }
 
 /** Initialization */
-void OroView::init(){
+void MemoryView::init(){
 
     TRACE("*** Initialization ***");
 
@@ -181,7 +181,7 @@ void OroView::init(){
 }
 
 /** Events */
-void OroView::keyPress(SDL_KeyboardEvent *e) {
+void MemoryView::keyPress(SDL_KeyboardEvent *e) {
     if (e->type == SDL_KEYUP) return;
 
     if (e->type == SDL_KEYDOWN) {
@@ -229,7 +229,7 @@ void OroView::keyPress(SDL_KeyboardEvent *e) {
     }
 }
 
-void OroView::mouseClick(SDL_MouseButtonEvent *e) {
+void MemoryView::mouseClick(SDL_MouseButtonEvent *e) {
 
     if(e->type == SDL_MOUSEBUTTONUP) {
 
@@ -278,7 +278,7 @@ void OroView::mouseClick(SDL_MouseButtonEvent *e) {
 
 }
 
-void OroView::mouseMove(SDL_MouseMotionEvent *e) {
+void MemoryView::mouseMove(SDL_MouseMotionEvent *e) {
 
     mousepos = vec2f(e->x, e->y);
 
@@ -302,7 +302,7 @@ void OroView::mouseMove(SDL_MouseMotionEvent *e) {
 }
 
 /** main update function */
-void OroView::update(float t, float dt) {
+void MemoryView::update(float t, float dt) {
 
     SDL_Delay(20); //N'allons pas trop vite au début...
 
@@ -326,7 +326,7 @@ void OroView::update(float t, float dt) {
     framecount++;
 }
 
-void OroView::updateTime() {
+void MemoryView::updateTime() {
     //display date
     char datestr[256];
     char timestr[256];
@@ -341,7 +341,7 @@ void OroView::updateTime() {
 }
 
 /** App logic */
-void OroView::logic(float t, float dt) {
+void MemoryView::logic(float t, float dt) {
     if(draw_loading && logic_time > 1000) draw_loading = false;
 
     //still want to update camera while paused
@@ -366,7 +366,7 @@ void OroView::logic(float t, float dt) {
     //        g.getNode(id).tickle();
     //        queueNodeInFooter(id);
     //    }
-    //    catch(OroViewException& exception) {
+    //    catch(MemoryViewException& exception) {
     //        cout << "One of the active concept do not exist yet: " << id << ". Creating it." << endl;
     //        oro.addNode(id, g);
     //        g.getNode(id).tickle();
@@ -381,7 +381,7 @@ void OroView::logic(float t, float dt) {
     updateCamera(dt);
 }
 
-void OroView::mouseTrace(Frustum& frustum, float dt) {
+void MemoryView::mouseTrace(Frustum& frustum, float dt) {
 
     GLuint	buffer[512];
     GLint	viewport[4];
@@ -504,7 +504,7 @@ void OroView::mouseTrace(Frustum& frustum, float dt) {
 }
 
 /** Drawing */
-void OroView::draw(float t, float dt) {
+void MemoryView::draw(float t, float dt) {
 
     Node* selectedNode = g.getSelected();
 
@@ -661,15 +661,15 @@ void OroView::draw(float t, float dt) {
 
 }
 
-void OroView::drawBackground(float dt) {
+void MemoryView::drawBackground(float dt) {
     display.setClearColour(background_colour);
     display.clear();
 }
 
-void OroView::queueNodeInFooter(const string& id) {
+void MemoryView::queueNodeInFooter(const string& id) {
     queueInFooter(g.getNode(id).renderer.getLabel());
 }
-void OroView::queueInFooter(const string& text) {
+void MemoryView::queueInFooter(const string& text) {
 
     int max_x = display.width + 10;
 
@@ -683,7 +683,7 @@ void OroView::queueInFooter(const string& text) {
     footer_content[text] = max_x;
 }
 
-void OroView::drawFooter() {
+void MemoryView::drawFooter() {
 
     glColor4f(1.0f, 1.0f, 0.8f, 0.7f);
 
@@ -706,7 +706,7 @@ void OroView::drawFooter() {
 
 }
 
-void OroView::loadingScreen() {
+void MemoryView::loadingScreen() {
     display.mode2D();
 
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -721,7 +721,7 @@ void OroView::loadingScreen() {
     font.print(display.width/2 - width/2, display.height/2 - 10, "%s", loading_message.c_str());
 }
 
-void OroView::drawVector(vec2f vec, vec2f pos, vec4f col) {
+void MemoryView::drawVector(vec2f vec, vec2f pos, vec4f col) {
 
     float radius = 5.0;
 
@@ -767,7 +767,7 @@ void OroView::drawVector(vec2f vec, vec2f pos, vec4f col) {
     glPopMatrix();
 }
 
-void OroView::displayCoulombField() {
+void MemoryView::displayCoulombField() {
     for (float i = -200.0; i < 200.0; i += 40.0) {
         for (float j = -200.0; j < 200.0; j += 40.0) {
             vec2f pos(i, j);
@@ -777,7 +777,7 @@ void OroView::displayCoulombField() {
     }
 }
 /** Camera */
-void OroView::updateCamera(float dt) {
+void MemoryView::updateCamera(float dt) {
 
     //camera tracking
 
@@ -806,13 +806,13 @@ void OroView::updateCamera(float dt) {
     camera.logic(dt);
 }
 
-void OroView::setCameraMode(bool track_users) {
+void MemoryView::setCameraMode(bool track_users) {
     this->track_users = track_users;
     if(selectedUser!=NULL) camera.lockOn(track_users);
     backgroundSelected=false;
 }
 
-void OroView::zoom(bool zoomin) {
+void MemoryView::zoom(bool zoomin) {
 
     float min_distance = camera.getMinDistance();
     float max_distance = camera.getMaxDistance();
@@ -833,12 +833,12 @@ void OroView::zoom(bool zoomin) {
 }
 
 /** Background */
-void OroView::setBackground(vec3f background) {
+void MemoryView::setBackground(vec3f background) {
     background_colour = background;
 }
 
 //trace click of mouse on background
-void OroView::selectBackground() {
+void MemoryView::selectBackground() {
 
     backgroundSelected = true;
 
@@ -865,7 +865,7 @@ void OroView::selectBackground() {
 
 /** Nodes */
 //select a node, deselect current node
-void OroView::selectNode(Node* node) {
+void MemoryView::selectNode(Node* node) {
 
     if (node->selected) return;
 
@@ -880,7 +880,7 @@ void OroView::selectNode(Node* node) {
 }
 
 //select a node, keep currently selected node
-void OroView::addSelectedNode(Node* node) {
+void MemoryView::addSelectedNode(Node* node) {
 
     backgroundSelected=false;
 
@@ -891,12 +891,12 @@ void OroView::addSelectedNode(Node* node) {
     }
 }
 
-void OroView::addAlias(const string& alias, const string& id) {
+void MemoryView::addAlias(const string& alias, const string& id) {
     g.addAlias(alias, id);
 }
 
 //Add node
-bool OroView::addNodeConnectedTo(const string& id,
+bool MemoryView::addNodeConnectedTo(const string& id,
                                  const string& node_label,
                                  const string& to,
                                  relation_type type,
@@ -910,7 +910,7 @@ bool OroView::addNodeConnectedTo(const string& id,
     try {
         neighbour = &g.getNode(to);
     }
-    catch(OroViewException& exception) {
+    catch(MemoryViewException& exception) {
         //neighbour not found, create it.
         TRACE("Neighbour " << to << " not found. Creating it.");
 
@@ -924,7 +924,7 @@ bool OroView::addNodeConnectedTo(const string& id,
         //if yes, reuse it
         n = &g.getNode(id);
     }
-    catch(OroViewException& exception) {
+    catch(MemoryViewException& exception) {
         //if not, create it, create it.
         TRACE("Not existing myself (" << id << "). Creating myself.");
 
@@ -985,11 +985,11 @@ bool OroView::addNodeConnectedTo(const string& id,
     return true;
 }
 
-Node& OroView::getNode(const std::string &id) {
+Node& MemoryView::getNode(const std::string &id) {
     return g.getNode(id);
 }
 
-void OroView::updateCurrentNode() {
+void MemoryView::updateCurrentNode() {
     Node* selectedNode = g.getSelected();
 
     if (selectedNode != NULL) {
@@ -1000,7 +1000,7 @@ void OroView::updateCurrentNode() {
 }
 
 /** Testing */
-void OroView::addRandomNodes(int amount,int nb_rel) {
+void MemoryView::addRandomNodes(int amount,int nb_rel) {
 
     const int length = 6; //length of randomly created ID.
 

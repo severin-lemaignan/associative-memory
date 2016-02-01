@@ -23,7 +23,7 @@
 #include "edge_renderer.h"
 #include "styles.h"
 
-class OroView;
+class MemoryView;
 class Graph;
 class Node;
 class NodeRelation;
@@ -59,7 +59,7 @@ public:
     //bool hasOutboundConnectionFrom(const Node* node) const;
 
     void step(Graph& g, float dt);
-    void render(rendering_mode mode, OroView& env);
+    void render(rendering_mode mode, MemoryView& env);
 
     const std::string& getId1() const;
     const std::string& getId2() const;

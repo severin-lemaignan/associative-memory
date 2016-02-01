@@ -23,7 +23,7 @@
 #include "macros.h"
 #include "constants.h"
 
-#include "oroview.h"
+#include "memoryview.h"
 #include "graph.h"
 #include "node.h"
 #include "node_relation.h"
@@ -216,7 +216,7 @@ void Node::step(Graph& g, float dt){
 
 }
 
-void Node::render(rendering_mode mode, OroView& env, bool debug){
+void Node::render(rendering_mode mode, MemoryView& env, bool debug){
 
 #ifndef TEXT_ONLY
         if (distance_to_selected >= MAX_NODE_LEVELS) return;
@@ -228,10 +228,10 @@ void Node::render(rendering_mode mode, OroView& env, bool debug){
 
         if (debug) {
             vec4f col(1.0, 0.2, 0.2, 0.7);
-            OroView::drawVector(hookeForce , pos, col);
+            MemoryView::drawVector(hookeForce , pos, col);
 
             col = vec4f(0.2, 1.0, 0.2, 0.7);
-            OroView::drawVector(coulombForce , pos, col);
+            MemoryView::drawVector(coulombForce , pos, col);
         }
 
 #endif

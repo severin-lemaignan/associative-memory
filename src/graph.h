@@ -22,13 +22,13 @@
 #include <vector>
 #include <set>
 
-#include "oroview_exceptions.h"
+#include "memoryview_exceptions.h"
 
 #include "node.h"
 #include "edge.h"
 #include "node_relation.h"
 
-class OroView;
+class MemoryView;
 
 class Graph
 {
@@ -67,7 +67,7 @@ public:
       In simple mode, neither edges or special effects are rendered. Useful for picking selected
       primitive in OpenGL GL_SELECT mode.
       */
-    void render(rendering_mode mode, OroView& env, bool debug = false);
+    void render(rendering_mode mode, MemoryView& env, bool debug = false);
 
     /**
       Returns an immutable reference to the list of nodes.
@@ -143,7 +143,7 @@ public:
     /** Save the current configuration of (displayed) nodes to a file
     (graph.dot)
     **/
-    void saveToGraphViz(OroView& env);
+    void saveToGraphViz(MemoryView& env);
 
 };
 

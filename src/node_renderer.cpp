@@ -20,7 +20,7 @@
 
 #include "node_renderer.h"
 #include "macros.h"
-#include "oroview.h"
+#include "memoryview.h"
 
 using namespace std;
 
@@ -122,7 +122,7 @@ void NodeRenderer::increment_idle_time(float dt) {
     else idle_time += dt;
 }
 
-void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, OroView& env, int distance_to_selected) {
+void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, int distance_to_selected) {
 
     current_distance_to_selected = distance_to_selected;
 

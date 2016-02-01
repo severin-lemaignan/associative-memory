@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "oroview_exceptions.h"
+#include "memoryview_exceptions.h"
 
 #include "node_relation.h"
 

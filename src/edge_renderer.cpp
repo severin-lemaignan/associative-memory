@@ -19,7 +19,7 @@
 #include "edge_renderer.h"
 
 #include "node.h"
-#include "oroview.h"
+#include "memoryview.h"
 
 using namespace std;
 
@@ -41,7 +41,7 @@ float EdgeRenderer::getAlpha() {
     return std::max(0.0f, FADE_TIME - (idle_time * std::max(1, current_distance_to_selected)))/FADE_TIME;
 }
 
-void EdgeRenderer::draw(rendering_mode mode, OroView& env, int distance_to_selected) {
+void EdgeRenderer::draw(rendering_mode mode, MemoryView& env, int distance_to_selected) {
 
     current_distance_to_selected = distance_to_selected;
 

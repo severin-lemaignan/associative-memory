@@ -26,7 +26,7 @@
 #include "styles.h"
 #include "spline.h"
 
-class OroView;
+class MemoryView;
 
 class EdgeRenderer
 {
@@ -57,7 +57,7 @@ public:
 
     EdgeRenderer(int tagid, const std::string& label = "", relation_type type = UNDEFINED);
 
-    void draw(rendering_mode mode, OroView& env, int distance_to_selected);
+    void draw(rendering_mode mode, MemoryView& env, int distance_to_selected);
 
     void update(vec2f pos1, vec4f col1, vec2f pos2, vec4f col2, vec2f spos);
 

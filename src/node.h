@@ -28,7 +28,7 @@
 #include "node_relation.h"
 
 class Graph;
-class OroView;
+class MemoryView;
 
 class Node
 {
@@ -107,7 +107,7 @@ public:
       In simple mode, no special effects are rendered. Useful for picking selected
       primitive in OpenGL GL_SELECT mode.
       */
-    void render(rendering_mode mode, OroView& env, bool debug = false);
+    void render(rendering_mode mode, MemoryView& env, bool debug = false);
 
     void decay();
 

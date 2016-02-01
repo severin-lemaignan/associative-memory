@@ -26,7 +26,7 @@
 #include "core/sdlapp.h"
 #include "core/display.h"
 
-#include "oroview.h"
+#include "memoryview.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     desc.add_options()
             ("help,h", "produce help message")
             ("fullscreen,f", "fullscreen")
-            ("g", po::value<string>()->default_value("1024x768"), "window geometry (LxH)")
+            ("geometry,g", po::value<string>()->default_value("1024x768"), "window geometry (LxH)")
             ("configuration", po::value<string>(), "rendering configuration (JSON, optional)")
             ;
 
@@ -78,8 +78,7 @@ int main(int argc, char *argv[]) {
         fullscreen = true;
     }
 
-    if (vm.count("geometry")) {
-        
+
         //get video mode
         auto argstr = vm["geometry"].as<string>();
         size_t x = argstr.rfind("x");
@@ -91,14 +90,12 @@ int main(int argc, char *argv[]) {
             int w = atoi(widthstr.c_str());
             int h = atoi(heightstr.c_str());
 
-            if(width!=0 && height!=0) {
-                debugLog("w=%d, h=%d\n",width,height);
+            assert(!(w!=0 && h!=0));
 
-                width = w;
-                height = h;
-            }
+            width = w;
+            height = h;
+            cerr << "Window size: w=" << width << ", h=" << height << endl;
         }
-    }
 
 
     float start_position = 0.0;
@@ -139,33 +136,33 @@ int main(int argc, char *argv[]) {
 
     } catch(SDLInitException& exception) {
 
-        throw OroViewException(string("SDL initialization failed ") + exception.what());
+        throw MemoryViewException(string("SDL initialization failed ") + exception.what());
     }
 
     if(multisample) glEnable(GL_MULTISAMPLE_ARB);
 
 #endif
 
-    OroView* oroview = NULL;
+    MemoryView* memoryview = NULL;
 
     try {
-        oroview = new OroView(config);
+        memoryview = new MemoryView(config);
 
         if(camera_mode == "track") {
-            oroview->setCameraMode(true);
+            memoryview->setCameraMode(true);
         }
 
-        oroview->run();
+        memoryview->run();
 
     } catch(ResourceException& exception) {
 
-        if (oroview != NULL) delete oroview;
+        if (memoryview != NULL) delete memoryview;
 
-        throw OroViewException(string("failed to load resource ") + exception.what());
+        throw MemoryViewException(string("failed to load resource ") + exception.what());
 
     }
 
-    if (oroview != NULL) delete oroview;
+    if (memoryview != NULL) delete memoryview;
 
 #ifndef TEXT_ONLY
 

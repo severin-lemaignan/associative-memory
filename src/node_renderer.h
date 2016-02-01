@@ -25,7 +25,7 @@
 #include "core/texture.h"
 #include "zoomcamera.h"
 
-class OroView;
+class MemoryView;
 
 class NodeRenderer
 {
@@ -73,7 +73,7 @@ public:
     float decayRatio;
 
 
-    void draw(const vec2f& pos, rendering_mode mode, OroView& env, int distance_to_selected = -1);
+    void draw(const vec2f& pos, rendering_mode mode, MemoryView& env, int distance_to_selected = -1);
 
     /**
     If the node is not selected, will increment the idle time of this

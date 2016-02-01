@@ -22,9 +22,9 @@
 #include "core/vectors.h"
 
 #include "macros.h"
-#include "oroview_exceptions.h"
+#include "memoryview_exceptions.h"
 
-#include "oroview.h"
+#include "memoryview.h"
 #include "edge.h"
 #include "node_relation.h"
 #include "node.h"
@@ -96,7 +96,7 @@ void Edge::step(Graph& g, float dt){
 
 }
 
-void Edge::render(rendering_mode mode, OroView& env){
+void Edge::render(rendering_mode mode, MemoryView& env){
 
 
 

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef OROVIEW_H
-#define OROVIEW_H
+#ifndef MEMORYVIEW_H
+#define MEMORYVIEW_H
 
 #include <sstream>
 #include <json/json.h>
@@ -29,14 +29,14 @@
 
 #include "zoomcamera.h"
 
-#include "oroview_exceptions.h"
+#include "memoryview_exceptions.h"
 #include "constants.h"
 
 #include "graph.h"
 
 class Node;
 
-class OroView : public SDLApp {
+class MemoryView : public SDLApp {
 
     //General configuration
     Json::Value config;
@@ -166,7 +166,7 @@ class OroView : public SDLApp {
     bool only_labelled_nodes;
 
 public:
-    OroView(const Json::Value& config);
+    MemoryView(const Json::Value& config);
 
     //Public resources
     FXFont font, fontlarge, fontmedium;
@@ -215,4 +215,4 @@ public:
     Node& getNode(const std::string& id);
 };
 
-#endif // OROVIEW_H
+#endif // MEMORYVIEW_H

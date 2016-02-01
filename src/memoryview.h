@@ -181,15 +181,15 @@ public:
     //Initialisation
     void init(); //overrides SDLApp::init
 
-    //Events
-    void keyPress(SDL_KeyboardEvent *e); //overrides SDLApp::keyPress
-    void mouseClick(SDL_MouseButtonEvent *e); //overrides SDLApp::mouseClick
-    void mouseMove(SDL_MouseMotionEvent *e); //overrides SDLApp::mouseMove
+    //Events overrides
+    void keyPress(SDL_KeyboardEvent *e) override;
+    void mouseClick(SDL_MouseButtonEvent *e) override;
+    void mouseMove(SDL_MouseMotionEvent *e) override;
 
-    //Main routines
-    void update(float t, float dt); //overrides SDLApp::update
-    void logic(float t, float dt); //overrides SDLApp::logic
-    void draw(float t, float dt); //overrides SDLApp::draw
+    //Main routines overrides
+    void update(float t, float dt) override;
+    void logic(float t, float dt) override;
+    void draw(float t, float dt) override;
 
     //Camera
     void setCameraMode(bool track_users);

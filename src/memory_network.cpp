@@ -7,19 +7,29 @@ using namespace std;
 
 
 MemoryNetwork::MemoryNetwork() :
-    external_activations({
-            {"input0", 0.2},
-            {"input1", -0.1},
-            {"input2", 0.3},
-            {"input3", 0.6},
-            {"input4", 0.6},
-            {"input5", 0.1},
-            {"input6", -0.2},
-            {"input7", 0.4},
-            {"input8", -0.1},
-            {"input9", 0.}
-        })
+    external_activations_names({
+            "input0",
+            "input1",
+            "input2",
+            "input3",
+            "input4",
+            "input5",
+            "input6",
+            "input7",
+            "input8",
+            "input9"})
 {
+    external_activations <<
+            0.2,
+            -0.1,
+            0.3,
+            0.6,
+            0.6,
+            0.1,
+            -0.2,
+            0.4,
+            -0.1,
+            0.;
     activations.fill(0);
     weights.fill(0);
 }
@@ -43,16 +53,8 @@ MemoryVector MemoryNetwork::internal_activations() {
 
 void MemoryNetwork::step()
 {
-    MemoryVector ext_activations;
 
-    size_t i = 0;
-    for(auto& vals: external_activations)
-    {
-        ext_activations(i) = vals.second;
-        i++;
-    }
-
-    auto net_activations = Eg * ext_activations + Ig * internal_activations();
+    auto net_activations = Eg * external_activations + Ig * internal_activations();
 
 
     // Activations update

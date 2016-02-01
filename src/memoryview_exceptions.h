@@ -23,7 +23,7 @@
 
 class MemoryViewException : public std::runtime_error {
 	public:
-		MemoryViewException() : std::runtime_error("A generic exception has been thrown in oro view.") { }
+		MemoryViewException() : std::runtime_error("A generic exception has been thrown in memory view.") { }
 		MemoryViewException(const char* msg) : std::runtime_error(msg) { }
 		MemoryViewException(const std::string& msg) : std::runtime_error(msg.c_str()) { }
 };

@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 
     try {
 
-        display.init("ORO View", width, height, fullscreen);
+        display.init("Memory View", width, height, fullscreen);
 
     } catch(SDLInitException& exception) {
 

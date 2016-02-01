@@ -715,7 +715,7 @@ void MemoryView::loadingScreen() {
 
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
-    string loading_message("Initializing ORO View...");
+    string loading_message("Initializing Memory View...");
     int width = font.getWidth(loading_message);
 
     font.print(display.width/2 - width/2, display.height/2 - 10, "%s", loading_message.c_str());

@@ -203,12 +203,12 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
         //        }
 
         if (e->keysym.sym == SDLK_SPACE) {
-            //addRandomNodes(2, 2);
+            addRandomNodes(2, 2);
             updateCurrentNode();
         }
 
         if (e->keysym.sym == SDLK_t) {
-            g.getRandomNode().tickle();
+            g.getRandomNode()->tickle();
         }
 
         if (e->keysym.sym == SDLK_p) {
@@ -1014,19 +1014,20 @@ void MemoryView::addRandomNodes(int amount,int nb_rel) {
             newId += (char)(rand() % 26 + 97); //ASCII codes of letters starts at 98 for "a"
         }
 
-        Node& neighbour = g.getRandomNode();
+        auto neighbour = g.getRandomNode();
 
-        Node& n = g.addNode(newId, newId, &neighbour);
+        Node& n = g.addNode(newId, newId, neighbour);
         vec4f col((float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, 0.7);
         n.setColour(col);
 
-        g.addEdge(n, neighbour, SUBCLASS, "voisin");
+        if (neighbour)
+            g.addEdge(n, *neighbour, SUBCLASS, "voisin");
 
         for(int k=0; k<(nb_rel - 1); ++k) {
 
             //We may pick ourselves, but it's not that a problem
-            Node& n2 = g.getRandomNode();
-            g.addEdge(n, n2, SUBCLASS, "test");
+            auto n2 = g.getRandomNode();
+            g.addEdge(n, *n2, SUBCLASS, "test");
         }
     }
 }

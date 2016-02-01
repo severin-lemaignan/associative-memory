@@ -88,9 +88,9 @@ public:
     Node* getNodeByTagID(int tagid);
 
     /**
-      Returns a random node.
+      Returns a random node (or nullptr if there is no node at all).
       */
-    Node& getRandomNode();
+    Node* getRandomNode();
 
     void select(Node* node);
     void deselect(Node* node);

@@ -100,10 +100,11 @@ Node* Graph::getNodeByTagID(int tagid) {
 
 }
 
-Node& Graph::getRandomNode() {
+Node* Graph::getRandomNode() {
+    if(nodes.size() == 0) return nullptr;
     NodeMap::iterator it = nodes.begin();
     advance( it, rand()%nodes.size());
-    return it->second;
+    return &(it->second);
 }
 
 void Graph::select(Node *node) {

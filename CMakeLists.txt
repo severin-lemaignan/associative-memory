@@ -8,11 +8,17 @@ find_package(PkgConfig REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 pkg_search_module(FTGL REQUIRED ftgl)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
 
-include_directories(${OPENGL_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${SDL_IMAGE_INCLUDE_DIRS} ${FTGL_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS}
+                    ${SDL_INCLUDE_DIR}
+                    ${SDL_IMAGE_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
+                    ${FTGL_INCLUDE_DIRS} 
+                    ${JSONCPP_INCLUDE_DIRS})
 
 #option(DEBUG "Enable debug visualizations" ON)
 #option(WITH_TOOLS "Compile sample tools" ON)
@@ -49,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
                         ${OPENGL_LIBRARIES} 
                         ${SDL_LIBRARY} 
                         ${SDL_IMAGE_LIBRARIES} 
+                        ${Boost_LIBRARIES} 
                         ${FTGL_LIBRARIES}
                         ${JSONCPP_LIBRARIES})
 

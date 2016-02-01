@@ -34,6 +34,8 @@
 
 #include "graph.h"
 
+#include "memory_network.hpp"
+
 class Node;
 
 class MemoryView : public SDLApp {
@@ -43,6 +45,9 @@ class MemoryView : public SDLApp {
 
     //Graph
     Graph g;
+
+    // Memory network
+    MemoryNetwork memory;
 
     //Time
     time_t currtime;
@@ -210,6 +215,9 @@ public:
                             const std::string& to,
                             relation_type type,
                             const std::string& edge_label);
+
+    void initFromMemoryNetwork(const MemoryNetwork& memory);
+    void updateFromMemoryNetwork(const MemoryNetwork& memory);
 
     void addAlias(const std::string& alias, const std::string& id);
     Node& getNode(const std::string& id);

@@ -185,15 +185,14 @@ void Graph::addEdge(Node& from, Node& to, const relation_type type, const std::s
         return;
     }
 
-    if (getEdgesBetween(from, to).size() == 0)
+    if (getEdgesBetween(from, to).size() == 0) {
         //so now we are confident that there's no edge we can reuse. Let's create a new one.
         edges.push_back(Edge(rel, label));
+    }
 
 
     return;
 }
-
-
 
 vector<const Edge*>  Graph::getEdgesFor(const Node& node) const{
     vector<const Edge*> res;
@@ -321,6 +320,10 @@ vec2f Graph::hookeAttractionFor(const Node& node) const {
     // less distance computation (not sure it makes a big difference)
 
     BOOST_FOREACH(const Edge* e, getEdgesFor(node)) {
+
+        // shortcut if the spring constant is zero
+        if (e->spring_constant <= 0) return force;
+
         const Node& n_tmp = getConstNode(e->getId1());
 
         //Retrieve the node at the edge other extremity
@@ -402,10 +405,10 @@ void Graph::saveToGraphViz(MemoryView& env) {
     env.graphvizGraph << "}\n";
 
     ofstream graphvizFile;
-    graphvizFile.open ("ontology.dot");
+    graphvizFile.open ("memory.dot");
     graphvizFile << env.graphvizGraph.str();
     graphvizFile.close();
 
-    cout << "Model correctly exported to ontology.dot" << endl;
+    cout << "Model correctly exported to memory.dot" << endl;
 }
 

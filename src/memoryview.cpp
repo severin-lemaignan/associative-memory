@@ -102,6 +102,8 @@ MemoryView::MemoryView(const Json::Value& config):
     physicsSetup(config);
 
     background_colour = BACKGROUND_COLOUR.truncate();
+    
+    initFromMemoryNetwork(memory);
 }
 
 void MemoryView::stylesSetup(const Json::Value& config) {
@@ -304,7 +306,7 @@ void MemoryView::mouseMove(SDL_MouseMotionEvent *e) {
 /** main update function */
 void MemoryView::update(float t, float dt) {
 
-    SDL_Delay(20); //N'allons pas trop vite au début...
+    SDL_Delay(20); //TODO Not too quick...
 
     dt = min(dt, max_tick_rate);
 
@@ -315,6 +317,7 @@ void MemoryView::update(float t, float dt) {
 
     logic_time = SDL_GetTicks();
 
+    memory.step();
     logic(runtime, dt);
 
     logic_time = SDL_GetTicks() - logic_time;
@@ -375,7 +378,8 @@ void MemoryView::logic(float t, float dt) {
 
     //    }
     //}
-
+    
+    updateFromMemoryNetwork(memory);
     g.step(dt);
 
     updateCamera(dt);
@@ -983,6 +987,51 @@ bool MemoryView::addNodeConnectedTo(const string& id,
     g.addEdge(*n, *neighbour, type, edge_label);
 
     return true;
+}
+
+void MemoryView::initFromMemoryNetwork(const MemoryNetwork& memory) {
+
+    vec4f col(0.,0.,0.,0.7);
+
+    for (size_t i = 0; i < memory.units_names.size(); i++) {
+
+        Node& n = g.addNode(memory.units_names[i], memory.units_names[i]);
+        n.setColour(col);
+    }
+
+    for (size_t i = 0; i < memory.units_names.size()-1; i++) {
+        for (size_t j = i+1; j < memory.units_names.size(); j++) {
+
+            auto n1 = g.getNode(memory.units_names[i]);
+            auto n2 = g.getNode(memory.units_names[j]);
+            g.addEdge(n1, n2, SUBCLASS, "w" + memory.units_names[i] + memory.units_names[j]);
+        }
+    }
+
+}
+
+void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
+
+    for (size_t i = 0; i < memory.activations.rows(); i++) {
+
+        double activation = memory.activations(i);
+        vec4f col;
+        if (activation > 0)
+            col = vec4f((float) activation, (float) activation * 0.5, 0, 0.7);
+        else
+            col = vec4f(0,0, (float) -activation, 0.7);
+
+        Node& n = g.addNode(memory.units_names[i], memory.units_names[i]);
+        n.setColour(col);
+    }
+
+    for (size_t i = 0; i < memory.activations.rows(); i++) {
+        for (size_t j = i; j < memory.activations.rows(); j++) {
+            
+        }
+    }
+
+
 }
 
 Node& MemoryView::getNode(const std::string &id) {

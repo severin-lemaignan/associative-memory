@@ -24,7 +24,7 @@ class MemoryNetwork
 {
 
 public:
-    std::vector<std::string> external_activations_names;
+    std::vector<std::string> units_names;
     MemoryVector external_activations;
     MemoryVector activations;
     MemoryMatrix weights;

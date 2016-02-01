@@ -7,7 +7,7 @@ using namespace std;
 
 
 MemoryNetwork::MemoryNetwork() :
-    external_activations_names({
+    units_names({
             "input0",
             "input1",
             "input2",

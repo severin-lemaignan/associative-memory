@@ -34,8 +34,6 @@
 
 #include "graph.h"
 
-#include "oro_connector.h"
-
 class Node;
 
 class OroView : public SDLApp {
@@ -131,8 +129,6 @@ class OroView : public SDLApp {
     TextureResource* bloomtex;
     TextureResource* beamtex;
 
-    //Connection to the ontology
-    OntologyConnector oro;
 
     //Drawing routines
     void drawBloom(Frustum &frustum, float dt);

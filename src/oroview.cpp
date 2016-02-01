@@ -39,10 +39,7 @@ OroView::OroView(const Json::Value& config):
     display_shadows(config.get("shadows", "true").asBool()),
     display_labels(config.get("display_labels", "true").asBool()),
     display_footer(config.get("display_footer", "true").asBool()),
-    only_labelled_nodes(config.get("only_labelled_nodes", "false").asBool()),
-    oro(config.get("oro_host", "localhost").asString(),
-        config.get("oro_port", "6969").asString(),
-        only_labelled_nodes)
+    only_labelled_nodes(config.get("only_labelled_nodes", "false").asBool())
 {
 
 
@@ -174,10 +171,10 @@ void OroView::init(){
 
     string root = config.get("initial_concept", ROOT_CONCEPT).asString();
 
-    oro.addNode(root, g);
+    //CONNECTION REMOVED oro.addNode(root, g);
     TRACE("Starting with concept " << root);
 
-    oro.walkThroughOntology(root, 2, this);
+    //CONNECTION REMOVED oro.walkThroughOntology(root, 2, this);
 
     TRACE("*** Graph created and populated ***");
     TRACE("*** STARTING MAIN LOOP ***");
@@ -363,20 +360,21 @@ void OroView::logic(float t, float dt) {
         }
     }
 
-    BOOST_FOREACH(string id, oro.popActiveConceptsId()) {
-        try {
-            g.getNode(id).tickle();
-            queueNodeInFooter(id);
-        }
-        catch(OroViewException& exception) {
-            cout << "One of the active concept do not exist yet: " << id << ". Creating it." << endl;
-            oro.addNode(id, g);
-            g.getNode(id).tickle();
-            queueNodeInFooter(id);
-            oro.walkThroughOntology(id, 1, this);
+    //CONNECTION REMOVED 
+    //BOOST_FOREACH(string id, oro.popActiveConceptsId()) {
+    //    try {
+    //        g.getNode(id).tickle();
+    //        queueNodeInFooter(id);
+    //    }
+    //    catch(OroViewException& exception) {
+    //        cout << "One of the active concept do not exist yet: " << id << ". Creating it." << endl;
+    //        oro.addNode(id, g);
+    //        g.getNode(id).tickle();
+    //        queueNodeInFooter(id);
+    //        oro.walkThroughOntology(id, 1, this);
 
-        }
-    }
+    //    }
+    //}
 
     g.step(dt);
 
@@ -996,7 +994,7 @@ void OroView::updateCurrentNode() {
 
     if (selectedNode != NULL) {
         TRACE("Updating node " << selectedNode->getID());
-        oro.walkThroughOntology(selectedNode->getID(), 1, this);
+        //CONNECTION REMOVED oro.walkThroughOntology(selectedNode->getID(), 1, this);
     }
     else cerr << "Select only one node to expand it." << endl;
 }

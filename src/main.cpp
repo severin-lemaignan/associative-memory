@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
             int w = atoi(widthstr.c_str());
             int h = atoi(heightstr.c_str());
 
-            assert(!(w!=0 && h!=0));
+            assert(w!=0 && h!=0);
 
             width = w;
             height = h;
@@ -143,26 +143,20 @@ int main(int argc, char *argv[]) {
 
 #endif
 
-    MemoryView* memoryview = NULL;
-
     try {
-        memoryview = new MemoryView(config);
+        MemoryView memoryview(config);
 
         if(camera_mode == "track") {
-            memoryview->setCameraMode(true);
+            memoryview.setCameraMode(true);
         }
 
-        memoryview->run();
+        memoryview.run();
 
     } catch(ResourceException& exception) {
-
-        if (memoryview != NULL) delete memoryview;
 
         throw MemoryViewException(string("failed to load resource ") + exception.what());
 
     }
-
-    if (memoryview != NULL) delete memoryview;
 
 #ifndef TEXT_ONLY
 

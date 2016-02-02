@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 
 #include "memory_network.hpp"
 
@@ -6,37 +7,27 @@ using namespace Eigen;
 using namespace std;
 
 
-MemoryNetwork::MemoryNetwork() :
-    units_names({
-            "input0",
-            "input1",
-            "input2",
-            "input3",
-            "input4",
-            "input5",
-            "input6",
-            "input7",
-            "input8",
-            "input9"})
+MemoryNetwork::MemoryNetwork():
+    gen(rd())
 {
-    external_activations <<
-            0.2,
-            -0.1,
-            0.3,
-            0.6,
-            0.6,
-            0.1,
-            -0.2,
-            0.4,
-            -0.1,
-            0.;
-    activations.fill(0);
-    weights.fill(0);
+    uniform_real_distribution<> dis(-0.2, 0.2);
+
+    for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+        units_names.push_back(string("input") + to_string(i));
+        external_activations(i) = dis(gen);
+        //external_activations(i) = 0.1;
+    }
+
+    rest_activations.fill(Arest);
+
+    internal_activations.fill(0);
+    net_activations.fill(0);
+
+    activations.fill(Arest);
+    weights.fill(Winit);
 }
 
-MemoryVector MemoryNetwork::internal_activations() {
-
-    MemoryVector internal_activation;
+MemoryVector MemoryNetwork::compute_internal_activations() {
 
     for (size_t i = 0; i < activations.rows(); i++)
     {
@@ -45,17 +36,24 @@ MemoryVector MemoryNetwork::internal_activations() {
         {
             sum += weights(i, j) * activations(j);
         }
-        internal_activation(i) = sum;
+        internal_activations(i) = sum;
     }
+}
 
-    return internal_activation;
+void MemoryNetwork::activate_unit(int id, double level) {
+    external_activations(id) = level;
 }
 
 void MemoryNetwork::step()
 {
 
-    auto net_activations = Eg * external_activations + Ig * internal_activations();
+    //uniform_int_distribution<> dist(0, NB_INPUT_UNITS-1);
 
+    //external_activations(dist(gen)) = 1.;
+
+    compute_internal_activations();
+
+    net_activations = Eg * external_activations + Ig * internal_activations;
 
     // Activations update
     // ******************
@@ -72,6 +70,9 @@ void MemoryNetwork::step()
         activations(i) +=  net_activations(i) * (activations(i) - Amin) 
                          - Dg * (activations(i) - Arest);
         }
+
+        // clamp in [Amin, Amax]
+        activations(i) = min(Amax, max(Amin, activations(i)));
     }
 
     // Weights update
@@ -92,7 +93,25 @@ void MemoryNetwork::step()
     }
 
 
-    //cout << "Activations" << endl << activations << endl;
-    //cout << "Weights" << endl << weights << std::endl;
+    printout();
+    cout << "Weights" << endl << weights << std::endl;
+    
+    // decay the external activations
+    external_activations += 0.01 * (-external_activations + rest_activations);
 
+}
+
+void MemoryNetwork::printout() {
+
+    cout << "External\tInternal\tNet\t\tActivation" << endl;
+    cout << "--------\t--------\t---\t\t----------" << endl;
+    cout << setprecision(4) << setw(6) << fixed;
+    for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+        cout << external_activations(i) << "\t\t";
+        cout << internal_activations(i) << "\t\t";
+        cout << net_activations(i) << "\t\t";
+        cout << activations(i) << endl;
+
+    }
+    cout << endl;
 }

@@ -379,6 +379,11 @@ void MemoryView::logic(float t, float dt) {
     //    }
     //}
     
+    // Activate units under the mouse
+    if(hoverNode) {
+        memory.activate_unit(hoverNode->getID(), 1.0);
+    }
+
     updateFromMemoryNetwork(memory);
     g.step(dt);
 

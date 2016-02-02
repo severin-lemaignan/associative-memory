@@ -77,9 +77,9 @@ public:
     /**
       Returns a reference to a node by its id. Throws an exception if the node doesn't exist.
       */
-    Node& getNode(const std::string& id);
+    Node& getNode(int id);
 
-    const Node& getConstNode(const std::string& id) const;
+    const Node& getConstNode(int id) const;
 
     /**
       Returns a pointer to a node by its tagid, ie the hash value of its ID. Return a NULL pointer
@@ -100,12 +100,10 @@ public:
       */
     Node* getSelected();
 
-    void addAlias(const std::string& alias, const std::string& id);
-
     /**
       Adds a new node to the graph (if it doesn't exist yet) and returns a reference to the new node.
       */
-    Node& addNode(const std::string& id, const std::string& label, const Node* neighbour = NULL, node_type type = INSTANCE_NODE);
+    Node& addNode(int id, const std::string& label, const Node* neighbour = NULL, node_type type = INSTANCE_NODE);
 
     /**
       Adds a new edge to the graph (if it doesn't exist yet) between rel.from and rel.to
@@ -117,6 +115,7 @@ public:
 
     std::vector<const Edge*> getEdgesFor(const Node& node) const;
     Edge* getEdge(const Node& node1, const Node& node2);
+    EdgeVector* getEdges() {return &edges;}
 
     /**
       Computes and update for each node the distance to the closest selected node.

@@ -107,7 +107,7 @@ class MemoryView : public SDLApp {
     //Footer content maps a text to write to it's X coordinate.
     std::map<std::string, int> footer_content;
     void queueInFooter(const std::string& text);
-    void queueNodeInFooter(const std::string& id);
+    void queueNodeInFooter(int id);
     void drawFooter();
 
     //Loading screen
@@ -208,8 +208,7 @@ public:
     void initFromMemoryNetwork(const MemoryNetwork& memory);
     void updateFromMemoryNetwork(const MemoryNetwork& memory);
 
-    void addAlias(const std::string& alias, const std::string& id);
-    Node& getNode(const std::string& id);
+    Node& getNode(int id);
 };
 
 #endif // MEMORYVIEW_H

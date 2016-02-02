@@ -429,7 +429,6 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     /** End of selection **/
 
     Node* nodeSelection = NULL;
-    //    RUser* userSelection = 0;
 
     if (mouse_hits > 0) {
 
@@ -446,10 +445,6 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
         if(choice != 0) {
             selectionDepth = depth;
             nodeSelection = g.getNodeByTagID(choice);
-
-            //	    else if((usertest = tagusermap.find(choice)) != tagusermap.end()) {
-            //		userSelection = usertest->second;
-            //	    }
         }
     }
 
@@ -457,11 +452,6 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
 
     // is over a file
     if(nodeSelection != NULL) {
-        //	// un hover a user
-        //	if(hoverUser != 0) {
-        //	    hoverUser->setMouseOver(false);
-        //	    hoverUser = 0;
-        //	}
 
         if(nodeSelection != hoverNode) {
             //deselect previous selection
@@ -471,22 +461,6 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
             nodeSelection->renderer.setMouseOver(true);
             hoverNode = nodeSelection;
         }
-        //    } // is over a user
-        //    else if(userSelection != 0) {
-        //	// un hover a file
-        //	if(hoverFile != 0) {
-        //	    hoverFile->setMouseOver(false);
-        //	    hoverFile = 0;
-        //	}
-        //
-        //	if(userSelection != hoverUser) {
-        //	    //deselect previous selection
-        //	    if(hoverUser !=0) hoverUser->setMouseOver(false);
-        //
-        //	    //select new
-        //	    userSelection->setMouseOver(true);
-        //	    hoverUser = userSelection;
-        //	}
     }
     else {
         if(hoverNode!=NULL) hoverNode->renderer.setMouseOver(false);
@@ -641,13 +615,13 @@ void MemoryView::draw(float t, float dt) {
         font.print(0,220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
 
         if(hoverNode != NULL) {
-            font.print(0,260,"Node %s:", hoverNode->getID().c_str());
+            font.print(0,260,"Node %s:", hoverNode->label.c_str());
             font.print(30,280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
             font.print(30,300,"Charge: %.2f", hoverNode->charge);
             font.print(30,320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
             font.print(30,340,"Number of relations: %d", hoverNode->getRelations().size());
             font.print(30,360,"Distance to closest selected node (%s): %d",
-                       (selectedNode == NULL) ? "N/A" : selectedNode->getID().c_str(),
+                       (selectedNode == NULL) ? "N/A" : selectedNode->label.c_str(),
                         hoverNode->distance_to_selected);
         }
 
@@ -670,7 +644,7 @@ void MemoryView::drawBackground(float dt) {
     display.clear();
 }
 
-void MemoryView::queueNodeInFooter(const string& id) {
+void MemoryView::queueNodeInFooter(int id) {
     queueInFooter(g.getNode(id).renderer.getLabel());
 }
 void MemoryView::queueInFooter(const string& text) {
@@ -895,22 +869,18 @@ void MemoryView::addSelectedNode(Node* node) {
     }
 }
 
-void MemoryView::addAlias(const string& alias, const string& id) {
-    g.addAlias(alias, id);
-}
-
 void MemoryView::initFromMemoryNetwork(const MemoryNetwork& memory) {
 
 
     for (size_t i = 0; i < memory.units_names.size(); i++) {
-        Node& n = g.addNode(memory.units_names[i], memory.units_names[i]);
+        Node& n = g.addNode(i, memory.units_names[i]);
     }
 
     for (size_t i = 0; i < memory.units_names.size()-1; i++) {
         for (size_t j = i+1; j < memory.units_names.size(); j++) {
 
-            auto& n1 = g.getNode(memory.units_names[i]);
-            auto& n2 = g.getNode(memory.units_names[j]);
+            auto& n1 = g.getNode(i);
+            auto& n2 = g.getNode(j);
             g.addEdge(n1, n2);
         }
     }
@@ -928,25 +898,18 @@ void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
         else
             col = vec4f(0,0, (float) -activation, 0.7);
 
-        Node& n = g.getNode(memory.units_names[i]);
+        Node& n = g.getNode(i);
         n.setColour(col);
     }
 
-    for (size_t i = 0; i < memory.activations.rows() - 1; i++) {
-        for (size_t j = i + 1; j < memory.activations.rows(); j++) {
-            auto& n1 = g.getNode(memory.units_names[i]);
-            auto& n2 = g.getNode(memory.units_names[j]);
-            auto e = g.getEdge(n1, n2);
-            if (e) e->setWeight(memory.weights(i,j));
-            else cout << "Missing edge between " << n1 << " and " << n2 << endl;
-            
-        }
+    for (auto& edge : *g.getEdges()) {
+        edge.setWeight(memory.weights(edge.getId1(),edge.getId2()));
     }
 
 
 }
 
-Node& MemoryView::getNode(const std::string &id) {
+Node& MemoryView::getNode(int id) {
     return g.getNode(id);
 }
 
@@ -977,7 +940,7 @@ void MemoryView::addRandomNodes(int amount,int nb_rel) {
 
         auto neighbour = g.getRandomNode();
 
-        Node& n = g.addNode(newId, newId, neighbour);
+        Node& n = g.addNode(g.getNodes().size(), newId, neighbour);
         vec4f col((float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, 0.7);
         n.setColour(col);
 

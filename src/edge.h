@@ -63,8 +63,8 @@ public:
 
     void setWeight(double weight);
 
-    const std::string& getId1() const;
-    const std::string& getId2() const;
+    int getId1() const;
+    int getId2() const;
 
 };
 

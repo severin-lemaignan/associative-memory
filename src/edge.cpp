@@ -121,10 +121,10 @@ void Edge::updateLength() {
     length = (node1->pos -  node2->pos).length();
 }
 
-const string& Edge::getId1() const {
+int Edge::getId1() const {
     return node1->getID();
 }
 
-const string& Edge::getId2() const {
+int Edge::getId2() const {
     return node2->getID();
 }

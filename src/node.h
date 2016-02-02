@@ -43,9 +43,8 @@ class Node
 
     std::vector<NodeRelation> relations;
 
-    std::string id;
+    int id;
     std::string safeid; //same as ID, with special chars removed (cf safeIdFilter())
-    std::string label;
 
     void updateKineticEnergy();
 
@@ -53,7 +52,9 @@ class Node
 
 public:
 
-    Node(const std::string& id, const std::string& label, const Node* neighbour = NULL, node_type type = CLASS_NODE);
+    Node(int id, const std::string& label, const Node* neighbour = NULL, node_type type = CLASS_NODE);
+
+    std::string label;
 
     bool operator< (const Node& node) const;
 
@@ -77,7 +78,8 @@ public:
     vec2f coulombForce;
 
 
-    const std::string& getID() const;
+    int getID() const {return id;}
+
     const std::string& getSafeID() const;
 
     /**

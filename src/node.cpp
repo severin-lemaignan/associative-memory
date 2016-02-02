@@ -39,11 +39,11 @@ bool safeIdFilter(char c) {
     return c=='-' || c==':' || c=='_';
 }
 
-Node::Node(const string& id, const string& label, const Node* neighbour, node_type type) :
+Node::Node(int id, const string& label, const Node* neighbour, node_type type) :
     id(id),
-    safeid(id),
+    safeid(to_string(id)),
     label(label),
-    renderer(NodeRenderer(hash_value(id), label, type)),
+    renderer(NodeRenderer(id, label, type)),
     selected(false),
     decayTime(0.0),
     decaySpeed(1.0),
@@ -72,10 +72,6 @@ Node::Node(const string& id, const string& label, const Node* neighbour, node_ty
 
 bool Node::operator< (const Node& node2) const {
     return id < node2.getID();
-}
-
-const string& Node::getID() const {
-    return id;
 }
 
 const string& Node::getSafeID() const {
@@ -132,7 +128,7 @@ NodeRelation& Node::addRelation(Node& to) {
         to.addRelation(*this);
     }
 
-    TRACE("Added relation from " << id << " to " << to.getID());
+    TRACE("Added relation from " << label << " to " << to.label);
 
     return relations.back();
 
@@ -159,7 +155,7 @@ void Node::step(Graph& g, float dt){
 
     /** Compute here the new position of the node **/
 
-    TRACE("Stepping for node " << id);
+    TRACE("Stepping for node " << label);
     vec2f force = vec2f(0.0, 0.0);
 
     if(!selected) {
@@ -197,7 +193,7 @@ void Node::step(Graph& g, float dt){
         //Update the age of the node renderer
         renderer.increment_idle_time(dt);
 
-    TRACE("Node " << id << " now in pos=(" << pos.x << ", " << pos.y <<")");
+    TRACE("Node " << label << " now in pos=(" << pos.x << ", " << pos.y <<")");
 
 
     //TRACE("Step computed for " << id << ". Speed is " << speed.x << ", " << speed.y << " (energy: " << kinetic_energy << ").");

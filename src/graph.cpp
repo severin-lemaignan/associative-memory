@@ -67,23 +67,23 @@ const Graph::NodeMap& Graph::getNodes() const {
     return nodes;
 }
 
-Node& Graph::getNode(const string& id) {
+Node& Graph::getNode(int id) {
 
-    AliasMap::iterator it = aliases.find(hash_value(id));
+    AliasMap::iterator it = aliases.find(id);
 
     if (it == aliases.end())
-        throw MemoryViewException("Node " + id + " not found");
+        throw MemoryViewException("Node ID " + to_string(id) + " not found");
 
     return *(it->second);
 
 }
 
-const Node& Graph::getConstNode(const string& id) const {
+const Node& Graph::getConstNode(int id) const {
 
-    AliasMap::const_iterator it = aliases.find(hash_value(id));
+    AliasMap::const_iterator it = aliases.find(id);
 
     if (it == aliases.end())
-        throw MemoryViewException("Node " + id + " not found");
+        throw MemoryViewException("Node ID " + to_string(id) + " not found");
 
     return *(it->second);
 
@@ -146,52 +146,33 @@ Node* Graph::getSelected() {
     return NULL;
 }
 
-void Graph::addAlias(const string& alias, const string& id) {
-
-    aliases.insert(make_pair(hash_value(alias),&(getNode(id))));
-}
-
-Node& Graph::addNode(const string& id, const string& label, const Node* neighbour, node_type type) {
+Node& Graph::addNode(int id, const string& label, const Node* neighbour, node_type type) {
 
     pair<NodeMap::iterator, bool> res;
 
     //TODO: I'm doing 2 !! copies of Node, here??
 
-    res = nodes.insert(make_pair(hash_value(id),Node(id, label, neighbour, type)));
+    res = nodes.insert(make_pair(id,Node(id, label, neighbour, type)));
 
     if ( ! res.second )
-        TRACE("Didn't add node " << id << " because it already exists.");
+        TRACE("Didn't add node " << label << " because it already exists.");
     else {
-        TRACE("Added node " << id);
-        aliases.insert(make_pair(hash_value(id),&res.first->second));
+        TRACE("Added node " << label);
+        aliases.insert(make_pair(id,&res.first->second));
         updateDistances();
     }
 
     return res.first->second;
 }
 
-/**
-Ask the graph to create the edge for this relation. If an edge already exist between the two nodes,
-it will be reused.
-*/
 void Graph::addEdge(Node& from, Node& to) {
 
-    NodeRelation& rel = from.addRelation(to);
-
-    //Don't add an edge if the relation is between the same node.
-    //It could be actually useful, but it provokes a segfault somewhere :-/
     if (&from == &to) {
-        TRACE("Leaving immediately because of strange segfault: from == to");
         return;
     }
 
-    if (!getEdge(from, to)) {
-        //so now we are confident that there's no edge we can reuse. Let's create a new one.
-        edges.push_back(Edge(rel, 0));
-    }
-
-
-    return;
+    NodeRelation& rel = from.addRelation(to);
+    edges.push_back(Edge(rel, 0));
 }
 
 vector<const Edge*>  Graph::getEdgesFor(const Node& node) const{

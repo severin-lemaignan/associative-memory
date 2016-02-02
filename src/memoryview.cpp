@@ -38,8 +38,7 @@ MemoryView::MemoryView(const Json::Value& config):
     config(config),
     display_shadows(config.get("shadows", true).asBool()),
     display_labels(config.get("display_labels", true).asBool()),
-    display_footer(config.get("display_footer", true).asBool()),
-    only_labelled_nodes(config.get("only_labelled_nodes", false).asBool())
+    display_footer(config.get("display_footer", false).asBool())
 {
 
 
@@ -54,12 +53,9 @@ MemoryView::MemoryView(const Json::Value& config):
 
     srand(currtime);
 
-    //Nodes & users
+    //Nodes
 
-    hoverNode = NULL;
-
-    track_users = false;
-    selectedUser = NULL;
+    hoverNode = nullptr;
 
     //Mouse
 
@@ -422,10 +418,6 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    //    for(std::map<std::string,RUser*>::iterator it = users.begin(); it!=users.end(); it++) {
-    //	it->second->drawSimple(dt);
-    //    }
-
     glDisable(GL_TEXTURE_2D);
     glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -437,7 +429,7 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     mouse_hits = glRenderMode(GL_RENDER);
     /** End of selection **/
 
-    Node* nodeSelection = NULL;
+    Node* nodeSelection = nullptr;
 
     if (mouse_hits > 0) {
 
@@ -460,11 +452,11 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     glDisable(GL_DEPTH_TEST);
 
     // is over a file
-    if(nodeSelection != NULL) {
+    if(nodeSelection) {
 
         if(nodeSelection != hoverNode) {
             //deselect previous selection
-            if(hoverNode !=NULL) hoverNode->renderer.setMouseOver(false);
+            if(hoverNode) hoverNode->renderer.setMouseOver(false);
 
             //select new
             nodeSelection->renderer.setMouseOver(true);
@@ -472,8 +464,8 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
         }
     }
     else {
-        if(hoverNode!=NULL) hoverNode->renderer.setMouseOver(false);
-        hoverNode=NULL;
+        if(hoverNode) hoverNode->renderer.setMouseOver(false);
+        hoverNode=nullptr;
     }
 
     if(mouseleftclicked) {
@@ -498,11 +490,6 @@ void MemoryView::draw(float t, float dt) {
     display.mode2D();
 
     drawBackground(dt);
-
-    //    if(draw_loading) {
-    //	loadingScreen();
-    //	return;
-    //    }
 
     Frustum frustum(camera);
 
@@ -540,55 +527,17 @@ void MemoryView::draw(float t, float dt) {
     //Draw names
     if (display_labels) g.render(NAMES, *this, advanced_debug);
 
-    //displayCoulombField(); //doesn't work?
-
 #ifndef TEXT_ONLY
 
 
-    //    glColor4f(1.0, 1.0, 0.0, 1.0);
-    //    for(map<string,RUser*>::iterator it = users.begin(); it!=users.end(); it++) {
-    //        trace_debug ? it->second->drawSimple(dt) : it->second->draw(dt);
-    //    }
-    //
-    //
-    //    if(!(gGourceHideUsernames || gGourceHideUsers)) {
-    //        for(map<string,RUser*>::iterator it = users.begin(); it!=users.end(); it++) {
-    //            it->second->drawName();
-    //        }
-    //    }
-    //
-    //    //draw selected item names again so they are over the top
-    //    if(selectedUser !=0) selectedUser->drawName();
-    //
-    //    if(selectedNode !=0) {
-    //        vec2f dirpos = selectedNode->getDir()->getPos();
-    //
-    //        glPushMatrix();
-    //            glTranslatef(dirpos.x, dirpos.y, 0.0);
-    //            selectedNode->drawName();
-    //        glPopMatrix();
-    //    }
 
     if(advanced_debug) {
 
         glDisable(GL_TEXTURE_2D);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        track_users ? usersBounds.draw() : nodesBounds.draw();
+        nodesBounds.draw();
 
-    }
-
-    //gGourceQuadTreeDebug
-    if(false) {
-        glDisable(GL_TEXTURE_2D);
-        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-
-        glLineWidth(1.0);
-        //	dirNodeTree->outline();
-
-        glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
-
-        //	userTree->outline();
     }
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -607,11 +556,10 @@ void MemoryView::draw(float t, float dt) {
         glDisable(GL_TEXTURE_2D);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        track_users ? usersBounds.draw() : nodesBounds.draw();
+        nodesBounds.draw();
 
         font.print(0,20, "FPS: %.2f", fps);
         font.print(0,40,"Time Scale: %.2f", time_scale);
-        //        font.print(0,60,"Users: %d", users.size());
         font.print(0,80,"Nodes: %d", g.nodesCount());
         font.print(0,100,"Edges: %d", g.edgesCount());
 
@@ -621,15 +569,13 @@ void MemoryView::draw(float t, float dt) {
         font.print(0,200,"Mouse Trace: %u ms", trace_time);
         font.print(0,220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
 
-        if(hoverNode != NULL) {
+        if(hoverNode) {
             font.print(0,260,"Node %s:", hoverNode->label.c_str());
             font.print(30,280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
             font.print(30,300,"Charge: %.2f", hoverNode->charge);
             font.print(30,320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
-            font.print(30,340,"Number of relations: %d", hoverNode->getRelations().size());
-            font.print(30,360,"Distance to closest selected node (%s): %d",
-                       (selectedNode == NULL) ? "N/A" : selectedNode->label.c_str(),
-                        hoverNode->distance_to_selected);
+            font.print(30,360,"Activity: %d",
+                        hoverNode->activity);
         }
 
     }
@@ -870,16 +816,7 @@ void MemoryView::initFromMemoryNetwork(const MemoryNetwork& memory) {
 void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
 
     for (size_t i = 0; i < memory.activations.rows(); i++) {
-
-        double activation = memory.activations(i);
-        vec4f col;
-        if (activation > 0)
-            col = vec4f((float) activation, (float) activation * 0.5, 0, 0.7);
-        else
-            col = vec4f(0,0, (float) -activation, 0.7);
-
-        Node& n = g.getNode(i);
-        n.setColour(col);
+        g.getNode(i).activity = memory.activations(i);
     }
 
     for (auto& edge : *g.getEdges()) {
@@ -896,7 +833,7 @@ Node& MemoryView::getNode(int id) {
 void MemoryView::updateCurrentNode() {
     Node* selectedNode = g.getSelected();
 
-    if (selectedNode != NULL) {
+    if (selectedNode) {
         TRACE("Updating node " << selectedNode->getID());
         //CONNECTION REMOVED oro.walkThroughOntology(selectedNode->getID(), 1, this);
     }

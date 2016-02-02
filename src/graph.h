@@ -38,15 +38,9 @@ public:
      */
     typedef std::map<int, Node> NodeMap;
 
-    /**
-      map of all nodes + aliases.
-      */
-    typedef std::map<int, Node*> AliasMap;
-
 private:
 
     NodeMap nodes;
-    AliasMap aliases;
 
     typedef std::vector<Edge> EdgeVector;
     EdgeVector edges;
@@ -80,12 +74,6 @@ public:
     Node& getNode(int id);
 
     const Node& getConstNode(int id) const;
-
-    /**
-      Returns a pointer to a node by its tagid, ie the hash value of its ID. Return a NULL pointer
-      if the node doesn't exists.
-      */
-    Node* getNodeByTagID(int tagid);
 
     /**
       Returns a random node (or nullptr if there is no node at all).

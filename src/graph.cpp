@@ -68,36 +68,11 @@ const Graph::NodeMap& Graph::getNodes() const {
 }
 
 Node& Graph::getNode(int id) {
-
-    AliasMap::iterator it = aliases.find(id);
-
-    if (it == aliases.end())
-        throw MemoryViewException("Node ID " + to_string(id) + " not found");
-
-    return *(it->second);
-
+    return nodes.at(id);
 }
 
 const Node& Graph::getConstNode(int id) const {
-
-    AliasMap::const_iterator it = aliases.find(id);
-
-    if (it == aliases.end())
-        throw MemoryViewException("Node ID " + to_string(id) + " not found");
-
-    return *(it->second);
-
-}
-
-Node* Graph::getNodeByTagID(int tagid) {
-
-    NodeMap::iterator it = nodes.find(tagid);
-
-    if (it == nodes.end())
-        return NULL;
-
-    return &(it->second);
-
+    return nodes.at(id);
 }
 
 Node* Graph::getRandomNode() {
@@ -143,7 +118,7 @@ Node* Graph::getSelected() {
     if (selectedNodes.size() == 1)
         return *selectedNodes.begin();
 
-    return NULL;
+    return nullptr;
 }
 
 Node& Graph::addNode(int id, const string& label, const Node* neighbour, node_type type) {
@@ -158,7 +133,6 @@ Node& Graph::addNode(int id, const string& label, const Node* neighbour, node_ty
         TRACE("Didn't add node " << label << " because it already exists.");
     else {
         TRACE("Added node " << label);
-        aliases.insert(make_pair(id,&res.first->second));
         updateDistances();
     }
 
@@ -213,7 +187,7 @@ void Graph::updateDistances() {
     }
 
     BOOST_FOREACH(Node* node, selectedNodes) {
-        recurseUpdateDistances(node, NULL, 0);
+        recurseUpdateDistances(node, nullptr, 0);
     }
 
 }

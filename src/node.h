@@ -56,6 +56,8 @@ public:
 
     std::string label;
 
+    double activity;
+
     bool operator< (const Node& node) const;
 
     NodeRenderer renderer;

@@ -57,7 +57,7 @@ Node::Node(int id, const string& label, const Node* neighbour, node_type type) :
     safeid.resize(std::remove_if(safeid.begin(), safeid.end(), safeIdFilter) - safeid.begin());
 
     //If a neighbour is given, we set our initial position close to it.
-    if (neighbour != NULL)
+    if (neighbour)
         pos = neighbour->pos + vec2f(10.0 * (float)rand()/RAND_MAX - 5 , 10.0 * (float)rand()/RAND_MAX - 5);
     else
         pos = vec2f(100.0 * (float)rand()/RAND_MAX - 50 , 100 * (float)rand()/RAND_MAX - 50);
@@ -152,6 +152,13 @@ void Node::updateKineticEnergy() {
 
 
 void Node::step(Graph& g, float dt){
+
+    TRACE("Updating " << label << " color based on activity");
+    if (activity > 0)
+        setColour(vec4f((float) activity, (float) activity * 0.5, 0, 1.0));
+    else
+        setColour(vec4f(0,0, (float) -activity, 1.0));
+
 
     /** Compute here the new position of the node **/
 

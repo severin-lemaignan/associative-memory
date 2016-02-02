@@ -301,8 +301,8 @@ vec2f Graph::hookeAttractionFor(const Node& node) const {
 
     BOOST_FOREACH(const Edge* e, getEdgesFor(node)) {
 
-        // shortcut if the spring constant is zero
-        if (e->spring_constant <= 0) return force;
+        // shortcut if the spring constant is zero or undefined
+        if (e->spring_constant == 0 || std::isnan(e->spring_constant)) return force;
 
         const Node& n_tmp = getConstNode(e->getId1());
 

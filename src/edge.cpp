@@ -54,6 +54,8 @@ void Edge::setWeight(double _weight){
 
 void Edge::step(Graph& g, float dt){
 
+    if(std::isnan(weight)) return;
+
     updateLength();
 
 #ifndef TEXT_ONLY

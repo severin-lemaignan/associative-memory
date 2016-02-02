@@ -12,9 +12,9 @@ typedef Eigen::Matrix<double, NB_INPUT_UNITS, NB_INPUT_UNITS> MemoryMatrix;
 typedef Eigen::Matrix<double, NB_INPUT_UNITS, 1> MemoryVector;
 
 
-const double Eg = 0.8;     // external influence
-const double Ig = 0.2;     // internal influence
-const double Dg = 0.5;     // activation decay
+const double Eg = 0.6;     // external influence
+const double Ig = 0.3;     // internal influence
+const double Dg = 0.2;     // activation decay
 const double Amax = 1.0;   // maximum activation
 const double Amin = -0.2;  // minimum activation
 const double Arest = -0.1; // rest activation

@@ -43,7 +43,7 @@ static const vec4f DEFAULT_SELECTED_COLOUR(0.99, 0.69, 0.24, 1.0); //Bright oran
 
 // "Prune/Kaki" color scheme
 static const vec4f DEFAULT_CLASSES_COLOUR(0.36, 0.21, 0.4, 1.0);
-static const vec4f DEFAULT_INSTANCES_COLOUR(0.32, 0.4, 0.21, 1.0);
+static const vec4f DEFAULT_INSTANCES_COLOUR(0., 0., 0., 1.0);
 static const vec4f DEFAULT_LITERALS_COLOUR(0.21, 0.4, 0.25, 1.0);
 
 static const vec4f DEFAULT_BACKGROUND_COLOUR(0.0, 0.0, 0.0);

@@ -92,7 +92,7 @@ void MemoryNetwork::step()
     }
 
 
-    cout << "Activations" << endl << activations << endl;
-    cout << "Weights" << endl << weights << std::endl;
+    //cout << "Activations" << endl << activations << endl;
+    //cout << "Weights" << endl << weights << std::endl;
 
 }

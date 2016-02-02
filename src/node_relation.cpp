@@ -21,9 +21,8 @@
 
 #include "node.h"
 
-NodeRelation::NodeRelation(Node* from, Node* to, const relation_type type, const std::string& label) :
+NodeRelation::NodeRelation(Node* from, Node* to) :
 	from(from),
-	to(to),
-	type(type),
-	label(label){}
+	to(to)
+{}
 

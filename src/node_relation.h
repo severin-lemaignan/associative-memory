@@ -30,13 +30,10 @@ class Node;
 class NodeRelation {
 
 public:
-	NodeRelation(Node* from, Node* to, const relation_type type, const std::string& label);
+	NodeRelation(Node* from, Node* to);
 
 	Node* from;
 	Node* to;
-	relation_type type;
-	std::string label;
-
 };
 
 #endif // NODERELATION_H

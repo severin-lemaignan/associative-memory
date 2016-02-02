@@ -113,10 +113,10 @@ public:
 
       It stores as well in the Edge object the reference to the relation.
       */
-    void addEdge(Node& from, Node& to, const relation_type type, const std::string& label);
+    void addEdge(Node& from, Node& to);
 
     std::vector<const Edge*> getEdgesFor(const Node& node) const;
-    std::vector<Edge*> getEdgesBetween(const Node& node1, const Node& node2);
+    Edge* getEdge(const Node& node1, const Node& node2);
 
     /**
       Computes and update for each node the distance to the closest selected node.

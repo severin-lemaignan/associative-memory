@@ -37,7 +37,6 @@ class EdgeRenderer
     vec2f label_pos;
 
     std::string label;
-    relation_type type;
 
     SplineEdge spline;
 
@@ -55,7 +54,7 @@ public:
 
     void increment_idle_time(float dt);
 
-    EdgeRenderer(int tagid, const std::string& label = "", relation_type type = UNDEFINED);
+    EdgeRenderer(int tagid, const std::string& label = "");
 
     void draw(rendering_mode mode, MemoryView& env, int distance_to_selected);
 

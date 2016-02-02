@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "core/vectors.h"
 
@@ -47,6 +48,8 @@ class Node
     std::string label;
 
     void updateKineticEnergy();
+
+    friend std::ostream& operator<<(std::ostream& os, const Node& n);
 
 public:
 
@@ -89,7 +92,7 @@ public:
       */
     std::vector<NodeRelation>& getRelations();
 
-    NodeRelation& addRelation(Node& to, const relation_type type, const std::string& label);
+    NodeRelation& addRelation(Node& to);
     /**
       Returns a vector of all the relations of *this that link to node.
       Returns an empty vector if no relation exist between *this and node.
@@ -118,6 +121,7 @@ public:
       */
     void tickle();
     void setSelected(bool selected);
+
 };
 
 #endif // NODE_H

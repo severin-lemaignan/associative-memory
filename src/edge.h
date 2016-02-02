@@ -32,7 +32,6 @@ class Edge
 {
     Node* node1;
     Node* node2;
-    relation_type rel_type;
 
     void updateLength();
 
@@ -44,10 +43,11 @@ class Edge
     EdgeRenderer renderer;
 
 public:
-    Edge(const NodeRelation& rel, const std::string& label = "");
+    Edge(const NodeRelation& rel, double weight = 0);
 
     float length;
     float spring_constant;
+    double weight;
     float nominal_length;
 
     //void addReferenceRelation(const NodeRelation& rel);
@@ -60,6 +60,8 @@ public:
 
     void step(Graph& g, float dt);
     void render(rendering_mode mode, MemoryView& env);
+
+    void setWeight(double weight);
 
     const std::string& getId1() const;
     const std::string& getId2() const;

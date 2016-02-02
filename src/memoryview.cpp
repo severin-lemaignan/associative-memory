@@ -899,112 +899,19 @@ void MemoryView::addAlias(const string& alias, const string& id) {
     g.addAlias(alias, id);
 }
 
-//Add node
-bool MemoryView::addNodeConnectedTo(const string& id,
-                                 const string& node_label,
-                                 const string& to,
-                                 relation_type type,
-                                 const string& edge_label){
-
-    Node* n;
-    Node* neighbour;
-
-    string label = node_label;
-
-    try {
-        neighbour = &g.getNode(to);
-    }
-    catch(MemoryViewException& exception) {
-        //neighbour not found, create it.
-        TRACE("Neighbour " << to << " not found. Creating it.");
-
-        addNodeConnectedTo(to, to, ROOT_CONCEPT, UNDEFINED, "");
-        neighbour = &g.getNode(to);
-    }
-
-    try {
-        //does the node already exists?
-
-        //if yes, reuse it
-        n = &g.getNode(id);
-    }
-    catch(MemoryViewException& exception) {
-        //if not, create it, create it.
-        TRACE("Not existing myself (" << id << "). Creating myself.");
-
-        node_type ntype;
-
-        //guess the type of the node we are adding
-        switch (type) {
-        case SUBCLASS:
-        case SUPERCLASS:
-        case CLASS:
-            ntype = CLASS_NODE;
-            break;
-
-        case INSTANCE:
-            ntype = INSTANCE_NODE;
-            break;
-
-        case PROPERTY:
-        case OBJ_PROPERTY:
-        case DATA_PROPERTY:
-            if (boost::starts_with(id, "literal")) {
-                if (node_label == "true"){
-                    ntype = TRUE_NODE;
-                    label = "";
-                }
-                else if (node_label == "false"){
-                    ntype = FALSE_NODE;
-                    label = "";
-                }
-                else ntype = LITERAL_NODE;
-
-            }
-            else ntype = INSTANCE_NODE;
-            break;
-
-        case COMMENT:
-            ntype = COMMENT_NODE;
-            break;
-
-        default:
-            TRACE("Default type of node? strange...");
-            ntype = INSTANCE_NODE;
-        }
-
-        if (only_labelled_nodes &&
-            ntype == CLASS_NODE &&
-            label == id) { //no a very robust way to check if a node has a label, but it's fast
-
-            TRACE("Node " << id << " has no label, discarding it.");
-            return false;
-        }
-
-        n = &g.addNode(id, label, neighbour, ntype);
-    }
-
-    g.addEdge(*n, *neighbour, type, edge_label);
-
-    return true;
-}
-
 void MemoryView::initFromMemoryNetwork(const MemoryNetwork& memory) {
 
-    vec4f col(0.,0.,0.,0.7);
 
     for (size_t i = 0; i < memory.units_names.size(); i++) {
-
         Node& n = g.addNode(memory.units_names[i], memory.units_names[i]);
-        n.setColour(col);
     }
 
     for (size_t i = 0; i < memory.units_names.size()-1; i++) {
         for (size_t j = i+1; j < memory.units_names.size(); j++) {
 
-            auto n1 = g.getNode(memory.units_names[i]);
-            auto n2 = g.getNode(memory.units_names[j]);
-            g.addEdge(n1, n2, SUBCLASS, "w" + memory.units_names[i] + memory.units_names[j]);
+            auto& n1 = g.getNode(memory.units_names[i]);
+            auto& n2 = g.getNode(memory.units_names[j]);
+            g.addEdge(n1, n2);
         }
     }
 
@@ -1021,12 +928,17 @@ void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
         else
             col = vec4f(0,0, (float) -activation, 0.7);
 
-        Node& n = g.addNode(memory.units_names[i], memory.units_names[i]);
+        Node& n = g.getNode(memory.units_names[i]);
         n.setColour(col);
     }
 
-    for (size_t i = 0; i < memory.activations.rows(); i++) {
-        for (size_t j = i; j < memory.activations.rows(); j++) {
+    for (size_t i = 0; i < memory.activations.rows() - 1; i++) {
+        for (size_t j = i + 1; j < memory.activations.rows(); j++) {
+            auto& n1 = g.getNode(memory.units_names[i]);
+            auto& n2 = g.getNode(memory.units_names[j]);
+            auto e = g.getEdge(n1, n2);
+            if (e) e->setWeight(memory.weights(i,j));
+            else cout << "Missing edge between " << n1 << " and " << n2 << endl;
             
         }
     }
@@ -1070,13 +982,13 @@ void MemoryView::addRandomNodes(int amount,int nb_rel) {
         n.setColour(col);
 
         if (neighbour)
-            g.addEdge(n, *neighbour, SUBCLASS, "voisin");
+            g.addEdge(n, *neighbour);
 
         for(int k=0; k<(nb_rel - 1); ++k) {
 
             //We may pick ourselves, but it's not that a problem
             auto n2 = g.getRandomNode();
-            g.addEdge(n, *n2, SUBCLASS, "test");
+            g.addEdge(n, *n2);
         }
     }
 }

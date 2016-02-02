@@ -174,9 +174,9 @@ Node& Graph::addNode(const string& id, const string& label, const Node* neighbou
 Ask the graph to create the edge for this relation. If an edge already exist between the two nodes,
 it will be reused.
 */
-void Graph::addEdge(Node& from, Node& to, const relation_type type, const std::string& label) {
+void Graph::addEdge(Node& from, Node& to) {
 
-    NodeRelation& rel = from.addRelation(to, type, label);
+    NodeRelation& rel = from.addRelation(to);
 
     //Don't add an edge if the relation is between the same node.
     //It could be actually useful, but it provokes a segfault somewhere :-/
@@ -185,9 +185,9 @@ void Graph::addEdge(Node& from, Node& to, const relation_type type, const std::s
         return;
     }
 
-    if (getEdgesBetween(from, to).size() == 0) {
+    if (!getEdge(from, to)) {
         //so now we are confident that there's no edge we can reuse. Let's create a new one.
-        edges.push_back(Edge(rel, label));
+        edges.push_back(Edge(rel, 0));
     }
 
 
@@ -205,15 +205,14 @@ vector<const Edge*>  Graph::getEdgesFor(const Node& node) const{
     return res;
 }
 
-vector<Edge*>  Graph::getEdgesBetween(const Node& node1, const Node& node2){
-    vector<Edge*> res;
+Edge*  Graph::getEdge(const Node& node1, const Node& node2){
 
-    BOOST_FOREACH(Edge& e, edges) {
+    for(Edge& e : edges) {
         if ((e.getId1() == node1.getID() && e.getId2() == node2.getID()) ||
-                (e.getId1() == node2.getID() && e.getId2() == node1.getID()))
-            res.push_back(&e);
+            (e.getId1() == node2.getID() && e.getId2() == node1.getID()))
+            return &e;
     }
-    return res;
+    return nullptr;
 }
 
 void Graph::updateDistances() {

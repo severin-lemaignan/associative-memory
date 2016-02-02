@@ -205,17 +205,6 @@ public:
     static void drawVector(vec2f vec, vec2f pos, vec4f col);
 
 
-    /** Add node.
-
-      @return true if the node has been added, false else (can be false for nodes
-      without label is only_labelled_node is true)
-      */
-    bool addNodeConnectedTo(const std::string& id,
-                            const std::string& node_label,
-                            const std::string& to,
-                            relation_type type,
-                            const std::string& edge_label);
-
     void initFromMemoryNetwork(const MemoryNetwork& memory);
     void updateFromMemoryNetwork(const MemoryNetwork& memory);
 

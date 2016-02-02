@@ -33,22 +33,23 @@
 using namespace std;
 using namespace boost;
 
-Edge::Edge(const NodeRelation& rel, const string& label) :
+Edge::Edge(const NodeRelation& rel, double weight) :
     node1(rel.from),
     node2(rel.to),
-    rel_type(rel.type),
-    renderer(EdgeRenderer(
-            hash_value(rel.from->getID() + rel.to->getID()),
-            label,
-            rel_type
-            ))
+    weight(weight),
+    renderer(EdgeRenderer(hash_value(rel.from->getID() + rel.to->getID())))
 {
     //    addReferenceRelation(rel);
 
-    spring_constant = INITIAL_SPRING_CONSTANT;
+    spring_constant = INITIAL_SPRING_CONSTANT * weight;
     nominal_length = NOMINAL_EDGE_LENGTH;
 
     length = 0.0;
+}
+
+void Edge::setWeight(double _weight){
+    weight = _weight;
+    spring_constant = INITIAL_SPRING_CONSTANT * weight;
 }
 
 void Edge::step(Graph& g, float dt){
@@ -92,7 +93,7 @@ void Edge::step(Graph& g, float dt){
                     pos2  - out_of_node2_distance , node2->renderer.col, spos);
 
 #endif
-    //TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " updated.");
+    TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " updated.");
 
 }
 

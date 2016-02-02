@@ -110,7 +110,7 @@ bool Node::isConnectedTo(Node* node) {
     return false;
 }
 
-NodeRelation& Node::addRelation(Node& to, const relation_type type, const std::string& label) {
+NodeRelation& Node::addRelation(Node& to) {
 
     //When adding a new relation, we create as well an initial UNDEFINED reciprocal relation if
     //the destination node has no back relation.
@@ -126,22 +126,10 @@ NodeRelation& Node::addRelation(Node& to, const relation_type type, const std::s
 
     vector<const NodeRelation*> rels = getRelationTo(to);
 
-    relations.push_back(NodeRelation(this, &to, type, label)); //Add a new relation
+    relations.push_back(NodeRelation(this, &to)); //Add a new relation
 
     if (!to.isConnectedTo(this)){
-        to.addRelation(*this, UNDEFINED, "");
-    }
-
-    if(rels.size() == 1 && rels[0]->type == UNDEFINED) { //I had already an undefined relation to the destination node
-
-    TRACE("Will replaced an old UNDEFINED relation by a better one!");
-
-    //**** TODO !!! *****/
-
-    //if (edge_p != NULL)
-    //    edge_p->removeReferenceRelation(*this);
-
-    //std::remove(relations.begin(), relations.end(), *(rels[0]));
+        to.addRelation(*this);
     }
 
     TRACE("Added relation from " << id << " to " << to.getID());
@@ -278,3 +266,11 @@ void Node::setSelected(bool select) {
     else charge /= 20;
 
 }
+
+
+std::ostream& operator<<(std::ostream& os, const Node& n)
+{
+    os << n.label;
+    return os;
+}
+

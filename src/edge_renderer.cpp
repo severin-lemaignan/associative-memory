@@ -23,10 +23,9 @@
 
 using namespace std;
 
-EdgeRenderer::EdgeRenderer(int tagid, const string& label, relation_type type) :
+EdgeRenderer::EdgeRenderer(int tagid, const string& label) :
     tagid(tagid),
     label(label),
-    type(type),
     label_pos(vec2f(0.0, 0.0)),
     idle_time(0.0),
     current_distance_to_selected(-1)
@@ -70,29 +69,11 @@ void EdgeRenderer::update(vec2f pos1, vec4f col1, vec2f pos2, vec4f col2, vec2f 
     vec2f projected_pos2  = display.project(vec3f(pos2.x, pos2.y, 0.0)).truncate();
     vec2f projected_spos = display.project(vec3f(spos.x, spos.y, 0.0)).truncate();
 
-    bool arrow_head = false;
-    bool arrow_tail = false;
-
-    // TODO: Optimization: we do not need to check that at each rendering step!
-    switch (type){
-        case SUBCLASS:
-        case INSTANCE:
-        case PROPERTY:
-        case OBJ_PROPERTY:
-        case DATA_PROPERTY:
-            arrow_tail = true;
-            break;
-        case SUPERCLASS:
-        case CLASS:
-            arrow_head = true;
-            break;
-    }
-
     spline = SplineEdge(projected_pos1, col1,
                         projected_pos2, col2,
                         spos,
-                        arrow_head,
-                        arrow_tail);
+                        false, // arrow_head
+                        false); // arrow_tail
 
 }
 

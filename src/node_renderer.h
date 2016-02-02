@@ -36,8 +36,6 @@ class NodeRenderer
 
     int tagid;
 
-    node_type type;
-
     TextureResource* icon;
 
     float getAlpha();
@@ -65,7 +63,7 @@ class NodeRenderer
 
 
 public:
-    NodeRenderer(int tagid, std::string label, node_type type = CLASS_NODE);
+    NodeRenderer(int tagid, std::string label);
 
     vec4f col;
     float size;

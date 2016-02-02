@@ -52,7 +52,7 @@ class Node
 
 public:
 
-    Node(int id, const std::string& label, const Node* neighbour = NULL, node_type type = CLASS_NODE);
+    Node(int id, const std::string& label, const Node* neighbour = nullptr);
 
     std::string label;
 

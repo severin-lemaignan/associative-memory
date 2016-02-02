@@ -97,8 +97,6 @@ MemoryView::MemoryView(const Json::Value& config):
     physicsSetup(config);
 
     background_colour = BACKGROUND_COLOUR.truncate();
-    
-    initFromMemoryNetwork(memory);
 }
 
 void MemoryView::stylesSetup(const Json::Value& config) {
@@ -115,14 +113,8 @@ void MemoryView::stylesSetup(const Json::Value& config) {
     if (colors["hovered"] != Json::nullValue)
         HOVERED_COLOUR = convertRGBA2Float(colors["hovered"]);
 
-    if (colors["classes"] != Json::nullValue)
-        CLASSES_COLOUR = convertRGBA2Float(colors["classes"]);
-
     if (colors["instances"] != Json::nullValue)
-        INSTANCES_COLOUR = convertRGBA2Float(colors["instances"]);
-
-    if (colors["literals"] != Json::nullValue)
-        LITERALS_COLOUR = convertRGBA2Float(colors["literals"]);
+        UNITS_COLOUR = convertRGBA2Float(colors["instances"]);
 
     if (colors["background"] != Json::nullValue){
         BACKGROUND_COLOUR = convertRGBA2Float(colors["background"]);
@@ -166,12 +158,7 @@ void MemoryView::init(){
 
     TRACE("*** Initialization ***");
 
-    string root = config.get("initial_concept", ROOT_CONCEPT).asString();
-
-    //CONNECTION REMOVED oro.addNode(root, g);
-    TRACE("Starting with concept " << root);
-
-    //CONNECTION REMOVED oro.walkThroughOntology(root, 2, this);
+    initFromMemoryNetwork();
 
     TRACE("*** Graph created and populated ***");
     TRACE("*** STARTING MAIN LOOP ***");
@@ -201,7 +188,6 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
 
         if (e->keysym.sym == SDLK_SPACE) {
             addRandomNodes(2, 2);
-            updateCurrentNode();
         }
 
         if (e->keysym.sym == SDLK_t) {
@@ -363,22 +349,6 @@ void MemoryView::logic(float t, float dt) {
         }
     }
 
-    //CONNECTION REMOVED 
-    //BOOST_FOREACH(string id, oro.popActiveConceptsId()) {
-    //    try {
-    //        g.getNode(id).tickle();
-    //        queueNodeInFooter(id);
-    //    }
-    //    catch(MemoryViewException& exception) {
-    //        cout << "One of the active concept do not exist yet: " << id << ". Creating it." << endl;
-    //        oro.addNode(id, g);
-    //        g.getNode(id).tickle();
-    //        queueNodeInFooter(id);
-    //        oro.walkThroughOntology(id, 1, this);
-
-    //    }
-    //}
-    
     // Activate units under the mouse
     if(hoverNode) {
         memory.activate_unit(hoverNode->getID(), 1.0);
@@ -606,7 +576,7 @@ void MemoryView::queueInFooter(const string& text) {
 
     // Ensure we do not overlap with previous text
     typedef pair<const string, int> mypair;
-    BOOST_FOREACH(mypair elem, footer_content) {
+    for(auto elem : footer_content) {
         int x = elem.second + fontlarge.getWidth(elem.first);
         max_x = max(x + 50, max_x);
     }
@@ -780,9 +750,7 @@ void MemoryView::selectNode(Node* node) {
     g.clearSelect();
     g.select(node);
 
-
     queueNodeInFooter(node->getID());
-    updateCurrentNode();
 }
 
 //select a node, keep currently selected node
@@ -795,7 +763,7 @@ void MemoryView::addSelectedNode(Node* node) {
     }
 }
 
-void MemoryView::initFromMemoryNetwork(const MemoryNetwork& memory) {
+void MemoryView::initFromMemoryNetwork() {
 
 
     for (size_t i = 0; i < memory.units_names.size(); i++) {
@@ -828,16 +796,6 @@ void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
 
 Node& MemoryView::getNode(int id) {
     return g.getNode(id);
-}
-
-void MemoryView::updateCurrentNode() {
-    Node* selectedNode = g.getSelected();
-
-    if (selectedNode) {
-        TRACE("Updating node " << selectedNode->getID());
-        //CONNECTION REMOVED oro.walkThroughOntology(selectedNode->getID(), 1, this);
-    }
-    else cerr << "Select only one node to expand it." << endl;
 }
 
 /** Testing */

@@ -91,7 +91,7 @@ public:
     /**
       Adds a new node to the graph (if it doesn't exist yet) and returns a reference to the new node.
       */
-    Node& addNode(int id, const std::string& label, const Node* neighbour = NULL, node_type type = INSTANCE_NODE);
+    Node& addNode(int id, const std::string& label, const Node* neighbour = nullptr);
 
     /**
       Adds a new edge to the graph (if it doesn't exist yet) between rel.from and rel.to

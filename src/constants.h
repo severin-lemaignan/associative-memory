@@ -21,9 +21,6 @@
 #include <string>
 #include "core/vectors.h"
 
-enum node_type {CLASS_NODE, INSTANCE_NODE, LITERAL_NODE, COMMENT_NODE, TRUE_NODE, FALSE_NODE};
-
-
 static const std::string dateFormat("%A, %d %B, %Y %X");
 
 static const float GRAVITY = 9.81;

@@ -39,11 +39,11 @@ Graph::Graph()
 
 void Graph::step(float dt) {
 
-    BOOST_FOREACH(Edge& e, edges) {
+    for(auto& e : edges) {
         e.step(*this, dt);
     }
 
-    BOOST_FOREACH(NodeMap::value_type& n, nodes) {
+    for(auto& n : nodes) {
 
         n.second.step(*this, dt);
     }
@@ -52,12 +52,12 @@ void Graph::step(float dt) {
 void Graph::render(rendering_mode mode, MemoryView& env, bool debug) {
 
     // Renders edges
-    BOOST_FOREACH(Edge& e, edges) {
+    for(auto& e : edges) {
         e.render(mode, env);
     }
 
     // Renders nodes
-    BOOST_FOREACH(NodeMap::value_type& n, nodes) {
+    for(auto& n : nodes) {
         n.second.render(mode, env, debug);
     }
 
@@ -105,7 +105,7 @@ void Graph::deselect(Node *node){
 }
 
 void Graph::clearSelect(){
-    BOOST_FOREACH(Node* node, selectedNodes) {
+    for(auto node : selectedNodes) {
         node->setSelected(false);
     }
 
@@ -121,13 +121,13 @@ Node* Graph::getSelected() {
     return nullptr;
 }
 
-Node& Graph::addNode(int id, const string& label, const Node* neighbour, node_type type) {
+Node& Graph::addNode(int id, const string& label, const Node* neighbour) {
 
     pair<NodeMap::iterator, bool> res;
 
     //TODO: I'm doing 2 !! copies of Node, here??
 
-    res = nodes.insert(make_pair(id,Node(id, label, neighbour, type)));
+    res = nodes.insert(make_pair(id,Node(id, label, neighbour)));
 
     if ( ! res.second )
         TRACE("Didn't add node " << label << " because it already exists.");
@@ -152,7 +152,7 @@ void Graph::addEdge(Node& from, Node& to) {
 vector<const Edge*>  Graph::getEdgesFor(const Node& node) const{
     vector<const Edge*> res;
 
-    BOOST_FOREACH(const Edge& e, edges) {
+    for(const auto& e : edges) {
         if (e.getId1() == node.getID() ||
                 e.getId2() == node.getID())
             res.push_back(&e);
@@ -175,18 +175,18 @@ void Graph::updateDistances() {
     // No node selected, set all distance to -1
     if (selectedNodes.empty()) {
         // Renders nodes
-        BOOST_FOREACH(NodeMap::value_type& n, nodes) {
+        for(auto& n : nodes) {
             n.second.distance_to_selected = -1;
         }
 
         return;
     }
     //Else, start from the selected node
-    BOOST_FOREACH(NodeMap::value_type& n, nodes) {
+    for(auto& n : nodes) {
         n.second.distance_to_selected_updated = false;
     }
 
-    BOOST_FOREACH(Node* node, selectedNodes) {
+    for(auto node : selectedNodes) {
         recurseUpdateDistances(node, nullptr, 0);
     }
 
@@ -197,7 +197,7 @@ void Graph::recurseUpdateDistances(Node* node, Node* parent, int distance) {
     node->distance_to_selected_updated = true;
     TRACE("Node " << node->getID() << " is at " << distance << " nodes from closest selected");
 
-    BOOST_FOREACH(Node* n, node->getConnectedNodes()){
+    for(auto n : node->getConnectedNodes()){
         if (n != parent &&
             (!n->distance_to_selected_updated || distance < n->distance_to_selected))
                 recurseUpdateDistances(n, node, distance + 1);
@@ -220,7 +220,7 @@ vec2f Graph::coulombRepulsionFor(const Node& node) const {
     //at the same time than Hooke force when possible -> one
     // less distance computation (not sure it makes a big difference)
 
-    BOOST_FOREACH(const NodeMap::value_type& nm, nodes) {
+    for(const auto& nm : nodes) {
         const Node& n = nm.second;
         if (&n != &node) {
             vec2f delta = n.pos - node.pos;
@@ -247,7 +247,7 @@ vec2f Graph::coulombRepulsionAt(const vec2f& pos) const {
     //at the same time than Hooke force when possible -> one
     // less distance computation (not sure it makes a big difference)
 
-    BOOST_FOREACH(const NodeMap::value_type& nm, nodes) {
+    for(const auto& nm : nodes) {
         const Node& n = nm.second;
 
         vec2f delta = n.pos - pos;
@@ -273,7 +273,7 @@ vec2f Graph::hookeAttractionFor(const Node& node) const {
     //at the same time than Hooke force when possible -> one
     // less distance computation (not sure it makes a big difference)
 
-    BOOST_FOREACH(const Edge* e, getEdgesFor(node)) {
+    for(const auto e : getEdgesFor(node)) {
 
         // shortcut if the spring constant is zero or undefined
         if (e->spring_constant == 0 || std::isnan(e->spring_constant)) return force;
@@ -347,12 +347,12 @@ void Graph::saveToGraphViz(MemoryView& env) {
     env.graphvizGraph << "strict digraph ontology {\n";
 
     // Renders edges
-    BOOST_FOREACH(Edge& e, edges) {
+    for(auto& e : edges) {
         e.render(GRAPHVIZ, env);
     }
 
     // Renders nodes
-    BOOST_FOREACH(NodeMap::value_type& n, nodes) {
+    for(auto& n : nodes) {
         n.second.render(GRAPHVIZ, env, false);
     }
 

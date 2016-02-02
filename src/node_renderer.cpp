@@ -24,10 +24,9 @@
 
 using namespace std;
 
-NodeRenderer::NodeRenderer(int tagid, string label, node_type type) :
+NodeRenderer::NodeRenderer(int tagid, string label) :
     tagid(tagid),
     label(label),
-    type(type),
     idle_time(0.0),
     hovered(false),
     selected(false),
@@ -40,34 +39,8 @@ NodeRenderer::NodeRenderer(int tagid, string label, node_type type) :
     fontsize = base_fontsize;
 
 #ifndef TEXT_ONLY
-    if (type == CLASS_NODE) {
-        base_col = CLASSES_COLOUR;
-        icon = texturemanager.grab("classes.png");
-    }
-    else if (type == INSTANCE_NODE) {
-        base_col = INSTANCES_COLOUR;
-        icon = texturemanager.grab("instances.png");
-    }
-    else if (type == LITERAL_NODE) {
-        base_col = LITERALS_COLOUR;
-        icon = texturemanager.grab("literals.png");
-    }
-    else if (type == COMMENT_NODE) {
-        base_col = LITERALS_COLOUR;
-        icon = texturemanager.grab("comment.png");
-    }
-    else if (type == TRUE_NODE) {
-        base_col = vec4f(0.2, 1.0, 0.2, 1.0); //green
-        icon = texturemanager.grab("yes.png");
-    }
-    else if (type == FALSE_NODE) {
-        base_col = vec4f(1.0, 0.2, 0.2, 1.0); //red
-        icon = texturemanager.grab("no.png");
-    }
-    else {
-        base_col = vec4f(1.0, 1.0, 1.0, 1.0);
-        icon = texturemanager.grab("instances.png");
-    }
+    base_col = UNITS_COLOUR;
+    icon = texturemanager.grab("instances.png");
 
     col = base_col * 1.2;
 #endif

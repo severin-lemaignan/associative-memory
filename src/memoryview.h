@@ -150,9 +150,6 @@ class MemoryView : public SDLApp {
       */
     void addRandomNodes(int amount, int nb_rel);
 
-    void updateCurrentNode();
-
-
     void stylesSetup(const Json::Value& config);
     void physicsSetup(const Json::Value& config);
     vec4f convertRGBA2Float(const Json::Value& color);
@@ -196,7 +193,7 @@ public:
     static void drawVector(vec2f vec, vec2f pos, vec4f col);
 
 
-    void initFromMemoryNetwork(const MemoryNetwork& memory);
+    void initFromMemoryNetwork();
     void updateFromMemoryNetwork(const MemoryNetwork& memory);
 
     Node& getNode(int id);

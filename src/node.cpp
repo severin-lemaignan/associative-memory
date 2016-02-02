@@ -39,11 +39,11 @@ bool safeIdFilter(char c) {
     return c=='-' || c==':' || c=='_';
 }
 
-Node::Node(int id, const string& label, const Node* neighbour, node_type type) :
+Node::Node(int id, const string& label, const Node* neighbour) :
     id(id),
     safeid(to_string(id)),
     label(label),
-    renderer(NodeRenderer(id, label, type)),
+    renderer(NodeRenderer(id, label)),
     selected(false),
     decayTime(0.0),
     decaySpeed(1.0),
@@ -89,7 +89,7 @@ std::vector<NodeRelation>& Node::getRelations() {
 vector<Node*>  Node::getConnectedNodes(){
     vector<Node*> res;
 
-    BOOST_FOREACH(NodeRelation& rel, relations) {
+    for(auto& rel : relations) {
         if (rel.to == this)
             res.push_back(rel.from);
         else
@@ -99,7 +99,7 @@ vector<Node*>  Node::getConnectedNodes(){
 }
 
 bool Node::isConnectedTo(Node* node) {
-    BOOST_FOREACH(NodeRelation& rel, relations) {
+    for(auto& rel : relations) {
         if (rel.to == node || rel.from == node)
             return true;
     }
@@ -107,18 +107,6 @@ bool Node::isConnectedTo(Node* node) {
 }
 
 NodeRelation& Node::addRelation(Node& to) {
-
-    //When adding a new relation, we create as well an initial UNDEFINED reciprocal relation if
-    //the destination node has no back relation.
-    //And before adding a relation, we check there is no existing UNDEFINED relation.
-    //If it's the case, we can safely replace it by a well defined relation.
-
-//    if (type == UNDEFINED) {
-//	//Add an undefined relation and return.
-//	relations.push_back(NodeRelation(this, &to, UNDEFINED, ""));
-//	TRACE("Added UNDEFINED back relation to " << to.getID());
-//	return;
-//    }
 
     vector<const NodeRelation*> rels = getRelationTo(to);
 
@@ -138,7 +126,7 @@ vector<const NodeRelation*> Node::getRelationTo(Node& node) const {
 
     vector<const NodeRelation*> res;
 
-    BOOST_FOREACH(const NodeRelation& rel, relations) {
+    for(const auto& rel : relations) {
         if (rel.to == &node)
             res.push_back(&rel);
     }

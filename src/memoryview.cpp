@@ -445,7 +445,7 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
 
         if(choice != 0) {
             selectionDepth = depth;
-            nodeSelection = g.getNodeByTagID(choice);
+            nodeSelection = &g.getNode(choice - 1); // cf node_rendered for the rationale of the -1 (basically, to make sure we can select the node 0)
         }
     }
 

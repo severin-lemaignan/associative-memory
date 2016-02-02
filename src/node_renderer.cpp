@@ -166,7 +166,7 @@ void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, 
 void NodeRenderer::drawSimple(const vec2f& pos){
 
 
-    glLoadName(tagid);
+    glLoadName(tagid + 1); // '+1' because otherwise the node ID 0 can not be distinguished from background
 
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);

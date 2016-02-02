@@ -91,6 +91,8 @@ class MemoryView : public SDLApp {
     bool mouserightclicked;
     bool mousedragged;
 
+    bool panning;
+
     float mouse_inactivity;
 
     vec2f mousepos;
@@ -99,7 +101,6 @@ class MemoryView : public SDLApp {
 
     //Background
     vec2f backgroundPos;
-    bool backgroundSelected;
     vec3f background_colour;
 
     void selectBackground();
@@ -195,9 +196,6 @@ public:
     void update(float t, float dt) override;
     void logic(float t, float dt) override;
     void draw(float t, float dt) override;
-
-    //Camera
-    void setCameraMode(bool track_users);
 
     //Background
     void setBackground(vec3f background);

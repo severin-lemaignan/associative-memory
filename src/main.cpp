@@ -145,11 +145,6 @@ int main(int argc, char *argv[]) {
 
     try {
         MemoryView memoryview(config);
-
-        if(camera_mode == "track") {
-            memoryview.setCameraMode(true);
-        }
-
         memoryview.run();
 
     } catch(ResourceException& exception) {

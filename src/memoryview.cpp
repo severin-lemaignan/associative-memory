@@ -68,8 +68,7 @@ MemoryView::MemoryView(const Json::Value& config):
     mouserightclicked = false;
     mousedragged = false;
 
-    backgroundSelected = false;
-
+    panning = false;
 
     draw_loading = true;
     display_node_infos = true;
@@ -235,7 +234,7 @@ void MemoryView::mouseClick(SDL_MouseButtonEvent *e) {
 
     if(e->type == SDL_MOUSEBUTTONUP) {
 
-        if(e->button == SDL_BUTTON_LEFT) {
+        if(e->button == SDL_BUTTON_LEFT || e->button == SDL_BUTTON_MIDDLE) {
 
             mouse_inactivity=0.0;
             SDL_ShowCursor(true);
@@ -248,34 +247,38 @@ void MemoryView::mouseClick(SDL_MouseButtonEvent *e) {
                 SDL_WarpMouse(mousepos.x, mousepos.y);
                 mousedragged=false;
             }
+            panning = false;
         }
     }
 
     if(e->type != SDL_MOUSEBUTTONDOWN) return;
 
-    //wheel up
-    if(e->button == SDL_BUTTON_WHEELUP) {
+    switch(e->button) {
+
+    case SDL_BUTTON_WHEELUP:
         zoom(true);
-        return;
-    }
+        break;
 
-    //wheel down
-    if(e->button == SDL_BUTTON_WHEELDOWN) {
+    case SDL_BUTTON_WHEELDOWN:
         zoom(false);
-        return;
-    }
+        break;
 
-    if(e->button == SDL_BUTTON_RIGHT) {
+    case SDL_BUTTON_RIGHT:
         mousepos = vec2f(e->x, e->y);
         mouserightclicked=true;
+        break;
 
-        return;
-    }
-
-    if(e->button == SDL_BUTTON_LEFT) {
-
+    case SDL_BUTTON_LEFT:
         mousepos = vec2f(e->x, e->y);
         mouseleftclicked=true;
+        mousedragged=true;
+        break;
+
+    case SDL_BUTTON_MIDDLE:
+        mousepos = vec2f(e->x, e->y);
+        panning=true;
+        mousedragged=true;
+        break;
     }
 
 }
@@ -286,19 +289,20 @@ void MemoryView::mouseMove(SDL_MouseMotionEvent *e) {
 
     Node* selectedNode = g.getSelected();
 
-    //move camera in direction the user dragged the mouse
     if(mousedragged) {
-        if (selectedNode != NULL) {
+        if (!panning && selectedNode) {
             selectedNode->pos += vec2f( e->xrel, e->yrel )/2;
         }
-        else backgroundPos += vec2f( e->xrel, e->yrel );
+        else if (panning) {
+            //move camera in direction the user dragged the mouse
+            backgroundPos -= vec2f( e->xrel, e->yrel );
+        }
 
         return;
     }
 
     mouse_inactivity = 0.0;
     SDL_ShowCursor(true);
-
 
     mousemoved=true;
 }
@@ -469,20 +473,18 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     }
     else {
         if(hoverNode!=NULL) hoverNode->renderer.setMouseOver(false);
-        //	if(hoverUser!=0) hoverUser->setMouseOver(false);
         hoverNode=NULL;
-        //	hoverUser=0;
     }
 
     if(mouseleftclicked) {
-        mousedragged=true;
-        if(hoverNode!=NULL) selectNode(hoverNode);
-        //	else if(hoverUser!=0) selectUser(hoverUser);
-        else selectBackground();
+        if(hoverNode)
+            selectNode(hoverNode);
+        //else 
+        //    selectBackground();
     }
 
     if(mouserightclicked) {
-        if(hoverNode!=NULL) addSelectedNode(hoverNode);
+            g.clearSelect();
     }
 }
 
@@ -764,35 +766,12 @@ void MemoryView::updateCamera(float dt) {
 
     //camera tracking
 
-    Node* selectedNode = g.getSelected();
+    Bounds2D mousebounds;
+    mousebounds.update(backgroundPos);
 
-    if(backgroundSelected) {
-        Bounds2D mousebounds;
-        mousebounds.update(backgroundPos);
-
-        camera.adjust(mousebounds);
-
-    } else if(track_users && (selectedNode !=NULL || selectedUser !=NULL)) {
-        Bounds2D focusbounds;
-
-        vec3f camerapos = camera.getPos();
-
-        //	if(selectedUser !=NULL) focusbounds.update(selectedUser->getPos());
-        if(selectedNode !=NULL) focusbounds.update(selectedNode->pos);
-
-        camera.adjust(focusbounds);
-    } else {
-        if(track_users && idle_time==0) camera.adjust(usersBounds);
-        else camera.adjust(nodesBounds);
-    }
+    camera.adjust(mousebounds);
 
     camera.logic(dt);
-}
-
-void MemoryView::setCameraMode(bool track_users) {
-    this->track_users = track_users;
-    if(selectedUser!=NULL) camera.lockOn(track_users);
-    backgroundSelected=false;
 }
 
 void MemoryView::zoom(bool zoomin) {
@@ -823,7 +802,7 @@ void MemoryView::setBackground(vec3f background) {
 //trace click of mouse on background
 void MemoryView::selectBackground() {
 
-    backgroundSelected = true;
+    g.clearSelect();
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -852,8 +831,6 @@ void MemoryView::selectNode(Node* node) {
 
     if (node->selected) return;
 
-    backgroundSelected=false;
-
     g.clearSelect();
     g.select(node);
 
@@ -864,8 +841,6 @@ void MemoryView::selectNode(Node* node) {
 
 //select a node, keep currently selected node
 void MemoryView::addSelectedNode(Node* node) {
-
-    backgroundSelected=false;
 
     if (node->selected) g.deselect(node);
     else {

@@ -89,8 +89,20 @@ void Edge::step(Graph& g, float dt){
     //Update the age of the node renderer
     renderer.increment_idle_time(dt);
 
-    renderer.update(pos1 + out_of_node1_distance , node1->renderer.col,
-                    pos2  - out_of_node2_distance , node2->renderer.col, spos);
+
+    //renderer.update(pos1 + out_of_node1_distance , node1->renderer.col,
+    //                pos2  - out_of_node2_distance , node2->renderer.col, spos);
+
+    vec4f col;
+    if (weight > 0) {
+        col = vec4f((float) weight, (float) weight * 0.5, 0, 0.7);
+    }
+    else {
+        col = vec4f(0,0, (float) -weight, 0.7);
+    }
+
+    renderer.update(pos1 + out_of_node1_distance , col,
+                    pos2  - out_of_node2_distance , col, spos);
 
 #endif
     TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " updated.");

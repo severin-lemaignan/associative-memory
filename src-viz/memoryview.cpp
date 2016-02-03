@@ -526,8 +526,13 @@ void MemoryView::draw(float t, float dt) {
     fontmedium.print(10,50, "Mode (tab to switch): %s",
                             _activate_on_hover ? "EXCITATE" : "INSPECT");
 
-    int offset = 100;
+    if(hoverNode) {
+        fontmedium.print(10,80,"Node %s:", hoverNode->label.c_str());
+        fontmedium.print(40, 100,"Activity: %.4f", hoverNode->activity);
+    }
 
+
+    int offset = 200;
     if(debug) {
         vec3f campos = camera.getPos();
 
@@ -552,8 +557,6 @@ void MemoryView::draw(float t, float dt) {
             font.print(40,offset + 280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
             font.print(40,offset + 300,"Charge: %.2f", hoverNode->charge);
             font.print(40,offset + 320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
-            font.print(40,offset + 360,"Activity: %.3f",
-                        hoverNode->activity);
         }
 
     }

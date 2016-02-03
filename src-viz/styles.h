@@ -41,7 +41,8 @@ static const vec4f DEFAULT_SELECTED_COLOUR(0.99, 0.69, 0.24, 1.0); //Bright oran
 
 static const vec4f DEFAULT_UNITS_COLOUR(0.1, 0.1, 0.1, 1.0);
 
-static const vec4f DEFAULT_BACKGROUND_COLOUR(0.0, 0.0, 0.0);
+//static const vec4f DEFAULT_BACKGROUND_COLOUR(0.0, 0.0, 0.0);
+static const vec4f DEFAULT_BACKGROUND_COLOUR(1.0, 1.0, 1.0);
 
 /******************************************************************************/
 

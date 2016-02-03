@@ -36,10 +36,8 @@ static const float GRAVITY_CONSTANT = 10.0;
 static const float INITIAL_SPRING_CONSTANT = 20.0; // N.pixels^(-1)
 static const float NOMINAL_EDGE_LENGTH = 50.0; // pixels
 
-static const float MIN_KINETIC_ENERGY = 1.0; //Nodes with a lower energy won't move at all.
+static const float MIN_KINETIC_ENERGY = 30.0; //Nodes with a lower energy won't move at all.
 static const float DEFAULT_MAX_SPEED = 500.0; //Maximum allowed speed for a node.
-
-static const std::string ROOT_CONCEPT = "owl:Thing";
 
 
 /********** Those values can be set in the config file *************/

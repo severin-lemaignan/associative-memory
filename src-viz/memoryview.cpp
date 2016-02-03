@@ -777,12 +777,12 @@ void MemoryView::addSelectedNode(Node* node) {
 void MemoryView::initFromMemoryNetwork() {
 
 
-    for (size_t i = 0; i < memory.units_names.size(); i++) {
-        Node& n = g.addNode(i, memory.units_names[i]);
+    for (size_t i = 0; i < memory.size(); i++) {
+        Node& n = g.addNode(i, memory.units_names()[i]);
     }
 
-    for (size_t i = 0; i < memory.units_names.size()-1; i++) {
-        for (size_t j = i+1; j < memory.units_names.size(); j++) {
+    for (size_t i = 0; i < memory.size()-1; i++) {
+        for (size_t j = i+1; j < memory.size(); j++) {
 
             auto& n1 = g.getNode(i);
             auto& n2 = g.getNode(j);
@@ -794,12 +794,12 @@ void MemoryView::initFromMemoryNetwork() {
 
 void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
 
-    for (size_t i = 0; i < memory.activations.rows(); i++) {
-        g.getNode(i).activity = memory.activations(i);
+    for (size_t i = 0; i < memory.size(); i++) {
+        g.getNode(i).activity = memory.activations()(i);
     }
 
     for (auto& edge : *g.getEdges()) {
-        edge.setWeight(memory.weights(edge.getId1(),edge.getId2()));
+        edge.setWeight(memory.weights()(edge.getId1(),edge.getId2()));
     }
 
 

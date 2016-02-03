@@ -17,15 +17,6 @@ class MemoryNetwork
 
 public:
 
-    MemoryVector rest_activations;
-
-    std::vector<std::string> units_names;
-    MemoryVector external_activations;
-    MemoryVector internal_activations;
-    MemoryVector net_activations;
-    MemoryVector activations;
-    MemoryMatrix weights;
-
     MemoryNetwork(double Eg = 0.6,     // external influence
                   double Ig = 0.3,     // internal influence
                   double Dg = 0.5,     // activation decay
@@ -39,6 +30,12 @@ public:
     void activate_unit(int id, double level);
     void step();
 
+    std::vector<std::string> units_names() const {return _units_names;}
+    MemoryVector activations() const {return _activations;}
+    MemoryMatrix weights() const {return _weights;}
+
+    size_t size() const {return NB_INPUT_UNITS;}
+
 private:
     const double Eg;
     const double Ig;
@@ -48,6 +45,17 @@ private:
     const double Arest;
     const double Lg;
     const double Winit;
+
+    MemoryVector rest_activations; // constant
+
+    std::vector<std::string> _units_names;
+
+    MemoryVector external_activations;
+    MemoryVector internal_activations;
+    MemoryVector net_activations;
+    MemoryVector _activations;
+    MemoryMatrix _weights;
+
 
     std::random_device rd;
     std::default_random_engine gen;

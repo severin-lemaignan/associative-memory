@@ -439,10 +439,17 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     }
 
     if(mouseleftclicked) {
-        if(hoverNode)
-            selectNode(hoverNode);
-        //else 
-        //    selectBackground();
+        if(hoverNode) {
+            if (hoverNode->selected()) {
+                g.deselect(hoverNode);
+            }
+            else {
+                addSelectedNode(hoverNode);
+            }
+        }
+        else {
+            g.clearSelect();
+        }
     }
 
     if(mouserightclicked) {

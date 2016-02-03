@@ -153,22 +153,13 @@ void Node::step(Graph& g, float dt){
     TRACE("Stepping for node " << label);
     vec2f force = vec2f(0.0, 0.0);
 
-    if(!_selected) {
-        // Algo from Wikipedia -- http://en.wikipedia.org/wiki/Force-based_layout
+    // Algo from Wikipedia -- http://en.wikipedia.org/wiki/Force-based_layout
 
-        coulombForce = g.coulombRepulsionFor(*this);
-        force +=coulombForce;
+    coulombForce = g.coulombRepulsionFor(*this);
+    force +=coulombForce;
 
-        hookeForce = g.hookeAttractionFor(*this);
-        force += hookeForce;
-    }
-    else { //selected node
-        vec2f gravityForce = g.gravityFor(*this);
-        force += gravityForce;
-
-        coulombForce = g.coulombRepulsionFor(*this);
-        force +=coulombForce;
-    }
+    hookeForce = g.hookeAttractionFor(*this);
+    force += hookeForce;
 
     TRACE("** Total force applying: Fx=" << force.x << ", Fy= " << force.y);
 
@@ -251,9 +242,6 @@ void Node::setSelected(bool select) {
 
     _selected = select;
     renderer.setSelected(select);
-
-    if(select) charge *= 20;
-    else charge /= 20;
 
 }
 

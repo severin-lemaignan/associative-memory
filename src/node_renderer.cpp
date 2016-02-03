@@ -54,15 +54,15 @@ void NodeRenderer::setColour(vec4f col) {
 
 void NodeRenderer::computeColourSize() {
     if (selected) {
-        col = SELECTED_COLOUR;
+        decay();
         size = base_size * SELECT_SIZE_FACTOR;
     }
     else {
         base_size = NODE_SIZE;
         decay();
 
-        if (hovered) col = HOVERED_COLOUR;
     }
+    if (hovered) col = HOVERED_COLOUR;
 }
 
 void NodeRenderer::decay() {

@@ -1,6 +1,8 @@
 Associative Memory
 ==================
 
+![Screenshot of memory-view](doc/screenshot.png)
+
 This project is two-fold: `libassociative-memory`, a associative memory network,
 and `memory-view`, an OpenGL-based real-time viewer for this memory network.
 
@@ -17,7 +19,6 @@ This library is available under the terms of the [Apache v2](LICENSE) license.
 memory-view
 -----------
 
-![Screenshot of memory-view](doc/screenshot.jpg)
 
 `memory-view` is an OpenGL-based viewer for associative memory networks,
 released under the [GPLv3](src-viz/LICENSE) license.

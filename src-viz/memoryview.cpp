@@ -33,6 +33,7 @@
 #include "graph.h"
 
 using namespace std;
+using namespace std::chrono;
 
 MemoryView::MemoryView(const Json::Value& config):
     config(config),
@@ -159,6 +160,7 @@ void MemoryView::init(){
     TRACE("*** Initialization ***");
 
     initFromMemoryNetwork();
+    memory.start();
 
     TRACE("*** Graph created and populated ***");
     TRACE("*** STARTING MAIN LOOP ***");
@@ -170,6 +172,7 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
 
     if (e->type == SDL_KEYDOWN) {
         if (e->keysym.sym == SDLK_ESCAPE) {
+            memory.stop();
             appFinished=true;
         }
 
@@ -305,7 +308,6 @@ void MemoryView::update(float t, float dt) {
 
     logic_time = SDL_GetTicks();
 
-    memory.step();
     logic(runtime, dt);
 
     logic_time = SDL_GetTicks() - logic_time;
@@ -315,20 +317,6 @@ void MemoryView::update(float t, float dt) {
     draw(runtime, dt);
 
     framecount++;
-}
-
-void MemoryView::updateTime() {
-    //display date
-    char datestr[256];
-    char timestr[256];
-    struct tm* timeinfo = localtime ( &currtime );
-
-    strftime(datestr, 256, dateFormat.c_str(), timeinfo);
-    displaydate = datestr;
-
-    //avoid wobbling by only moving font if change is sufficient
-    int date_offset = (int) fontmedium.getWidth(displaydate) * 0.5;
-    if(abs(date_x_offset - date_offset) > 5) date_x_offset = date_offset;
 }
 
 /** App logic */
@@ -527,13 +515,16 @@ void MemoryView::draw(float t, float dt) {
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
 
-    fontmedium.draw(display.width/2 - date_x_offset, 20, displaydate);
+    //fontmedium.draw(display.width/2 - date_x_offset, 20, displaydate);
+
+    glColor4f(.5f, .5f, .5f, .5f);
+    fontmedium.print(10,20, "Network update frequency: %dHz", memory.frequency());
 
     if(debug) {
         vec3f campos = camera.getPos();
 
         glDisable(GL_TEXTURE_2D);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(.5f, .5f, .5f, .5f);
 
         nodesBounds.draw();
 

@@ -5,6 +5,8 @@
 
 using namespace Eigen;
 using namespace std;
+using namespace std::chrono;
+
 
 MemoryNetwork::MemoryNetwork(double Eg,   
                              double Ig,   
@@ -53,15 +55,59 @@ MemoryVector MemoryNetwork::compute_internal_activations() {
     }
 }
 
-void MemoryNetwork::activate_unit(int id, double level) {
+void MemoryNetwork::activate_unit(int id,
+                                  double level,
+                                  milliseconds duration) {
     external_activations(id) = level;
+    external_activations_decay(id) = 1.0/duration.count();
+}
+
+void MemoryNetwork::start() {
+
+    _is_running = true;
+     _network_thread = thread(&MemoryNetwork::run, this);
+}
+
+void MemoryNetwork::stop() {
+
+    _is_running = false;
+    _network_thread.join();
+}
+
+void MemoryNetwork::run() {
+
+
+    cerr << "Memory network thread started." << endl;
+    _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+    while(_is_running) step();
+    cerr << "Memory network finished." << endl;
+
 }
 
 void MemoryNetwork::step()
 {
 
+    // Compute dt
+    auto now = high_resolution_clock::now();
+    duration<double, std::milli> dt = now - _last_timestamp; // fractional duration
+    _last_timestamp = now;
+
+    // If needed, compute frequency + optional printout network values
+    _steps_since_last_frequency_update++;
+    duration<double, std::milli> ms_since_last_freq = now - _last_freq_computation;
+    if(ms_since_last_freq.count() > 200) {
+        _frequency = _steps_since_last_frequency_update * 1000./ms_since_last_freq.count();
+        _last_freq_computation = now;
+        _steps_since_last_frequency_update = 0;
+
+        // print out the network activations + weights
+        printout();
+    }
+
+
     // Establish connections
     // *********************
+
     for (size_t i = 0; i < external_activations.size() - 1; i++) {
 
         if (external_activations(i) == 0) continue;
@@ -118,16 +164,22 @@ void MemoryNetwork::step()
     }
 
 
-    //printout();
-    
     // decay the external activations
-    external_activations *= 0.99;
+    for (size_t i = 0; i < external_activations.size(); i++) {
+
+        external_activations(i) -= external_activations_decay(i) * dt.count();
+
+        if (external_activations(i) <= 0) {
+            external_activations_decay(i) = 0;
+            external_activations(i) = 0;
+        }
+    }
 
 }
 
 void MemoryNetwork::printout() {
 
-    cout << "Weights" << endl << setprecision(2) << _weights << endl;
+    //cout << "Weights" << endl << setprecision(2) << _weights << endl;
 
     cout << "External\tInternal\tNet\t\tActivation" << endl;
     cout << "--------\t--------\t---\t\t----------" << endl;

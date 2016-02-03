@@ -60,15 +60,9 @@ class MemoryView : public SDLApp {
 
     float time_scale;
 
-    std::string displaydate;
-
     float runtime;
     int framecount;
     float max_tick_rate;
-
-    int date_x_offset;
-
-    void updateTime();
 
     //Nodes
 

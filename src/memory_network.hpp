@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <random>
+#include <chrono>
+#include <thread>
 
 #define NB_INPUT_UNITS 50
 
@@ -19,22 +21,29 @@ public:
 
     MemoryNetwork(double Eg = 0.6,     // external influence
                   double Ig = 0.3,     // internal influence
-                  double Dg = 0.5,     // activation decay
+                  double Dg = 0.5,     // activation decay (per ms)
                   double Amax = 1.0,   // maximum activation
                   double Amin = -0.2,  // minimum activation
                   double Arest = -0.1, // rest activation
-                  double Lg = 0.01,    // learning rate
+                  double Lg = 0.01,    // learning rate (per ms)
                   double Winit = 0.0); // initial weights
 
 
-    void activate_unit(int id, double level);
-    void step();
+    void activate_unit(int id, 
+                    double level, 
+                    std::chrono::milliseconds duration = std::chrono::milliseconds(200));
+
 
     std::vector<std::string> units_names() const {return _units_names;}
     MemoryVector activations() const {return _activations;}
     MemoryMatrix weights() const {return _weights;}
 
     size_t size() const {return NB_INPUT_UNITS;}
+    int frequency() const {return _frequency;}
+
+    void start();
+    void stop();
+    bool isrunning() const {return _is_running;}
 
 private:
     const double Eg;
@@ -51,6 +60,7 @@ private:
     std::vector<std::string> _units_names;
 
     MemoryVector external_activations;
+    MemoryVector external_activations_decay;
     MemoryVector internal_activations;
     MemoryVector net_activations;
     MemoryVector _activations;
@@ -62,7 +72,20 @@ private:
 
     MemoryVector compute_internal_activations();
 
+    void run();
+    void step();
+
+    std::thread _network_thread;
+
+    bool _is_running = false;
+
     void printout();
+
+    int _frequency = 0;
+    int _steps_since_last_frequency_update = 0;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> _last_timestamp;
+    std::chrono::time_point<std::chrono::high_resolution_clock> _last_freq_computation;
 };
 
 

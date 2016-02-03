@@ -66,12 +66,14 @@ class MemoryView : public SDLApp {
 
     //Nodes
 
-    Node* hoverNode;
-    Node* draggedNode;
+    Node* hoverNode = nullptr;
+    Node* draggedNode = nullptr;
     void selectNode(Node* node);
     void addSelectedNode(Node* node);
     Bounds2D nodesBounds;
     bool display_node_infos;
+
+    bool _activate_on_hover = true;
 
     //Mouse
     GLint mouse_hits;

@@ -189,6 +189,10 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
         //            gGourceQuadTreeDebug = !gGourceQuadTreeDebug;
         //        }
 
+        if (e->keysym.sym == SDLK_TAB) {
+            _activate_on_hover = !_activate_on_hover;
+        }
+
         if (e->keysym.sym == SDLK_SPACE) {
             addRandomNodes(2, 2);
         }
@@ -340,7 +344,7 @@ void MemoryView::logic(float t, float dt) {
     }
 
     // Activate units under the mouse
-    if(hoverNode) {
+    if(hoverNode && _activate_on_hover) {
         memory.activate_unit(hoverNode->getID(), 1.0);
     }
 
@@ -518,7 +522,11 @@ void MemoryView::draw(float t, float dt) {
     //fontmedium.draw(display.width/2 - date_x_offset, 20, displaydate);
 
     glColor4f(.5f, .5f, .5f, .5f);
-    fontmedium.print(10,20, "Network update frequency: %dHz", memory.frequency());
+    fontmedium.print(10,20, "Network update frequency: %dkHz", memory.frequency()/1000);
+    fontmedium.print(10,50, "Mode (tab to switch): %s",
+                            _activate_on_hover ? "EXCITATE" : "INSPECT");
+
+    int offset = 100;
 
     if(debug) {
         vec3f campos = camera.getPos();
@@ -528,31 +536,27 @@ void MemoryView::draw(float t, float dt) {
 
         nodesBounds.draw();
 
-        font.print(10,20, "FPS: %.2f", fps);
-        font.print(10,40,"Time Scale: %.2f", time_scale);
-        font.print(10,80,"Nodes: %d", g.nodesCount());
-        font.print(10,100,"Edges: %d", g.edgesCount());
+        font.print(10,offset + 20, "FPS: %.2f", fps);
+        font.print(10,offset + 40,"Time Scale: %.2f", time_scale);
+        font.print(10,offset + 80,"Nodes: %d", g.nodesCount());
+        font.print(10,offset + 100,"Edges: %d", g.edgesCount());
 
-        font.print(10,140,"Camera: (%.2f, %.2f, %.2f)", campos.x, campos.y, campos.z);
-        font.print(10,160,"Gravity: %.2f", GRAVITY);
-        font.print(10,180,"Logic Time: %u ms", logic_time);
-        font.print(10,200,"Mouse Trace: %u ms", trace_time);
-        font.print(10,220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
+        font.print(10,offset + 140,"Camera: (%.2f, %.2f, %.2f)", campos.x, campos.y, campos.z);
+        font.print(10,offset + 160,"Gravity: %.2f", GRAVITY);
+        font.print(10,offset + 180,"Logic Time: %u ms", logic_time);
+        font.print(10,offset + 200,"Mouse Trace: %u ms", trace_time);
+        font.print(10,offset + 220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
 
         if(hoverNode) {
-            font.print(10,260,"Node %s:", hoverNode->label.c_str());
-            font.print(40,280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
-            font.print(40,300,"Charge: %.2f", hoverNode->charge);
-            font.print(40,320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
-            font.print(40,360,"Activity: %.3f",
+            font.print(10,offset + 260,"Node %s:", hoverNode->label.c_str());
+            font.print(40,offset + 280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
+            font.print(40,offset + 300,"Charge: %.2f", hoverNode->charge);
+            font.print(40,offset + 320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
+            font.print(40,offset + 360,"Activity: %.3f",
                         hoverNode->activity);
         }
 
     }
-    font.print(40,display.height - 30,
-            "Mode (tab to switch): %s",
-            //activateOnHover ? "hovering activate units" : "hovering shows activation level");
-            (true ? "hovering activate units" : "hovering shows activation level"));
 
     if (display_footer) drawFooter();
 

@@ -49,7 +49,7 @@ Edge::Edge(const NodeRelation& rel, double weight) :
 
 void Edge::setWeight(double _weight){
     weight = _weight;
-    spring_constant = INITIAL_SPRING_CONSTANT * weight;
+    spring_constant = max(0., INITIAL_SPRING_CONSTANT * weight);
 }
 
 void Edge::step(Graph& g, float dt){

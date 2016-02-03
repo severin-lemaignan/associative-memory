@@ -285,7 +285,7 @@ vec2f Graph::hookeAttractionFor(const Node& node) const {
     for(const auto e : getEdgesFor(node)) {
 
         // shortcut if the spring constant is zero or undefined
-        if (e->spring_constant == 0 || std::isnan(e->spring_constant)) return force;
+        if (e->spring_constant == 0 || std::isnan(e->spring_constant)) continue;
 
         const Node& n_tmp = getConstNode(e->getId1());
 

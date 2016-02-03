@@ -36,11 +36,8 @@ class EdgeRenderer
 
     vec2f label_pos;
 
-    std::string label;
 
     SplineEdge spline;
-
-    int current_distance_to_selected;
 
     float getAlpha();
 
@@ -49,14 +46,16 @@ class EdgeRenderer
 
 public:
 
-    // True is one of the two edge nodes is selected
+    // True if one of the two edge nodes is selected
     bool selected;
+
+    std::string label;
 
     void increment_idle_time(float dt);
 
     EdgeRenderer(int tagid, const std::string& label = "");
 
-    void draw(rendering_mode mode, MemoryView& env, int distance_to_selected);
+    void draw(rendering_mode mode, MemoryView& env);
 
     void update(vec2f pos1, vec4f col1, vec2f pos2, vec4f col2, vec2f spos);
 

@@ -58,7 +58,7 @@ void NodeRenderer::computeColourSize() {
         size = base_size * SELECT_SIZE_FACTOR;
     }
     else {
-        base_size = NODE_SIZE * max(0.6f, getAlpha()); //scales nodes depending on their 'visibility' (mix of idle time + distance to selected node)
+        base_size = NODE_SIZE;
         decay();
 
         if (hovered) col = HOVERED_COLOUR;
@@ -76,22 +76,11 @@ void NodeRenderer::decay() {
 
 float NodeRenderer::getAlpha() {
 
-    if (current_distance_to_selected <= 1) return 1.0f;
-
-    int distance = std::max(1, current_distance_to_selected);
-    //float level =  FADE_TIME - (idle_time * distance)/FADE_TIME;
-
-    // We use a function in (1-x^3) to smooth the fading of nodes
-    #define MAX_DISTANCE_3 (MAX_NODE_LEVELS * MAX_NODE_LEVELS * MAX_NODE_LEVELS)
-
-    float fading = (FADE_TIME - idle_time) / FADE_TIME;
-    float level =  1.0f - (std::pow(distance, 3)/MAX_DISTANCE_3);
-
-    return std::max(0.0f, level * fading);
+    return std::max(0.0f, (FADE_TIME - idle_time) / FADE_TIME);
 }
 
 void NodeRenderer::increment_idle_time(float dt) {
-    if (selected || hovered || current_distance_to_selected <= 1) idle_time = 0.0;
+    if (selected || hovered) idle_time = 0.0;
     else idle_time += dt;
 }
 
@@ -99,6 +88,8 @@ void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, 
 
     current_distance_to_selected = distance_to_selected;
 
+    std::stringstream str;
+    str << fixed << setprecision( 1 ) << activation;
 
     switch (mode) {
 
@@ -110,7 +101,8 @@ void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, 
         break;
 
     case NAMES:
-        if(!label.empty()) drawName(pos, env.font);
+        if(!label.empty()) drawName(pos + vec2f(5,-2), env.font, label);
+        drawName(pos + vec2f(5,8), env.font, str.str(), 0.8);
 
         break;
 
@@ -153,7 +145,7 @@ void NodeRenderer::drawSimple(const vec2f& pos){
     glPushMatrix();
     glTranslatef(offsetpos.x, offsetpos.y, 0.0f);
 
-    col.w = getAlpha();
+    col.w = 1.0;
 
     glColor4fv(col);
 
@@ -177,7 +169,11 @@ void NodeRenderer::drawSimple(const vec2f& pos){
 
 }
 
-void NodeRenderer::drawName(const vec2f& pos, FXFont& font){
+void NodeRenderer::drawName(const vec2f& pos,
+                            FXFont& font, 
+                            string text, 
+                            float font_scale)
+{
 
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.0);
@@ -195,8 +191,8 @@ void NodeRenderer::drawName(const vec2f& pos, FXFont& font){
     glPushMatrix();
     glLoadIdentity();
 
-    font.setFontSize(fontsize);
-    font.draw(screenpos.x, screenpos.y, label);
+    font.setFontSize(fontsize * font_scale);
+    font.draw(screenpos.x, screenpos.y, text);
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();

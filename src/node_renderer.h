@@ -57,7 +57,7 @@ class NodeRenderer
     void computeSize();
 
     void drawSimple(const vec2f& pos);
-    void drawName(const vec2f& pos, FXFont& font);
+    void drawName(const vec2f& pos, FXFont& font, std::string text, float font_scale = 1.0);
     void drawBloom(const vec2f& pos);
     void drawShadow(const vec2f& pos);
 
@@ -70,6 +70,7 @@ public:
     float fontsize;
     float decayRatio;
 
+    double activation;
 
     void draw(const vec2f& pos, rendering_mode mode, MemoryView& env, int distance_to_selected = -1);
 

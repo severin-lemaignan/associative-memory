@@ -27,23 +27,16 @@ EdgeRenderer::EdgeRenderer(int tagid, const string& label) :
     tagid(tagid),
     label(label),
     label_pos(vec2f(0.0, 0.0)),
-    idle_time(0.0),
-    current_distance_to_selected(-1)
+    idle_time(0.0)
 {
 }
 
 float EdgeRenderer::getAlpha() {
 
-    //This edge is connected to the selected node, don't fade it away.
-    if (selected) return 1.0f;
-
-    return std::max(0.0f, FADE_TIME - (idle_time * std::max(1, current_distance_to_selected)))/FADE_TIME;
+    return std::max(0.0f, FADE_TIME - idle_time)/FADE_TIME;
 }
 
-void EdgeRenderer::draw(rendering_mode mode, MemoryView& env, int distance_to_selected) {
-
-    current_distance_to_selected = distance_to_selected;
-
+void EdgeRenderer::draw(rendering_mode mode, MemoryView& env) {
     switch (mode) {
     case NORMAL:
         spline.draw();

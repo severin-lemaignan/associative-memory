@@ -29,19 +29,17 @@ static const int LARGE_FONT_SIZE = 42;
 static const float ARROW_SIZE = 5.0;
 static const float SELECT_SIZE_FACTOR = 1.5; //selected node will appear SELECT_SIZE_FACTOR bigger.
 
-static const int MAX_NODE_LEVELS = 6; //how many levels of nodes are displayed around the selected one?
-
 static const int FOOTER_SPEED = 4; //how fast item names move on the bottom of the screen
 
-static const float FADE_TIME = 25.0; //idle time (in sec) before labels vanish
-static const float DECAY_TIME = 2.0; //idle time (in sec) before labels vanish
+static const float FADE_TIME = .3; //idle time (in sec) before labels vanish
+static const float DECAY_TIME = 2.0; //idle time (in sec) before nodes vanish
 static const float SHADOW_STRENGTH = 0.5; //intensity of shadows (from 0.0 to 1.0)
 static const vec2f SHADOW_OFFSET(1.0, 1.0); //offset of shadows
 
 static const vec4f DEFAULT_HOVERED_COLOUR(0.55, 0.1, 0.1, 1.0); // Dark red
 static const vec4f DEFAULT_SELECTED_COLOUR(0.99, 0.69, 0.24, 1.0); //Bright orange
 
-static const vec4f DEFAULT_UNITS_COLOUR(0., 0., 0., 1.0);
+static const vec4f DEFAULT_UNITS_COLOUR(0.1, 0.1, 0.1, 1.0);
 
 static const vec4f DEFAULT_BACKGROUND_COLOUR(0.0, 0.0, 0.0);
 

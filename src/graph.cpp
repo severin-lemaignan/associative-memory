@@ -85,7 +85,7 @@ Node* Graph::getRandomNode() {
 void Graph::select(Node *node) {
 
    //Already selected?
-    if (node->selected) return;
+    if (node->selected()) return;
 
     node->setSelected(true);
     selectedNodes.insert(node);
@@ -96,7 +96,7 @@ void Graph::select(Node *node) {
 void Graph::deselect(Node *node){
 
     //Already deselected?
-    if (!node->selected) return;
+    if (!node->selected()) return;
 
     node->setSelected(false);
     selectedNodes.erase(node);

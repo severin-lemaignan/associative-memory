@@ -50,14 +50,6 @@ public:
     double weight;
     float nominal_length;
 
-    //void addReferenceRelation(const NodeRelation& rel);
-    //void removeReferenceRelation(const NodeRelation& rel);
-
-    //bool coversRelation(const NodeRelation& rel);
-
-    //int countRelations() const;
-    //bool hasOutboundConnectionFrom(const Node* node) const;
-
     void step(Graph& g, float dt);
     void render(rendering_mode mode, MemoryView& env);
 

@@ -80,15 +80,25 @@ void Edge::step(Graph& g, float dt){
     td.normalize();
 
     vec2f out_of_node1_distance = td * (
-                (node1->selected ? NODE_SIZE * SELECT_SIZE_FACTOR : NODE_SIZE) / 2 + 2
+                (node1->selected() ? NODE_SIZE * SELECT_SIZE_FACTOR : NODE_SIZE) / 2 + 2
                 );
 
     vec2f out_of_node2_distance = td * (
-                (node2->selected ? NODE_SIZE * SELECT_SIZE_FACTOR : NODE_SIZE) / 2 + 2
+                (node2->selected() ? NODE_SIZE * SELECT_SIZE_FACTOR : NODE_SIZE) / 2 + 2
                 );
 
-    (node1->selected || node2->selected) ? renderer.selected = true : renderer.selected = false;
-    //Update the age of the node renderer
+    if (   node1->selected() 
+        || node2->selected()
+        || node1->hovered()
+        || node2->hovered())
+    {
+        renderer.selected = true;
+    }
+    else {
+        renderer.selected = false;
+    }
+
+    //Update the age of the edge renderer
     renderer.increment_idle_time(dt);
 
 
@@ -96,12 +106,18 @@ void Edge::step(Graph& g, float dt){
     //                pos2  - out_of_node2_distance , node2->renderer.col, spos);
 
     vec4f col;
-    if (weight > 0) {
-        col = vec4f((float) weight, (float) weight * 0.5, 0, 0.7);
+    if (renderer.selected) {
+        col = HOVERED_COLOUR;
     }
     else {
-        col = vec4f(0,0, (float) -weight, 0.7);
+        if (weight > 0) {
+            col = vec4f((float) weight, (float) weight * 0.5, 0, 0.7);
+        }
+        else {
+            col = vec4f(0,0, (float) -weight, 0.7);
+        }
     }
+
 
     renderer.update(pos1 + out_of_node1_distance , col,
                     pos2  - out_of_node2_distance , col, spos);
@@ -116,15 +132,20 @@ void Edge::render(rendering_mode mode, MemoryView& env){
 
 
 #ifndef TEXT_ONLY
-    int distance = std::min(node1->distance_to_selected, node2->distance_to_selected);
-    if (distance >= MAX_NODE_LEVELS - 1) return;
-
     if (mode == GRAPHVIZ) {
         env.graphvizGraph << node1->getSafeID() << " -> " << node2->getSafeID() << ";\n";
         return;
     }
 
-    renderer.draw(mode, env, distance);
+    if (std::isnan(weight)) {
+        renderer.label = "";
+    }
+    else {
+        std::stringstream str;
+        str << fixed << setprecision( 2 ) << weight;
+        renderer.label = str.str();
+    }
+    renderer.draw(mode, env);
 #endif
     //TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " rendered.");
 

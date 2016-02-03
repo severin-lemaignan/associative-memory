@@ -50,6 +50,9 @@ class Node
 
     friend std::ostream& operator<<(std::ostream& os, const Node& n);
 
+    bool _selected;
+    bool _hovered;
+
 public:
 
     Node(int id, const std::string& label, const Node* neighbour = nullptr);
@@ -69,7 +72,7 @@ public:
     vec2f speed;
     vec2f pos;
 
-    bool selected;
+
      /** The (minimum) amount of nodes that link me to the selected node.
        If no node is selected, -1
     **/
@@ -125,6 +128,11 @@ public:
       */
     void tickle();
     void setSelected(bool selected);
+    bool selected() {return _selected;}
+
+    void hovered(bool hovered);
+    bool hovered() {return _hovered;}
+
 
 };
 

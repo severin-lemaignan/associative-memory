@@ -44,7 +44,7 @@ Node::Node(int id, const string& label, const Node* neighbour) :
     safeid(to_string(id)),
     label(label),
     renderer(NodeRenderer(id, label)),
-    selected(false),
+    _selected(false),
     decayTime(0.0),
     decaySpeed(1.0),
     decaying(true),
@@ -143,9 +143,9 @@ void Node::step(Graph& g, float dt){
 
     TRACE("Updating " << label << " color based on activity");
     if (activity > 0)
-        setColour(vec4f((float) activity, (float) activity * 0.5, 0, 1.0));
+        setColour(vec4f(activity + 0.1, activity * 0.5 + 0.1, 0.1, 1.0));
     else
-        setColour(vec4f(0,0, (float) -activity, 1.0));
+        setColour(vec4f(0.1,0.1, -activity + 0.1, 1.0));
 
 
     /** Compute here the new position of the node **/
@@ -153,7 +153,7 @@ void Node::step(Graph& g, float dt){
     TRACE("Stepping for node " << label);
     vec2f force = vec2f(0.0, 0.0);
 
-    if(!selected) {
+    if(!_selected) {
         // Algo from Wikipedia -- http://en.wikipedia.org/wiki/Force-based_layout
 
         coulombForce = g.coulombRepulsionFor(*this);
@@ -198,11 +198,10 @@ void Node::step(Graph& g, float dt){
 void Node::render(rendering_mode mode, MemoryView& env, bool debug){
 
 #ifndef TEXT_ONLY
-        if (distance_to_selected >= MAX_NODE_LEVELS) return;
-
         if (mode == GRAPHVIZ) {
             env.graphvizGraph << safeid;
         }
+        renderer.activation = activity;
         renderer.draw(pos, mode, env, distance_to_selected);
 
         if (debug) {
@@ -247,10 +246,10 @@ void Node::tickle() {
 
 void Node::setSelected(bool select) {
 
-    if ((select && selected)||
-    (!select && !selected)) return;
+    if ((select && _selected)||
+    (!select && !_selected)) return;
 
-    selected = select;
+    _selected = select;
     renderer.setSelected(select);
 
     if(select) charge *= 20;
@@ -258,6 +257,11 @@ void Node::setSelected(bool select) {
 
 }
 
+void Node::hovered(bool hovered) {
+
+    renderer.setMouseOver(hovered);
+    _hovered = hovered;
+}
 
 std::ostream& operator<<(std::ostream& os, const Node& n)
 {

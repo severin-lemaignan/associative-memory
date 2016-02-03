@@ -426,15 +426,15 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
 
         if(nodeSelection != hoverNode) {
             //deselect previous selection
-            if(hoverNode) hoverNode->renderer.setMouseOver(false);
+            if(hoverNode) hoverNode->hovered(false);
 
             //select new
-            nodeSelection->renderer.setMouseOver(true);
+            nodeSelection->hovered(true);
             hoverNode = nodeSelection;
         }
     }
     else {
-        if(hoverNode) hoverNode->renderer.setMouseOver(false);
+        if(hoverNode) hoverNode->hovered(false);
         hoverNode=nullptr;
     }
 
@@ -528,27 +528,31 @@ void MemoryView::draw(float t, float dt) {
 
         nodesBounds.draw();
 
-        font.print(0,20, "FPS: %.2f", fps);
-        font.print(0,40,"Time Scale: %.2f", time_scale);
-        font.print(0,80,"Nodes: %d", g.nodesCount());
-        font.print(0,100,"Edges: %d", g.edgesCount());
+        font.print(10,20, "FPS: %.2f", fps);
+        font.print(10,40,"Time Scale: %.2f", time_scale);
+        font.print(10,80,"Nodes: %d", g.nodesCount());
+        font.print(10,100,"Edges: %d", g.edgesCount());
 
-        font.print(0,140,"Camera: (%.2f, %.2f, %.2f)", campos.x, campos.y, campos.z);
-        font.print(0,160,"Gravity: %.2f", GRAVITY);
-        font.print(0,180,"Logic Time: %u ms", logic_time);
-        font.print(0,200,"Mouse Trace: %u ms", trace_time);
-        font.print(0,220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
+        font.print(10,140,"Camera: (%.2f, %.2f, %.2f)", campos.x, campos.y, campos.z);
+        font.print(10,160,"Gravity: %.2f", GRAVITY);
+        font.print(10,180,"Logic Time: %u ms", logic_time);
+        font.print(10,200,"Mouse Trace: %u ms", trace_time);
+        font.print(10,220,"Draw Time: %u ms", SDL_GetTicks() - draw_time);
 
         if(hoverNode) {
-            font.print(0,260,"Node %s:", hoverNode->label.c_str());
-            font.print(30,280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
-            font.print(30,300,"Charge: %.2f", hoverNode->charge);
-            font.print(30,320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
-            font.print(30,360,"Activity: %d",
+            font.print(10,260,"Node %s:", hoverNode->label.c_str());
+            font.print(40,280,"Speed: (%.2f, %.2f)", hoverNode->speed.x, hoverNode->speed.y);
+            font.print(40,300,"Charge: %.2f", hoverNode->charge);
+            font.print(40,320,"Kinetic energy: %.2f", hoverNode->kinetic_energy);
+            font.print(40,360,"Activity: %.3f",
                         hoverNode->activity);
         }
 
     }
+    font.print(40,display.height - 30,
+            "Mode (tab to switch): %s",
+            //activateOnHover ? "hovering activate units" : "hovering shows activation level");
+            (true ? "hovering activate units" : "hovering shows activation level"));
 
     if (display_footer) drawFooter();
 
@@ -745,7 +749,7 @@ void MemoryView::selectBackground() {
 //select a node, deselect current node
 void MemoryView::selectNode(Node* node) {
 
-    if (node->selected) return;
+    if (node->selected()) return;
 
     g.clearSelect();
     g.select(node);
@@ -756,7 +760,7 @@ void MemoryView::selectNode(Node* node) {
 //select a node, keep currently selected node
 void MemoryView::addSelectedNode(Node* node) {
 
-    if (node->selected) g.deselect(node);
+    if (node->selected()) g.deselect(node);
     else {
         g.select(node);
         queueNodeInFooter(node->getID());

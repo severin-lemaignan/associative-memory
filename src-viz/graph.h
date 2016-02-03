@@ -84,9 +84,14 @@ public:
     void deselect(Node* node);
     void clearSelect();
 
-    /** If and only if ONE node is selected, return it. Else, returns NULL
+    /** Returns the selected node (a random one, if several are selected) or
+     * nullptr if none are selected.
       */
     Node* getSelected();
+
+    /** Returns the node currently hovered by the mouse, or nullptr if none
+     */
+    Node* getHovered();
 
     /**
       Adds a new node to the graph (if it doesn't exist yet) and returns a reference to the new node.

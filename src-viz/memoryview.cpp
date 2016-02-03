@@ -230,6 +230,7 @@ void MemoryView::mouseClick(SDL_MouseButtonEvent *e) {
                 mousedragged=false;
             }
             panning = false;
+            draggedNode = nullptr;
         }
     }
 
@@ -254,6 +255,7 @@ void MemoryView::mouseClick(SDL_MouseButtonEvent *e) {
         mousepos = vec2f(e->x, e->y);
         mouseleftclicked=true;
         mousedragged=true;
+        if (hoverNode) draggedNode = hoverNode;
         break;
 
     case SDL_BUTTON_MIDDLE:
@@ -269,16 +271,16 @@ void MemoryView::mouseMove(SDL_MouseMotionEvent *e) {
 
     mousepos = vec2f(e->x, e->y);
 
-    Node* selectedNode = g.getSelected();
-
     if(mousedragged) {
-        if (!panning && selectedNode) {
-            selectedNode->pos += vec2f( e->xrel, e->yrel )/2;
-        }
-        else if (panning) {
+        if (panning) {
             //move camera in direction the user dragged the mouse
             backgroundPos -= vec2f( e->xrel, e->yrel );
         }
+        else {
+            if (draggedNode) {
+                draggedNode->pos += vec2f( e->xrel, e->yrel )/2;
+            }
+         }
 
         return;
     }

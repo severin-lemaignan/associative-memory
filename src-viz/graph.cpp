@@ -115,11 +115,20 @@ void Graph::clearSelect(){
 }
 
 Node* Graph::getSelected() {
-    if (selectedNodes.size() == 1)
+    if (selectedNodes.size() >= 1)
         return *selectedNodes.begin();
 
     return nullptr;
 }
+
+Node* Graph::getHovered() {
+    for (auto& node : nodes) {
+        if (node.second.hovered()) return &node.second;
+    }
+
+    return nullptr;
+}
+
 
 Node& Graph::addNode(int id, const string& label, const Node* neighbour) {
 

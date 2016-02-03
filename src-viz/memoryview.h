@@ -70,9 +70,10 @@ class MemoryView : public SDLApp {
 
     void updateTime();
 
-    //Nodes & users
+    //Nodes
 
     Node* hoverNode;
+    Node* draggedNode;
     void selectNode(Node* node);
     void addSelectedNode(Node* node);
     Bounds2D nodesBounds;

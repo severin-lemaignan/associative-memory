@@ -6,9 +6,23 @@
 using namespace Eigen;
 using namespace std;
 
-
-MemoryNetwork::MemoryNetwork():
-    gen(rd())
+MemoryNetwork::MemoryNetwork(double Eg,   
+                             double Ig,   
+                             double Dg,   
+                             double Amax, 
+                             double Amin, 
+                             double Arest,
+                             double Lg,   
+                             double Winit) :
+                Eg(Eg),
+                Ig(Ig),   
+                Dg(Dg),   
+                Amax(Amax), 
+                Amin(Amin), 
+                Arest(Arest),
+                Lg(Lg),
+                Winit(Winit),
+                gen(rd())
 {
 
     for (size_t i = 0; i < NB_INPUT_UNITS; i++) {

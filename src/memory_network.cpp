@@ -142,7 +142,7 @@ void MemoryNetwork::step()
     }
     
     // decay
-    _activations -= Dg * (_activations - rest_activations);
+    _activations -= Dg * dt.count() * (_activations - rest_activations);
 
     // Weights update
     // **************
@@ -154,11 +154,11 @@ void MemoryNetwork::step()
 
             if (_activations(i) * _activations(j) > 0)
             {
-            _weights(i,j) += Lg * _activations(i) * _activations(j) * (1 - _weights(i,j));
+            _weights(i,j) += Lg * dt.count() * _activations(i) * _activations(j) * (1 - _weights(i,j));
             }
             else
             {
-            _weights(i,j) += Lg * _activations(i) * _activations(j) * (1 + _weights(i,j));
+            _weights(i,j) += Lg * dt.count() * _activations(i) * _activations(j) * (1 + _weights(i,j));
             }
         }
     }

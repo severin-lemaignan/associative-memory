@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
+            ("decay,d", po::value<double>()->default_value(0.2), "decay (per ms)")
+            ("learning,l", po::value<double>()->default_value(0.01), "learning rate (per ms)")
             ("fullscreen,f", "fullscreen")
             ("geometry,g", po::value<string>()->default_value("1024x768"), "window geometry (LxH)")
             ("configuration", po::value<string>(), "rendering configuration (JSON, optional)")
@@ -144,7 +146,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     try {
-        MemoryView memoryview(config);
+        MemoryView memoryview(config, vm["decay"].as<double>(), vm["learning"].as<double>());
         memoryview.run();
 
     } catch(ResourceException& exception) {

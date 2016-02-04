@@ -159,7 +159,7 @@ class MemoryView : public SDLApp {
     bool display_footer;
 
 public:
-    MemoryView(const Json::Value& config);
+    MemoryView(const Json::Value& config, double decay_rate, double learning_rate);
 
     //Public resources
     FXFont font, fontlarge, fontmedium;

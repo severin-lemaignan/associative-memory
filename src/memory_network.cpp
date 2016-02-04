@@ -8,21 +8,21 @@ using namespace std;
 using namespace std::chrono;
 
 
-MemoryNetwork::MemoryNetwork(double Eg,   
+MemoryNetwork::MemoryNetwork(double Dg,   
+                             double Lg,   
+                             double Eg,   
                              double Ig,   
-                             double Dg,   
                              double Amax, 
                              double Amin, 
                              double Arest,
-                             double Lg,   
                              double Winit) :
+                Dg(Dg),   
+                Lg(Lg),
                 Eg(Eg),
                 Ig(Ig),   
-                Dg(Dg),   
                 Amax(Amax), 
                 Amin(Amin), 
                 Arest(Arest),
-                Lg(Lg),
                 Winit(Winit),
                 gen(rd())
 {
@@ -152,6 +152,9 @@ void MemoryNetwork::step()
         {
             if (std::isnan(_weights(i,j))) continue;
 
+            // only update weights (ie, learn) if the units are co-activated
+            if (external_activations(i) * external_activations(j) == 0) continue;
+
             if (_activations(i) * _activations(j) > 0)
             {
             _weights(i,j) += Lg * dt.count() * _activations(i) * _activations(j) * (1 - _weights(i,j));
@@ -181,10 +184,11 @@ void MemoryNetwork::printout() {
 
     //cout << "Weights" << endl << setprecision(2) << _weights << endl;
 
-    cout << "External\tInternal\tNet\t\tActivation" << endl;
-    cout << "--------\t--------\t---\t\t----------" << endl;
-    cout << setprecision(4) << setw(6) << fixed;
+    cout << setprecision(4) << setw(6) << fixed << "\033[2J";
+    cout << "ID\t\tExternal\tInternal\tNet\t\tActivation" << endl;
+    cout << "--\t\t--------\t--------\t---\t\t----------" << endl;
     for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+        cout << i << "\t\t";
         cout << external_activations(i) << "\t\t";
         cout << internal_activations(i) << "\t\t";
         cout << net_activations(i) << "\t\t";

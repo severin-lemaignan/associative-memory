@@ -8,7 +8,7 @@
 #include <chrono>
 #include <thread>
 
-#define NB_INPUT_UNITS 50
+#define NB_INPUT_UNITS 10
 
 typedef Eigen::Matrix<double, NB_INPUT_UNITS, NB_INPUT_UNITS> MemoryMatrix;
 typedef Eigen::Matrix<double, NB_INPUT_UNITS, 1> MemoryVector;
@@ -19,13 +19,13 @@ class MemoryNetwork
 
 public:
 
-    MemoryNetwork(double Eg = 0.6,     // external influence
+    MemoryNetwork(double Dg = 0.2,     // activation decay (per ms)
+                  double Lg = 0.01,    // learning rate (per ms)
+                  double Eg = 0.6,     // external influence
                   double Ig = 0.3,     // internal influence
-                  double Dg = 0.5,     // activation decay (per ms)
                   double Amax = 1.0,   // maximum activation
                   double Amin = -0.2,  // minimum activation
                   double Arest = -0.1, // rest activation
-                  double Lg = 0.01,    // learning rate (per ms)
                   double Winit = 0.0); // initial weights
 
 
@@ -46,13 +46,13 @@ public:
     bool isrunning() const {return _is_running;}
 
 private:
+    const double Dg;
+    const double Lg;
     const double Eg;
     const double Ig;
-    const double Dg;
     const double Amax;
     const double Amin;
     const double Arest;
-    const double Lg;
     const double Winit;
 
     MemoryVector rest_activations; // constant

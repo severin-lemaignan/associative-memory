@@ -35,8 +35,10 @@
 using namespace std;
 using namespace std::chrono;
 
-MemoryView::MemoryView(const Json::Value& config):
+MemoryView::MemoryView(const Json::Value& config, 
+                       double decay_rate, double learning_rate):
     config(config),
+    memory(decay_rate, learning_rate),
     display_shadows(config.get("shadows", true).asBool()),
     display_labels(config.get("display_labels", true).asBool()),
     display_footer(config.get("display_footer", false).asBool())

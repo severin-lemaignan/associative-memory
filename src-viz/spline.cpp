@@ -146,6 +146,8 @@ void SplineEdge::drawShadow() {
 
     int edges_count = spline_point.size() - 1;
 
+    if (edges_count <= 0) return;
+
     glBegin(GL_QUAD_STRIP);
 
     for(int i=0;i<edges_count;i++) {
@@ -163,6 +165,8 @@ void SplineEdge::drawShadow() {
 void SplineEdge::draw() {
 
     int edges_count = spline_point.size() - 1;
+
+    if (edges_count <= 0) return;
 
     glBegin(GL_QUAD_STRIP);
 

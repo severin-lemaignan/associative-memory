@@ -105,6 +105,16 @@ void Edge::step(Graph& g, float dt){
     //renderer.update(pos1 + out_of_node1_distance , node1->renderer.col,
     //                pos2  - out_of_node2_distance , node2->renderer.col, spos);
 
+    auto col = computeColour();
+    renderer.update(pos1 + out_of_node1_distance , col,
+                    pos2  - out_of_node2_distance , col, spos);
+
+#endif
+    TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " updated.");
+
+}
+
+vec4f Edge::computeColour() const {
     vec4f col;
     if (renderer.selected) {
         col = HOVERED_COLOUR;
@@ -118,13 +128,7 @@ void Edge::step(Graph& g, float dt){
         }
     }
 
-
-    renderer.update(pos1 + out_of_node1_distance , col,
-                    pos2  - out_of_node2_distance , col, spos);
-
-#endif
-    TRACE("Edge between " << node1->getID() << " and " << node2->getID() << " updated.");
-
+    return col;
 }
 
 void Edge::render(rendering_mode mode, MemoryView& env){
@@ -132,8 +136,12 @@ void Edge::render(rendering_mode mode, MemoryView& env){
 
 
 #ifndef TEXT_ONLY
-    if (mode == GRAPHVIZ) {
-        env.graphvizGraph << node1->getSafeID() << " -> " << node2->getSafeID() << ";\n";
+    if (mode == GRAPHVIZ and !std::isnan(weight)) {
+        std::stringstream str;
+        auto col = computeColour();
+        str << "#" << setfill('0') << setw(2) << hex << (int) floor(col.x * 256) << setw(2) << (int) floor(col.y * 256) << setw(2) << (int) floor(col.z * 256);
+
+        env.graphvizGraph << node1->getSafeID() << " -- " << node2->getSafeID() << " [label=" << fixed << setprecision( 2 ) << weight <<", color=\"" << str.str() << "\"];\n";
         return;
     }
 

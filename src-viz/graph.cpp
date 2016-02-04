@@ -353,7 +353,7 @@ vec2f Graph::project(float force, const vec2f& d) const {
 
 void Graph::saveToGraphViz(MemoryView& env) {
 
-    env.graphvizGraph << "strict digraph ontology {\n";
+    env.graphvizGraph << "strict graph memorynetwork {\n";
 
     // Renders edges
     for(auto& e : edges) {

@@ -42,6 +42,8 @@ class Edge
 
     EdgeRenderer renderer;
 
+    vec4f computeColour() const;
+
 public:
     Edge(const NodeRelation& rel, double weight = 0);
 

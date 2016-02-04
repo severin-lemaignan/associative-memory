@@ -118,9 +118,15 @@ void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, 
         float halfsize = size * 0.5f;
         vec2f offsetpos = pos - vec2f(halfsize, halfsize);
 
+        std::stringstream strcol;
+        strcol << "#" << setfill('0') << setw(2) << hex << (int) floor(col.x * 256) << setw(2) << (int) floor(col.y * 256) << setw(2) << (int) floor(col.z * 256);
+
         env.graphvizGraph << " [label=\"" << label
-                          << "\", shape=box, height=0.2, "
-                          << "pos=\"" << offsetpos.x << "," << offsetpos.y << "\"];\n";
+                          << "\", height=0.2"
+                          << ", style=filled"
+                          << ", fontcolor=\"" << ((col.x+col.y+col.z > 0.5) ? "black":"white")
+                          << "\", fillcolor=\"" << strcol.str()
+                          << "\", pos=\"" << offsetpos.x << "," << offsetpos.y << "\"];\n";
         return;
     }
 

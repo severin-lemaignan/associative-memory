@@ -60,7 +60,7 @@ void MemoryNetwork::activate_unit(int id,
                                   double level,
                                   milliseconds duration) {
     external_activations(id) = level;
-    external_activations_decay(id) = 1.0/duration.count();
+    external_activations_decay(id) = level/duration.count();
 }
 
 void MemoryNetwork::start() {

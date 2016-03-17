@@ -35,7 +35,7 @@ public:
 
 
     void activate_unit(int id, 
-                    double level, 
+                    double level = 1.0, 
                     std::chrono::milliseconds duration = std::chrono::milliseconds(200));
 
 

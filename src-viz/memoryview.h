@@ -133,6 +133,8 @@ class MemoryView : public SDLApp {
     void drawBackground(float dt);
     void displayCoulombField();
 
+    void drawNodeDetails(Node* node, int offset, bool highlight = false);
+
     //Logic routines
     void mouseTrace(Frustum& frustum, float dt); //render the mouse and update hovered objects
 

@@ -89,6 +89,11 @@ public:
       */
     Node* getSelected();
 
+    /** Returns the set of all selected nodes
+     * (the set may be possibly empty)
+     */
+    std::set<Node*> getAllSelected() {return selectedNodes;}
+
     /** Returns the node currently hovered by the mouse, or nullptr if none
      */
     Node* getHovered();

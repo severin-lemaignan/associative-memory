@@ -453,10 +453,75 @@ void MemoryView::mouseTrace(Frustum& frustum, float dt) {
     }
 }
 
+void MemoryView::drawNodeDetails(Node* node, int offset, bool highlight) {
+
+        
+        if (highlight)
+            glColor4f(0.f, 0.f, 0.f, 1.f);
+        else
+            glColor4f(.5f, .5f, .5f, .5f);
+
+        fontmedium.print(10,offset,"Node %s:", node->label.c_str());
+        fontmedium.print(40, offset + 20,"Activity: %.4f", node->activity);
+
+
+        // Display a graph of the unit's recent activity
+        
+        const int v_offset = offset + 50; // px
+        const int h_offset = 30; // px
+        const int height = 50; //px
+        const int width = 150; //px
+
+
+        glColor4f(0.f, .1f, 0.1f, .6f);
+        font.print(10, v_offset - 5 ,"1.0");
+        font.print(15, v_offset + height - 7,"0");
+        font.print(5, v_offset + height + height * 0.1 - 2 ,"-0.1");
+
+        glBindTexture(GL_TEXTURE_2D, beamtex->textureid);
+
+        glDisable(GL_TEXTURE_2D);
+        // graph bounding box
+        glBegin(GL_LINE_STRIP);
+            glVertex2f(h_offset, v_offset);
+            glVertex2f(h_offset + width, v_offset);
+            glVertex2f(h_offset + width, v_offset + height + 0.1 * height);
+            glVertex2f(h_offset, v_offset + height + 0.1 * height);
+            glVertex2f(h_offset, v_offset);
+        glEnd();
+
+        // line '0'
+        glColor4f(0.f, 1.f, 0.2f, .6f);
+        glBegin(GL_LINE_STRIP);
+            glVertex2f(h_offset, v_offset + height);
+            glVertex2f(h_offset + width, v_offset + height);
+        glEnd();
+
+        // graph itself
+        glColor4f(1.f, .2f, 0.2f, 1.f);
+        auto history = memory.activationHistory(node->getID());
+
+        glBegin(GL_LINE_STRIP);
+        for(int i=0;i<history.size();i++) {
+            auto activity = history[i];
+
+            vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
+            vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
+
+            glVertex2fv(pos1);
+            glVertex2fv(pos2);
+        }
+
+        glEnd();
+
+        glEnable(GL_TEXTURE_2D);
+
+}
+
 /** Drawing */
 void MemoryView::draw(float t, float dt) {
 
-    Node* selectedNode = g.getSelected();
+    auto selectedNodes = g.getAllSelected();
 
 #ifndef TEXT_ONLY
 
@@ -528,61 +593,15 @@ void MemoryView::draw(float t, float dt) {
     fontmedium.print(10,50, "Mode (tab to switch): %s",
                             _activate_on_hover ? "EXCITATE" : "INSPECT");
 
+    int display_offset = 80;
     if(hoverNode) {
-        fontmedium.print(10,80,"Node %s:", hoverNode->label.c_str());
-        fontmedium.print(40, 100,"Activity: %.4f", hoverNode->activity);
+        drawNodeDetails(hoverNode, display_offset, true);
+    }
+    display_offset += 120;
 
-
-        // Display a graph of the unit's recent activity
-        
-        const int v_offset = 130; // px
-        const int h_offset = 30; // px
-        const int height = 50; //px
-        const int width = 150; //px
-
-
-        glColor4f(0.f, .1f, 0.1f, .6f);
-        font.print(10, v_offset - 5 ,"1.0");
-        font.print(15, v_offset + height - 7,"0");
-        font.print(5, v_offset + height + height * 0.1 - 2 ,"-0.1");
-
-        glBindTexture(GL_TEXTURE_2D, beamtex->textureid);
-
-        glDisable(GL_TEXTURE_2D);
-        // graph bounding box
-        glBegin(GL_LINE_STRIP);
-            glVertex2f(h_offset, v_offset);
-            glVertex2f(h_offset + width, v_offset);
-            glVertex2f(h_offset + width, v_offset + height + 0.1 * height);
-            glVertex2f(h_offset, v_offset + height + 0.1 * height);
-            glVertex2f(h_offset, v_offset);
-        glEnd();
-
-        // line '0'
-        glColor4f(0.f, 1.f, 0.2f, .6f);
-        glBegin(GL_LINE_STRIP);
-            glVertex2f(h_offset, v_offset + height);
-            glVertex2f(h_offset + width, v_offset + height);
-        glEnd();
-
-        // graph itself
-        glColor4f(1.f, .2f, 0.2f, 1.f);
-        auto history = memory.activationHistory(hoverNode->getID());
-
-        glBegin(GL_LINE_STRIP);
-        for(int i=0;i<history.size();i++) {
-            auto activity = history[i];
-
-            vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
-            vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
-
-            glVertex2fv(pos1);
-            glVertex2fv(pos2);
-        }
-
-        glEnd();
-
-        glEnable(GL_TEXTURE_2D);
+    for (auto node : selectedNodes) {
+        drawNodeDetails(node, display_offset, false);
+        display_offset += 120;
     }
 
     int offset = 200;

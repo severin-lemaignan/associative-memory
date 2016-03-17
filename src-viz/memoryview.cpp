@@ -196,11 +196,8 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
         }
 
         if (e->keysym.sym == SDLK_SPACE) {
-            addRandomNodes(2, 2);
-        }
-
-        if (e->keysym.sym == SDLK_t) {
-            g.getRandomNode()->tickle();
+            //addRandomNodes(2, 2);
+            memory.max_frequency(20);
         }
 
         if (e->keysym.sym == SDLK_p) {
@@ -589,7 +586,11 @@ void MemoryView::draw(float t, float dt) {
     //fontmedium.draw(display.width/2 - date_x_offset, 20, displaydate);
 
     glColor4f(.5f, .5f, .5f, .5f);
-    fontmedium.print(10,20, "Network update frequency: %dkHz", memory.frequency()/1000);
+    auto freq = memory.frequency();
+    if (freq > 2000)
+        fontmedium.print(10,20, "Network update frequency: %dkHz", memory.frequency()/1000);
+    else
+        fontmedium.print(10,20, "Network update frequency: %dHz", memory.frequency());
     fontmedium.print(10,50, "Mode (tab to switch): %s",
                             _activate_on_hover ? "EXCITATE" : "INSPECT");
 

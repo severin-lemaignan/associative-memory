@@ -50,6 +50,14 @@ public:
     size_t size() const {return NB_INPUT_UNITS;}
     int frequency() const {return _frequency;}
 
+    /** Slow down the memory update mechanism (typically, for debugging) up to
+     * 'freq' updated per seconds
+     *
+     * The update frequency is set to max_freq.  Calling slowdown with
+     * max_freq=0 removes any previously set limit.
+     */
+    void max_frequency(float freq) {_max_freq = freq;}
+
     void start();
     void stop();
     bool isrunning() const {return _is_running;}
@@ -93,6 +101,7 @@ private:
     void printout();
 
     int _frequency = 0;
+    float _max_freq = 0.f;
     int _steps_since_last_frequency_update = 0;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> _last_timestamp;

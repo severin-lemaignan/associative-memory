@@ -93,6 +93,12 @@ void MemoryNetwork::step()
     duration<double, std::milli> dt = now - _last_timestamp; // fractional duration
     _last_timestamp = now;
 
+    if (_max_freq != 0.f) {
+        duration<double, std::milli> target_period(1000./_max_freq);
+        std::this_thread::sleep_for(target_period);
+    }
+
+
     // If needed, compute frequency + optional printout network values
     _steps_since_last_frequency_update++;
     duration<double, std::milli> ms_since_last_freq = now - _last_freq_computation;

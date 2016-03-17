@@ -143,13 +143,16 @@ void MemoryNetwork::step()
         else
             _activations(i) +=  net_activations(i) * (_activations(i) - Amin);
 
-
-        // clamp in [Amin, Amax]
-        _activations(i) = min(Amax, max(Amin, _activations(i)));
     }
     
     // decay
     _activations -= Dg * dt.count() * (_activations - rest_activations);
+
+    for (size_t i = 0; i < NB_INPUT_UNITS; i++)
+    {
+        // clamp in [Amin, Amax]
+        _activations(i) = min(Amax, max(Amin, _activations(i)));
+    }
 
     // if necessary, store the activation history
     duration<double, std::milli> ms_since_last_history = now - _last_history_store;

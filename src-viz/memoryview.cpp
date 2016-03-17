@@ -110,7 +110,7 @@ void MemoryView::stylesSetup(const Json::Value& config) {
 
     cout << "Setting customs colors from config file." << endl;
     if (colors["selected"] != Json::nullValue) {
-        SELECTED_COLOUR = convertRGBA2Float(colors["selected"]);
+        ACTIVE_COLOUR = convertRGBA2Float(colors["selected"]);
     }
 
     if (colors["hovered"] != Json::nullValue)

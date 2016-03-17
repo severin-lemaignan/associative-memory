@@ -37,7 +37,9 @@ static const float SHADOW_STRENGTH = 0.5; //intensity of shadows (from 0.0 to 1.
 static const vec2f SHADOW_OFFSET(1.0, 1.0); //offset of shadows
 
 static const vec4f DEFAULT_HOVERED_COLOUR(0.55, 0.1, 0.1, 1.0); // Dark red
-static const vec4f DEFAULT_SELECTED_COLOUR(0.99, 0.69, 0.24, 1.0); //Bright orange
+
+static const vec4f DEFAULT_ACTIVE_COLOUR(0.99, 0.69, 0.24, 1.0); //Bright orange
+static const vec4f DEFAULT_INHIBITED_COLOUR(0., 0.7, 1.0, 1.0); //Blue
 
 static const vec4f DEFAULT_UNITS_COLOUR(0.1, 0.1, 0.1, 1.0);
 
@@ -48,7 +50,8 @@ static const vec4f DEFAULT_BACKGROUND_COLOUR(1.0, 1.0, 1.0);
 
 // Colours are defined as global variables
 extern vec4f HOVERED_COLOUR;
-extern vec4f SELECTED_COLOUR;
+extern vec4f ACTIVE_COLOUR;
+extern vec4f INHIBITED_COLOUR;
 extern vec4f UNITS_COLOUR;
 extern vec4f BACKGROUND_COLOUR;
 

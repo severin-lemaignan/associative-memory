@@ -226,15 +226,6 @@ void Node::decay() {
     }
 }
 
-void Node::tickle() {
-    decaying = true;
-    decaySpeed = 0.2;
-    renderer.col = SELECTED_COLOUR;
-    renderer.size = NODE_SIZE * SELECT_SIZE_FACTOR * 3.0;
-    renderer.fontsize = LARGE_FONT_SIZE * 1.5;
-    charge *= 50;
-}
-
 void Node::setSelected(bool select) {
 
     if ((select && _selected)||

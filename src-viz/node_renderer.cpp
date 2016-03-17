@@ -30,7 +30,6 @@ NodeRenderer::NodeRenderer(int tagid, string label) :
     idle_time(0.0),
     hovered(false),
     selected(false),
-    current_distance_to_selected(-1),
     base_size(NODE_SIZE),
     base_fontsize(BASE_FONT_SIZE)
 {
@@ -54,15 +53,21 @@ void NodeRenderer::setColour(vec4f col) {
 
 void NodeRenderer::computeColourSize() {
     if (selected) {
-        decay();
         size = base_size * SELECT_SIZE_FACTOR;
     }
     else {
         base_size = NODE_SIZE;
-        decay();
 
     }
     if (hovered) col = HOVERED_COLOUR;
+    else {
+        if (activation > 0) {
+            col = UNITS_COLOUR + ((ACTIVE_COLOUR - UNITS_COLOUR) * activation);
+        }
+        else {
+            col = UNITS_COLOUR + ((INHIBITED_COLOUR - UNITS_COLOUR) * -activation);
+        }
+    }
 }
 
 void NodeRenderer::decay() {
@@ -85,8 +90,6 @@ void NodeRenderer::increment_idle_time(float dt) {
 }
 
 void NodeRenderer::draw(const vec2f& pos, rendering_mode mode, MemoryView& env, int distance_to_selected) {
-
-    current_distance_to_selected = distance_to_selected;
 
     std::stringstream str;
     str << fixed << setprecision( 1 ) << activation;

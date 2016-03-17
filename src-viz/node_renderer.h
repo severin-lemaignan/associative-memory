@@ -45,7 +45,6 @@ class NodeRenderer
 
     bool hovered;
     bool selected;
-    int current_distance_to_selected;
 
     vec4f base_col;
     float base_size;

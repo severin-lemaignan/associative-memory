@@ -24,6 +24,7 @@ MemoryNetwork::MemoryNetwork(double Dg,
                 Amin(Amin), 
                 Arest(Arest),
                 Winit(Winit),
+                _activationsHistory(NB_INPUT_UNITS, boost::circular_buffer<double>(HISTORY_DURATION.count() * HISTORY_SAMPLING_RATE,0.0)),
                 gen(rd())
 {
 
@@ -143,6 +144,16 @@ void MemoryNetwork::step()
     
     // decay
     _activations -= Dg * dt.count() * (_activations - rest_activations);
+
+    // if necessary, store the activation history
+    duration<double, std::milli> ms_since_last_history = now - _last_history_store;
+    if(ms_since_last_history.count() > (1000./HISTORY_SAMPLING_RATE)) {
+        _last_history_store = now;
+
+        for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+            _activationsHistory[i].push_back(_activations[i]);
+        }
+    }
 
     // Weights update
     // **************

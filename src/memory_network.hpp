@@ -8,7 +8,12 @@
 #include <chrono>
 #include <thread>
 
-#define NB_INPUT_UNITS 10
+#include <boost/circular_buffer.hpp> // used to store the activation history of each unit
+
+#define NB_INPUT_UNITS 50
+
+const std::chrono::seconds HISTORY_DURATION(5);
+const int HISTORY_SAMPLING_RATE=10; // Hz
 
 typedef Eigen::Matrix<double, NB_INPUT_UNITS, NB_INPUT_UNITS> MemoryMatrix;
 typedef Eigen::Matrix<double, NB_INPUT_UNITS, 1> MemoryVector;
@@ -37,6 +42,10 @@ public:
     std::vector<std::string> units_names() const {return _units_names;}
     MemoryVector activations() const {return _activations;}
     MemoryMatrix weights() const {return _weights;}
+
+    boost::circular_buffer<double> activationHistory(size_t unit_id) const {
+        return _activationsHistory[unit_id];
+    }
 
     size_t size() const {return NB_INPUT_UNITS;}
     int frequency() const {return _frequency;}
@@ -67,6 +76,8 @@ private:
     MemoryMatrix _weights;
 
 
+    std::vector<boost::circular_buffer<double>> _activationsHistory;
+
     std::random_device rd;
     std::default_random_engine gen;
 
@@ -86,6 +97,7 @@ private:
 
     std::chrono::time_point<std::chrono::high_resolution_clock> _last_timestamp;
     std::chrono::time_point<std::chrono::high_resolution_clock> _last_freq_computation;
+    std::chrono::time_point<std::chrono::high_resolution_clock> _last_history_store;
 };
 
 

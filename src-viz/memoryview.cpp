@@ -466,14 +466,14 @@ void MemoryView::drawNodeDetails(Node* node, int offset, bool highlight) {
         
         const int v_offset = offset + 50; // px
         const int h_offset = 30; // px
-        const int height = 50; //px
-        const int width = 150; //px
+        const double height = 50; //px
+        const double width = 150; //px
 
 
         glColor4f(0.f, .1f, 0.1f, .6f);
         font.print(10, v_offset - 5 ,"1.0");
-        font.print(15, v_offset + height - 7,"0");
-        font.print(5, v_offset + height + height * 0.1 - 2 ,"-0.1");
+        font.print(15, v_offset + height - 5,"0");
+        font.print(5, v_offset + height - height * memory.Amin - 5 ,"-0.2");
 
         glBindTexture(GL_TEXTURE_2D, beamtex->textureid);
 
@@ -482,8 +482,8 @@ void MemoryView::drawNodeDetails(Node* node, int offset, bool highlight) {
         glBegin(GL_LINE_STRIP);
             glVertex2f(h_offset, v_offset);
             glVertex2f(h_offset + width, v_offset);
-            glVertex2f(h_offset + width, v_offset + height + 0.1 * height);
-            glVertex2f(h_offset, v_offset + height + 0.1 * height);
+            glVertex2f(h_offset + width, v_offset + height - memory.Amin * height);
+            glVertex2f(h_offset, v_offset + height - memory.Amin * height);
             glVertex2f(h_offset, v_offset);
         glEnd();
 

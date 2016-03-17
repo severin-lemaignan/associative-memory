@@ -62,7 +62,6 @@ public:
     void stop();
     bool isrunning() const {return _is_running;}
 
-private:
     const double Dg;
     const double Lg;
     const double Eg;
@@ -72,6 +71,7 @@ private:
     const double Arest;
     const double Winit;
 
+private:
     MemoryVector rest_activations; // constant
 
     std::vector<std::string> _units_names;

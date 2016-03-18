@@ -1,3 +1,6 @@
+#ifndef _RUNNER_EXPE
+#define _RUNNER_EXPE
+
 #include <string>
 #include <set>
 #include <map>
@@ -33,3 +36,4 @@ struct Experiment
     void summary() const;
 };
 
+#endif

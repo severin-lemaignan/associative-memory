@@ -1,7 +1,11 @@
 #include <boost/program_options.hpp>
 
+#include <chrono>
+
 #include <iostream>
 #include <fstream>
+
+#include "memory_network.hpp"
 
 #include "parser.hpp"
 
@@ -63,5 +67,36 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    cout << "-------------------------------------------------" << endl;
+    cout << "        Configuring the memory network           " << endl;
+    cout << "-------------------------------------------------" << endl << endl;
+    auto& expe = experiment_parser.expe;
+
+    MemoryNetwork memory;
+    if (expe.parameters.count("MaxFreq")) {
+        cout << "Setting the max frequency to " << expe.parameters["MaxFreq"] << endl;
+        memory.max_frequency(expe.parameters["MaxFreq"]);
+    }
+
+    cout << endl << "-------------------------------------------------" << endl;
+    cout <<         "        Running the experiment                   " << endl;
+    cout <<         "-------------------------------------------------" << endl << endl;
+
+    memory.start();
+
+    std::this_thread::sleep_for(chrono::milliseconds(expe.endtime));
+
+    memory.stop();
+
+    cout << "Experiment completed." << endl;
+    cout << "-------------------------------------------------" << endl << endl;
+
+    //auto start = high_resolution_clock::now();
+
+
+
+    //duration<double, std::milli> ms_since_last_freq = now - _last_freq_computation;
+
+    return 0;
 }
 

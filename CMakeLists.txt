@@ -29,6 +29,33 @@ install(FILES
     DESTINATION include/${PROJECT_NAME}
 )
 
+######################################################
+##               experiment runner                  ##
+######################################################
+######################################################
+
+option(WITH_RUNNER "Compile the experiment runner" ON)
+
+if(WITH_RUNNER)
+
+    find_package(Boost COMPONENTS program_options REQUIRED)
+
+    include_directories(src/
+                        ${Boost_INCLUDE_DIRS})
+
+    file(GLOB_RECURSE SRC src-runner/*.cpp)
+
+    add_executable(runner ${SRC})
+    target_link_libraries(runner
+                            ${PROJECT_NAME} 
+                            ${Boost_LIBRARIES})
+
+    install(TARGETS runner
+        RUNTIME DESTINATION bin
+    )
+
+endif()
+
 
 ######################################################
 ##                 memory-view                      ##

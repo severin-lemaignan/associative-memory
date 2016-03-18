@@ -5,23 +5,28 @@
 
 #include "experiment.hpp"
 
+using namespace std;
 
 Experiment::Experiment() {
     activations[0] = {};
 }
 
-void Experiment::set_name(const std::string& _name) {name = _name;}
+void Experiment::set_name(const string& _name) {name = _name;}
 
-void Experiment::add_unit(std::string& unit) {
+void Experiment::store_param(parameter& param) {
+    parameters[param.name] = param.value;
+}
+
+void Experiment::add_unit(string& unit) {
     units.insert(unit);
 }
 
-void Experiment::add_activation(const std::string& unit, const timeperiod& period) {
+void Experiment::add_activation(const string& unit, const timeperiod& period) {
 
-    endtime = std::max(endtime, period.stop);
+    endtime = max(endtime, period.stop);
 
-    std::vector<std::string> active_units_before_start;
-    std::vector<std::string> active_units_before_stop;
+    vector<string> active_units_before_start;
+    vector<string> active_units_before_stop;
 
     for (auto& kv : activations) {
         auto t = kv.first;
@@ -49,14 +54,14 @@ void Experiment::add_activation(const std::string& unit, const timeperiod& perio
 
     // if needed, add a point at stop time, and make sure the unit is not active
     if (activations.count(period.stop) == 0) {
-        active_units_before_stop.erase(std::remove(active_units_before_stop.begin(), active_units_before_stop.end(), unit), active_units_before_stop.end());
+        active_units_before_stop.erase(remove(active_units_before_stop.begin(), active_units_before_stop.end(), unit), active_units_before_stop.end());
         activations[period.stop] = active_units_before_stop;
     }
 }
 
-void Experiment::add_plot(const std::string& unit, const timeperiod& period) {
+void Experiment::add_plot(const string& unit, const timeperiod& period) {
 
-    endtime = std::max(endtime, period.stop);
+    endtime = max(endtime, period.stop);
 
     plots.push_back(make_tuple(unit, period.start, period.stop));
 
@@ -65,33 +70,39 @@ void Experiment::add_plot(const std::string& unit, const timeperiod& period) {
 void Experiment::summary() const
 {
 
-    std::cout << "Summary of the experiment \"" << name << "\"" << std::endl << std::endl;
+    cout << "Summary of the experiment \"" << name << "\"" << endl << endl;
 
-    std::cout << units.size() << " defined units:" << std::endl;
+    cout << "Network parameters:" << endl;
+    for (auto& kv : parameters) {
+        cout << "- " << kv.first << ": " << kv.second << endl;
+    }
+
+
+    cout << endl << units.size() << " defined units:" << endl;
     for (auto unit : units) {
-        std::cout << unit << std::endl;
+        cout << unit << endl;
     }
 
-    std::cout << std::endl << "Activations plan:" << std::endl;
+    cout << endl << "Activations plan:" << endl;
     for (auto& kv : activations) {
-        std::cout << "  - at " << kv.first << "ms: ";
-        if (kv.second.empty()) std::cout << "none";
+        cout << "  - at " << kv.first << "ms: ";
+        if (kv.second.empty()) cout << "none";
         else
-            copy(kv.second.begin(), kv.second.end(), std::ostream_iterator<std::string>(std::cout, ", "));
+            copy(kv.second.begin(), kv.second.end(), ostream_iterator<string>(cout, ", "));
 
-        std::cout << std::endl;
+        cout << endl;
     }
 
-    std::cout << std::endl << "Requested plots:" << std::endl;
+    cout << endl << "Requested plots:" << endl;
     for (auto& plot : plots) {
-        std::string unit;
+        string unit;
         int start, end;
 
         tie(unit, start, end) = plot;
-        std::cout << "Unit <" << unit << "> from " << start << "ms to " << end << "ms" << std::endl;
+        cout << "Unit <" << unit << "> from " << start << "ms to " << end << "ms" << endl;
 
     }
 
-    std::cout << std::endl << "Total duration: " << endtime << "ms" << std::endl;
+    cout << endl << "Total duration: " << endtime << "ms" << endl;
 }
 

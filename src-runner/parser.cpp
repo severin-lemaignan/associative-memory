@@ -37,18 +37,13 @@ int main(int argc, char** argv) {
 
     bool r = qi::phrase_parse(iter, end, experiment_parser,ascii::space);
 
-//
-//    if (r && iter == str.end()) {
-//        cout << "-------------------------\n";
-//        cout << "Parsing succeeded\n";
-//        cout << str << " Parses OK: " << endl;
-//    } else {
-//        cout << "-------------------------\n";
-//        cout << str << ": Parsing failed\n";
-//        cout << "-------------------------\n";
-//    }
-//
-    experiment_parser.expe.summary();
+
+    if (r && iter == str.end()) {
+        experiment_parser.expe.summary();
+    } else {
+        cout << "Parsing of " << argv[1] << " failed!";
+    }
+
 
     return 0;
 }

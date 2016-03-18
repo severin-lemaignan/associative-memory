@@ -13,9 +13,16 @@ struct timeperiod
     int stop;
 };
 
+struct parameter
+{
+    std::string name;
+    double value;
+};
+
 struct Experiment
 {
 
+    std::map<std::string, double> parameters;
     std::set<std::string> units;
     std::map<int, std::vector<std::string>> activations;
     std::vector<std::tuple<std::string, int, int>> plots;
@@ -26,6 +33,8 @@ struct Experiment
     Experiment();
 
     void set_name(const std::string& _name);
+
+    void store_param(parameter& param);
 
     void add_unit(std::string& unit);
 

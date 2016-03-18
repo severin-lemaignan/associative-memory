@@ -39,11 +39,14 @@ struct Experiment
     map<int, vector<string>> activations;
     vector<tuple<string, int, int>> plots;
 
+    string name;
     int endtime = 0;
 
     Experiment() {
         activations[0] = {};
     }
+
+    void set_name(const string& _name) {name = _name;}
 
     void add_unit(string& unit) {
         units.insert(unit);
@@ -98,8 +101,7 @@ struct Experiment
     void summary() const
     {
 
-        cout << "Summary of the experiment" << endl;
-        cout << "=========================" << endl << endl;
+        cout << "Summary of the experiment \"" << name << "\"" << endl << endl;
 
         cout << units.size() << " defined units:" << endl;
         for (auto unit : units) {
@@ -178,8 +180,8 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                    >> ']' 
                    >> eol;
 
-        title1 %= text >> eol >> double_ruler;
-        title2 %= text >> eol >> simple_ruler;
+        title1 %= text >> omit[eol >> double_ruler];
+        title2 %= text >> omit[eol >> simple_ruler];
 
         unitstitle = lit("Units") >> eol 
                   >> simple_ruler;
@@ -190,7 +192,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
         plotstitle = lit("Plots") >> eol 
                   >> simple_ruler;
 
-        start = title1 >> *eol 
+        start = title1[boost::bind(&Experiment::set_name, &expe, _1)] >> *eol 
              >> text >> *eol 
 
              >> unitstitle >> *eol
@@ -224,8 +226,8 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
     qi::rule<Iterator, string()> text;
     qi::rule<Iterator, string()> listitem;
     qi::rule<Iterator, timeperiod()> perioditem;
-    qi::rule<Iterator> title1;
-    qi::rule<Iterator> title2;
+    qi::rule<Iterator, string()> title1;
+    qi::rule<Iterator, string()> title2;
     qi::rule<Iterator> unitstitle;
     qi::rule<Iterator> activationstitle;
     qi::rule<Iterator> plotstitle;

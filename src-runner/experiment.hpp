@@ -22,9 +22,11 @@ struct parameter
 struct Experiment
 {
 
+    typedef std::pair<std::string, double> Activation;
+
     std::map<std::string, double> parameters;
     std::set<std::string> units;
-    std::map<int, std::vector<std::string>> activations;
+    std::map<int, std::vector<Activation>> activations;
     std::vector<std::tuple<std::string, int, int>> plots;
 
     std::string name;

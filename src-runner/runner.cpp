@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
         this_thread::sleep_for(milliseconds(kv.first - last_activation));
 
         for (auto& activation : kv.second) {
-            cout << " - Activating " << activation.first << " for " << activation.second.count() << "ms" << endl;
+            cerr << " - Activating " << activation.first << " for " << activation.second.count() << "ms" << endl;
             memory.activate_unit(activation.first, 1.0, activation.second);
         }
 
@@ -129,12 +129,65 @@ int main(int argc, char *argv[]) {
 
     memory.stop();
 
-    cout << "Experiment completed. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
-    cout << "-------------------------------------------------" << endl << endl;
+    cerr << endl << "EXPERIMENT COMPLETED. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
+
+    cerr << endl << "-------------------------------------------------" << endl;
+    cerr <<         "        Preparing experiment's data              " << endl;
+    cerr <<         "-------------------------------------------------" << endl << endl;
+
+    auto date = system_clock::to_time_t(system_clock::now());
+    tm tm = *std::localtime(&date);
+
+    cout << "# Results for experiment <" << expe.name << "> (run at " << std::put_time(&tm, "%c %Z") << ")." << endl;
+    cout << "# Sampling frequency: " << HISTORY_SAMPLING_RATE << "Hz" << endl;
+    
+
+    vector<vector<double>> data;
+    vector<string> header;
+
+    header.push_back("time");
+    for (size_t idx = 0;
+                idx < double(duration_cast<std::chrono::milliseconds>(expe.duration).count()) / (1000./HISTORY_SAMPLING_RATE);
+                idx++)
+    {
+        data.push_back(vector<double>());
+        data[idx].push_back(idx * 1000./HISTORY_SAMPLING_RATE);
+
+        for (auto& kv : expe.plots) {
+            //data[idx].push_back(NAN); // pre-fill with NaN
+            data[idx].push_back(0); // pre-fill with zeros
+        }
+    }
+
+    size_t plot_idx = 0;
+    for (auto& kv : expe.plots) {
+        header.push_back(kv.first);
+        size_t id = memory.unit_id(kv.first);
+        cerr << "  - for " << kv.first << ": " << endl;
+
+        for (auto& period : kv.second) {
+
+            cerr << "    - from " << period.start << "ms to " << period.stop << "ms" << endl;
 
 
+            for (size_t idx = double(period.start) / (1000./HISTORY_SAMPLING_RATE);
+                    idx < double(period.stop) / (1000./HISTORY_SAMPLING_RATE);
+                    idx++)
+            {
+                data[idx][plot_idx + 1] = logs[id][idx];
+            }
+        }
 
+        plot_idx++;
+    }
 
+    for(auto h : header) cout << h << ", ";
+    cout << endl;
+
+    for(auto row : data) {
+        for(auto item : row) cout << item << ", ";
+        cout << endl;
+    }
 
     return 0;
 }

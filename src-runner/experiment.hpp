@@ -22,12 +22,12 @@ struct parameter
 
 struct Experiment
 {
-    typedef std::pair<std::string, std::chrono::milliseconds> Activation;
+    typedef std::pair<std::string, std::chrono::milliseconds> Duration;
 
     std::map<std::string, double> parameters;
     std::set<std::string> units;
-    std::map<int, std::vector<Activation>> activations;
-    std::vector<std::tuple<std::string, int, int>> plots;
+    std::map<int, std::vector<Duration>> activations;
+    std::map<std::string, std::vector<timeperiod>> plots;
 
     std::string name;
     std::chrono::milliseconds duration;

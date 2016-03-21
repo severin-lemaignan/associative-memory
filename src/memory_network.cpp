@@ -40,9 +40,10 @@ MemoryNetwork::MemoryNetwork(double Dg,
 
     _activations.fill(Arest);
     _weights.fill(NAN);
+
 }
 
-MemoryVector MemoryNetwork::compute_internal_activations() {
+void MemoryNetwork::compute_internal_activations() {
 
     for (size_t i = 0; i < NB_INPUT_UNITS; i++)
     {
@@ -60,7 +61,7 @@ void MemoryNetwork::activate_unit(int id,
                                   double level,
                                   milliseconds duration) {
     external_activations(id) = level;
-    external_activations_decay(id) = level/duration.count();
+    external_activations_decay(id) = duration.count();
 }
 
 void MemoryNetwork::start() {
@@ -190,19 +191,20 @@ void MemoryNetwork::step()
     // decay the external activations
     for (size_t i = 0; i < external_activations.size(); i++) {
 
-        external_activations(i) -= external_activations_decay(i) * dt.count();
-
-        if (external_activations(i) <= 0) {
-            external_activations_decay(i) = 0;
+        if (external_activations_decay(i) > 0) {
+            external_activations_decay(i) -= dt.count();
+        }
+        else {
             external_activations(i) = 0;
         }
     }
 
 }
 
+
 void MemoryNetwork::printout() {
 
-    //cout << "Weights" << endl << setprecision(2) << _weights << endl;
+    cout << "Weights" << endl << setprecision(2) << _weights << endl;
 
     cout << setprecision(4) << setw(6) << fixed << "\033[2J";
     cout << "ID\t\tExternal\tInternal\tNet\t\tActivation" << endl;

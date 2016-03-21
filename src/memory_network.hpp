@@ -89,7 +89,7 @@ private:
     std::random_device rd;
     std::default_random_engine gen;
 
-    MemoryVector compute_internal_activations();
+    void compute_internal_activations();
 
     void run();
     void step();

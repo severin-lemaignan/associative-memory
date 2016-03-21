@@ -88,13 +88,31 @@ void MemoryNetwork::activate_unit(size_t id,
 }
 
 size_t MemoryNetwork::unit_id(const std::string& name) const {
-    return distance(find(_units_names.begin(), _units_names.end(), name), _units_names.begin());
+    size_t i = 0;
+    for ( ; i < _units_names.size(); i++) {
+        if (_units_names[i] == name) return i;
+    }
+    return i;
+}
+
+void MemoryNetwork::units_names(const std::set<std::string>& names) {
+    // input is a set as we do not want to identical unit name,
+    // but we internally store it as a vector as each unit must have
+    // a unique ID.
+    if (_is_running) throw runtime_error("Can not change the names of units once the network is running.");
+
+    _units_names.clear();
+    copy(names.begin(), names.end(), std::back_inserter(_units_names));
 }
 
 void MemoryNetwork::start() {
 
-    _is_running = true;
-     _network_thread = thread(&MemoryNetwork::run, this);
+    _network_thread = thread(&MemoryNetwork::run, this);
+
+    // wait for the thread to be effectively running
+    while(!_is_running) {
+        this_thread::sleep_for(milliseconds(1));
+    };
 }
 
 void MemoryNetwork::stop() {
@@ -108,6 +126,7 @@ void MemoryNetwork::run() {
 
     cerr << "Memory network thread started." << endl;
     _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+    _is_running = true;
     while(_is_running) step();
     cerr << "Memory network finished." << endl;
 

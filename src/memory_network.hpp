@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include <map>
+#include <set>
 #include <string>
 #include <random>
 #include <chrono>
@@ -44,6 +45,8 @@ public:
 
     std::vector<std::string> units_names() const {return _units_names;}
     size_t unit_id(const std::string& name) const;
+    void units_names(const std::set<std::string>& names);
+
     MemoryVector activations() const {return _activations;}
     MemoryMatrix weights() const {return _weights;}
 

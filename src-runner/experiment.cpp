@@ -8,7 +8,7 @@
 using namespace std;
 using namespace std::chrono;
 
-Experiment::Experiment() {
+Experiment::Experiment() : duration(0) {
     activations[0] = {};
 }
 
@@ -24,7 +24,7 @@ void Experiment::add_unit(string& unit) {
 
 void Experiment::add_activation(const string& unit, const timeperiod& period) {
 
-    endtime = max(endtime, period.stop);
+    duration = milliseconds(max(duration.count(), period.stop));
 
     vector<string> active_units_before_start;
     vector<string> active_units_before_stop;
@@ -34,7 +34,7 @@ void Experiment::add_activation(const string& unit, const timeperiod& period) {
 
 void Experiment::add_plot(const string& unit, const timeperiod& period) {
 
-    endtime = max(endtime, period.stop);
+    duration = milliseconds(max(duration.count(), period.stop));
 
     plots.push_back(make_tuple(unit, period.start, period.stop));
 
@@ -75,6 +75,6 @@ void Experiment::summary() const
 
     }
 
-    cout << endl << "Total duration: " << endtime << "ms" << endl;
+    cout << endl << "Total duration: " << duration.count() << "ms" << endl;
 }
 

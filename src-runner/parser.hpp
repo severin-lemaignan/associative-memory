@@ -23,8 +23,8 @@ namespace ascii = boost::spirit::ascii;
 
 BOOST_FUSION_ADAPT_STRUCT(
         timeperiod,
-        (int, start)
-        (int, stop)
+        (long int, start)
+        (long int, stop)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -43,7 +43,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
         using qi::omit;
         using qi::lit;
         using qi::_a;
-        using qi::int_;
+        using qi::long_;
         using qi::double_;
         using ascii::char_;
         using ascii::space;
@@ -76,10 +76,10 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                            >> char_('-')
                            >> space 
                            >> '[' ]
-                   >> int_ 
+                   >> long_ 
                    >> ',' 
                    >> omit[*space]
-                   >> int_ 
+                   >> long_ 
                    >> ']' 
                    >> eol;
 

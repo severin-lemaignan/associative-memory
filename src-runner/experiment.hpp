@@ -10,8 +10,8 @@
 
 struct timeperiod
 {
-    int start;
-    int stop;
+    long int start;
+    long int stop;
 };
 
 struct parameter
@@ -30,7 +30,7 @@ struct Experiment
     std::vector<std::tuple<std::string, int, int>> plots;
 
     std::string name;
-    int endtime = 0;
+    std::chrono::milliseconds duration;
 
     Experiment();
 

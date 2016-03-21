@@ -74,6 +74,8 @@ int main(int argc, char *argv[]) {
     auto& expe = experiment_parser.expe;
 
     MemoryNetwork memory(expe.units.size());
+    memory.units_names(expe.units);
+
     if (expe.parameters.count("MaxFreq")) {
         cout << "Setting the max frequency to " << expe.parameters["MaxFreq"] << endl;
         memory.max_frequency(expe.parameters["MaxFreq"]);
@@ -99,15 +101,17 @@ int main(int argc, char *argv[]) {
         last_activation = kv.first;
     }
 
+    auto remaining_time = expe.duration - (high_resolution_clock::now() - start);
+    this_thread::sleep_for(remaining_time);
+
     memory.stop();
 
-    cout << "Experiment completed." << endl;
+    cout << "Experiment completed. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
     cout << "-------------------------------------------------" << endl << endl;
 
 
 
 
-    //duration<double, std::milli> ms_since_last_freq = now - _last_freq_computation;
 
     return 0;
 }

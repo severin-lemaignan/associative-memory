@@ -11,6 +11,7 @@ using namespace std::chrono;
 
 
 MemoryNetwork::MemoryNetwork(size_t size,
+                             LoggingFunction logging_function,
                              double Dg,   
                              double Lg,   
                              double Eg,   
@@ -27,7 +28,7 @@ MemoryNetwork::MemoryNetwork(size_t size,
                 Amin(Amin), 
                 Arest(Arest),
                 Winit(Winit),
-                _activationsHistory(size, boost::circular_buffer<double>(HISTORY_DURATION.count() * HISTORY_SAMPLING_RATE,0.0)),
+                _log_activation(logging_function),
                 gen(rd())
 {
 
@@ -125,7 +126,7 @@ void MemoryNetwork::run() {
 
 
     cerr << "Memory network thread started." << endl;
-    _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+    _start_time = _last_timestamp = _last_freq_computation = high_resolution_clock::now();
     _is_running = true;
     while(_is_running) step();
     cerr << "Memory network finished." << endl;
@@ -201,13 +202,11 @@ void MemoryNetwork::step()
         _activations(i) = min(Amax, max(Amin, _activations(i)));
     }
 
-    // if necessary, store the activation history
-    duration<double, std::milli> ms_since_last_history = now - _last_history_store;
-    if(ms_since_last_history.count() > (1000./HISTORY_SAMPLING_RATE)) {
-        _last_history_store = now;
-
+    // if necessary, log the activations
+    if(_log_activation) {
         for (size_t i = 0; i < size(); i++) {
-            _activationsHistory[i].push_back(_activations[i]);
+            _log_activation(duration_cast<microseconds>(now - _start_time),
+                            _activations);
         }
     }
 

@@ -3,15 +3,38 @@
 #include <chrono>
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 #include "memory_network.hpp"
 
 #include "parser.hpp"
 
+const int HISTORY_SAMPLING_RATE=500; //Hz
+
 using namespace std;
 using namespace std::chrono;
 namespace po = boost::program_options;
+
+map<size_t, vector<double>> logs;
+
+microseconds _last_log;
+
+void logging(microseconds time_from_start,
+             const MemoryVector& levels)
+{
+
+    // if necessary, store the activation level
+    auto us_since_last_log = time_from_start - _last_log;
+    if(us_since_last_log.count() > (1000000./HISTORY_SAMPLING_RATE)) {
+        _last_log = time_from_start;
+        for(size_t i = 0; i < levels.size(); i++) {
+            logs[i].push_back(levels[i]);
+        }
+    }
+
+
+}
 
 int main(int argc, char *argv[]) {
 
@@ -68,12 +91,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    cout << "-------------------------------------------------" << endl;
-    cout << "        Configuring the memory network           " << endl;
-    cout << "-------------------------------------------------" << endl << endl;
+    cerr << "-------------------------------------------------" << endl;
+    cerr << "        Configuring the memory network           " << endl;
+    cerr << "-------------------------------------------------" << endl << endl;
     auto& expe = experiment_parser.expe;
 
-    MemoryNetwork memory(expe.units.size());
+    MemoryNetwork memory(expe.units.size(), &logging);
     memory.units_names(expe.units);
 
     if (expe.parameters.count("MaxFreq")) {

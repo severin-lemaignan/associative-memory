@@ -8,16 +8,14 @@
 #include <random>
 #include <chrono>
 #include <thread>
-
-#include <boost/circular_buffer.hpp> // used to store the activation history of each unit
-
-
-const std::chrono::seconds HISTORY_DURATION(5);
-const int HISTORY_SAMPLING_RATE=20; // Hz
+#include <functional>
 
 typedef Eigen::MatrixXd MemoryMatrix;
 typedef Eigen::VectorXd MemoryVector;
 
+
+typedef std::function<void(std::chrono::duration<long int, std::micro>,
+                           const MemoryVector&)> LoggingFunction;
 
 class MemoryNetwork
 {
@@ -25,6 +23,7 @@ class MemoryNetwork
 public:
 
     MemoryNetwork(size_t size,
+                  LoggingFunction logging_function = nullptr, // user-defined callback used to store activation history
                   double Dg = 0.2,     // activation decay (per ms)
                   double Lg = 0.01,    // learning rate (per ms)
                   double Eg = 0.6,     // external influence
@@ -49,10 +48,6 @@ public:
 
     MemoryVector activations() const {return _activations;}
     MemoryMatrix weights() const {return _weights;}
-
-    boost::circular_buffer<double> activationHistory(size_t unit_id) const {
-        return _activationsHistory[unit_id];
-    }
 
     size_t size() const {return _activations.size();}
     int frequency() const {return _frequency;}
@@ -90,8 +85,7 @@ private:
     MemoryVector _activations;
     MemoryMatrix _weights;
 
-
-    std::vector<boost::circular_buffer<double>> _activationsHistory;
+    LoggingFunction _log_activation;
 
     std::random_device rd;
     std::default_random_engine gen;
@@ -111,9 +105,9 @@ private:
     float _max_freq = 0.f;
     int _steps_since_last_frequency_update = 0;
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> _last_timestamp;
-    std::chrono::time_point<std::chrono::high_resolution_clock> _last_freq_computation;
-    std::chrono::time_point<std::chrono::high_resolution_clock> _last_history_store;
+    std::chrono::system_clock::time_point _start_time;
+    std::chrono::system_clock::time_point _last_timestamp;
+    std::chrono::system_clock::time_point _last_freq_computation;
 };
 
 

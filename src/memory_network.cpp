@@ -106,6 +106,26 @@ void MemoryNetwork::units_names(const std::set<std::string>& names) {
     copy(names.begin(), names.end(), std::back_inserter(_units_names));
 }
 
+void MemoryNetwork::set_parameter(const std::string& name, double value) {
+
+    if (_is_running) throw runtime_error("Can not change the network parameters once the network is running.");
+
+    cerr << "Setting memory network parameter " << name << " to " << value << endl;
+
+    if(name == "Dg") {Dg = value; return;}
+    if(name == "Lg") {Lg = value; return;}
+    if(name == "Eg") {Eg = value; return;}
+    if(name == "Ig") {Ig = value; return;}
+    if(name == "Amax") {Amax = value; return;}
+    if(name == "Amin") {Amin = value; return;}
+    if(name == "Arest") {
+        Arest = value;
+        rest_activations.fill(Arest);
+        _activations.fill(Arest);
+        return;}
+    if(name == "Winit") {Winit = value; return;}
+}
+
 void MemoryNetwork::start() {
 
     _network_thread = thread(&MemoryNetwork::run, this);
@@ -249,18 +269,18 @@ void MemoryNetwork::step()
 
 void MemoryNetwork::printout() {
 
-    cout << "Weights" << endl << setprecision(2) << _weights << endl;
+    cerr << "Weights" << endl << setprecision(2) << _weights << endl;
 
-    cout << setprecision(4) << setw(6) << fixed << "\033[2J";
-    cout << "ID\t\tExternal\tInternal\tNet\t\tActivation" << endl;
-    cout << "--\t\t--------\t--------\t---\t\t----------" << endl;
+    cerr << setprecision(4) << setw(6) << fixed << "\033[2J";
+    cerr << "ID\t\tExternal\tInternal\tNet\t\tActivation" << endl;
+    cerr << "--\t\t--------\t--------\t---\t\t----------" << endl;
     for (size_t i = 0; i < size(); i++) {
-        cout << i << "\t\t";
-        cout << external_activations(i) << "\t\t";
-        cout << internal_activations(i) << "\t\t";
-        cout << net_activations(i) << "\t\t";
-        cout << _activations(i) << endl;
+        cerr << i << "\t\t";
+        cerr << external_activations(i) << "\t\t";
+        cerr << internal_activations(i) << "\t\t";
+        cerr << net_activations(i) << "\t\t";
+        cerr << _activations(i) << endl;
 
     }
-    cout << endl;
+    cerr << endl;
 }

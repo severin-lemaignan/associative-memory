@@ -60,18 +60,20 @@ public:
      */
     void max_frequency(float freq) {_max_freq = freq;}
 
+    void set_parameter(const std::string& name, double value);
+
     void start();
     void stop();
     bool isrunning() const {return _is_running;}
 
-    const double Dg;
-    const double Lg;
-    const double Eg;
-    const double Ig;
-    const double Amax;
-    const double Amin;
-    const double Arest;
-    const double Winit;
+    double Dg;
+    double Lg;
+    double Eg;
+    double Ig;
+    double Amax;
+    double Amin;
+    double Arest;
+    double Winit;
 
 private:
     MemoryVector rest_activations; // constant

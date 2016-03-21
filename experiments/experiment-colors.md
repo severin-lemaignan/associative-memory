@@ -7,15 +7,15 @@ This first experiment tests some basic behaviours of the library.
 Network Parameters
 ------------------
 
-- Dg: 0.2       (activation decay per ms)
+- Dg: 1.5       (activation decay per ms)
 - Lg: 0.01      (learning rate per ms)
 - Eg: 0.6       (external influence)
-- Ig: 0.3       (internal influence)
+- Ig: 0.1       (internal influence)
 - Amax: 1.0     (maximum activation)
 - Amin: -0.2    (minimum activation)
 - Arest: -0.1   (rest activation)
 - Winit: 0.0    (initial weights)
-- MaxFreq: 0    (maximum network update frequency -- 0 means no limit)
+- MaxFreq: 10000    (maximum network update frequency -- 0 means no limit)
 
 
 Units
@@ -48,6 +48,8 @@ Plots
 -----
 
 - sky:
-    - [450,600]
+    - [0,600]
+- blue:
+    - [0,600]
 
 

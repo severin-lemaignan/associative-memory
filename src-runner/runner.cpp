@@ -55,10 +55,11 @@ int main(int argc, char *argv[]) {
     po::notify(vm);
 
     if (vm.count("help")) {
-        cout << "memory-runner -- Runs experiments on associative memory networks\n\n" << desc << "\n";
-        cout << "Séverin Lemaignan, Plymouth University 2016, " << endl;
-        cout << "Report bugs to: " << endl;
-        cout << "https://www.github.com/severin-lemaignan/associative-memory/issues" << endl;
+        cerr << "memory-runner -- Runs experiments on associative memory networks.\n\n";
+        cerr << "The results can to piped to a csv file.\n\n" << desc << "\n";
+        cerr << "Séverin Lemaignan, Plymouth University 2016, " << endl;
+        cerr << "Report bugs to: " << endl;
+        cerr << "https://www.github.com/severin-lemaignan/associative-memory/issues" << endl;
 
         return 1;
     }
@@ -100,13 +101,23 @@ int main(int argc, char *argv[]) {
     memory.units_names(expe.units);
 
     if (expe.parameters.count("MaxFreq")) {
-        cout << "Setting the max frequency to " << expe.parameters["MaxFreq"] << endl;
         memory.max_frequency(expe.parameters["MaxFreq"]);
     }
 
-    cout << endl << "-------------------------------------------------" << endl;
-    cout <<         "        Running the experiment                   " << endl;
-    cout <<         "-------------------------------------------------" << endl << endl;
+#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory.set_parameter(PARAM, expe.parameters[PARAM]);}
+
+    set_param("Dg")
+    set_param("Lg")
+    set_param("Eg")
+    set_param("Ig")
+    set_param("Amax")
+    set_param("Amin")
+    set_param("Arest")
+    set_param("Winit")
+
+    cerr << endl << "-------------------------------------------------" << endl;
+    cerr <<         "        Running the experiment                   " << endl;
+    cerr <<         "-------------------------------------------------" << endl << endl;
 
     memory.start();
 

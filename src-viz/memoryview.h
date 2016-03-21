@@ -36,6 +36,8 @@
 
 #include "memory_network.hpp"
 
+#define NB_INPUT_UNITS 50
+
 class Node;
 
 class MemoryView : public SDLApp {

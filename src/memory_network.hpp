@@ -10,13 +10,12 @@
 
 #include <boost/circular_buffer.hpp> // used to store the activation history of each unit
 
-#define NB_INPUT_UNITS 50
 
 const std::chrono::seconds HISTORY_DURATION(5);
-const int HISTORY_SAMPLING_RATE=10; // Hz
+const int HISTORY_SAMPLING_RATE=20; // Hz
 
-typedef Eigen::Matrix<double, NB_INPUT_UNITS, NB_INPUT_UNITS> MemoryMatrix;
-typedef Eigen::Matrix<double, NB_INPUT_UNITS, 1> MemoryVector;
+typedef Eigen::MatrixXd MemoryMatrix;
+typedef Eigen::VectorXd MemoryVector;
 
 
 class MemoryNetwork
@@ -24,7 +23,8 @@ class MemoryNetwork
 
 public:
 
-    MemoryNetwork(double Dg = 0.2,     // activation decay (per ms)
+    MemoryNetwork(size_t size,
+                  double Dg = 0.2,     // activation decay (per ms)
                   double Lg = 0.01,    // learning rate (per ms)
                   double Eg = 0.6,     // external influence
                   double Ig = 0.3,     // internal influence
@@ -51,7 +51,7 @@ public:
         return _activationsHistory[unit_id];
     }
 
-    size_t size() const {return NB_INPUT_UNITS;}
+    size_t size() const {return _activations.size();}
     int frequency() const {return _frequency;}
 
     /** Slow down the memory update mechanism (typically, for debugging) up to

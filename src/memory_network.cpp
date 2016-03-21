@@ -10,7 +10,8 @@ using namespace std;
 using namespace std::chrono;
 
 
-MemoryNetwork::MemoryNetwork(double Dg,   
+MemoryNetwork::MemoryNetwork(size_t size,
+                             double Dg,   
                              double Lg,   
                              double Eg,   
                              double Ig,   
@@ -26,11 +27,22 @@ MemoryNetwork::MemoryNetwork(double Dg,
                 Amin(Amin), 
                 Arest(Arest),
                 Winit(Winit),
-                _activationsHistory(NB_INPUT_UNITS, boost::circular_buffer<double>(HISTORY_DURATION.count() * HISTORY_SAMPLING_RATE,0.0)),
+                _activationsHistory(size, boost::circular_buffer<double>(HISTORY_DURATION.count() * HISTORY_SAMPLING_RATE,0.0)),
                 gen(rd())
 {
 
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+    rest_activations.resize(size);
+    _units_names.resize(size);
+
+    external_activations.resize(size);
+    external_activations_decay.resize(size);
+    internal_activations.resize(size);
+    net_activations.resize(size);
+    _activations.resize(size);
+    _weights.resize(size, size);
+
+
+    for (size_t i = 0; i < size; i++) {
         _units_names.push_back(string("input") + to_string(i));
     }
 
@@ -47,10 +59,10 @@ MemoryNetwork::MemoryNetwork(double Dg,
 
 void MemoryNetwork::compute_internal_activations() {
 
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++)
+    for (size_t i = 0; i < size(); i++)
     {
         double sum = 0;
-        for (size_t j = 0; j < NB_INPUT_UNITS; j++)
+        for (size_t j = 0; j < size(); j++)
         {
             if (std::isnan(_weights(i,j))) continue;
             sum += _weights(i, j) * _activations(j);
@@ -124,7 +136,7 @@ void MemoryNetwork::step()
         _steps_since_last_frequency_update = 0;
 
         // print out the network activations + weights
-        printout();
+        //printout();
     }
 
 
@@ -151,7 +163,7 @@ void MemoryNetwork::step()
 
     // Activations update
     // ******************
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++)
+    for (size_t i = 0; i < size(); i++)
     {
 
         if (net_activations(i) > 0)
@@ -164,7 +176,7 @@ void MemoryNetwork::step()
     // decay
     _activations -= Dg * dt.count() * (_activations - rest_activations);
 
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++)
+    for (size_t i = 0; i < size(); i++)
     {
         // clamp in [Amin, Amax]
         _activations(i) = min(Amax, max(Amin, _activations(i)));
@@ -175,16 +187,16 @@ void MemoryNetwork::step()
     if(ms_since_last_history.count() > (1000./HISTORY_SAMPLING_RATE)) {
         _last_history_store = now;
 
-        for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+        for (size_t i = 0; i < size(); i++) {
             _activationsHistory[i].push_back(_activations[i]);
         }
     }
 
     // Weights update
     // **************
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++)
+    for (size_t i = 0; i < size(); i++)
     {
-        for (size_t j = 0; j < NB_INPUT_UNITS; j++)
+        for (size_t j = 0; j < size(); j++)
         {
             if (std::isnan(_weights(i,j))) continue;
 
@@ -224,7 +236,7 @@ void MemoryNetwork::printout() {
     cout << setprecision(4) << setw(6) << fixed << "\033[2J";
     cout << "ID\t\tExternal\tInternal\tNet\t\tActivation" << endl;
     cout << "--\t\t--------\t--------\t---\t\t----------" << endl;
-    for (size_t i = 0; i < NB_INPUT_UNITS; i++) {
+    for (size_t i = 0; i < size(); i++) {
         cout << i << "\t\t";
         cout << external_activations(i) << "\t\t";
         cout << internal_activations(i) << "\t\t";

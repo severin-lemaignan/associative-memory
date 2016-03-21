@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     cout << "-------------------------------------------------" << endl << endl;
     auto& expe = experiment_parser.expe;
 
-    MemoryNetwork memory;
+    MemoryNetwork memory(expe.units.size());
     if (expe.parameters.count("MaxFreq")) {
         cout << "Setting the max frequency to " << expe.parameters["MaxFreq"] << endl;
         memory.max_frequency(expe.parameters["MaxFreq"]);

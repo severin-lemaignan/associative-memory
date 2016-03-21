@@ -34,12 +34,16 @@ public:
                   double Winit = 0.0); // initial weights
 
 
-    void activate_unit(int id, 
+    void activate_unit(size_t id, 
                     double level = 1.0, 
                     std::chrono::milliseconds duration = std::chrono::milliseconds(200));
 
+    void activate_unit(const std::string& name, 
+                    double level = 1.0, 
+                    std::chrono::milliseconds duration = std::chrono::milliseconds(200));
 
     std::vector<std::string> units_names() const {return _units_names;}
+    size_t unit_id(const std::string& name) const;
     MemoryVector activations() const {return _activations;}
     MemoryMatrix weights() const {return _weights;}
 

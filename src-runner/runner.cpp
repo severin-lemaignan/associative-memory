@@ -10,6 +10,7 @@
 #include "parser.hpp"
 
 using namespace std;
+using namespace std::chrono;
 namespace po = boost::program_options;
 
 int main(int argc, char *argv[]) {
@@ -84,14 +85,25 @@ int main(int argc, char *argv[]) {
 
     memory.start();
 
-    std::this_thread::sleep_for(chrono::milliseconds(expe.endtime));
+    int last_activation = 0;
+    auto start = high_resolution_clock::now();
+    
+    for (const auto& kv : expe.activations) {
+        this_thread::sleep_for(milliseconds(kv.first - last_activation));
+
+        for (auto& activation : kv.second) {
+            cout << " - Activating " << activation.first << " for " << activation.second.count() << "ms" << endl;
+            memory.activate_unit(activation.first, 1.0, activation.second);
+        }
+
+        last_activation = kv.first;
+    }
 
     memory.stop();
 
     cout << "Experiment completed." << endl;
     cout << "-------------------------------------------------" << endl << endl;
 
-    //auto start = high_resolution_clock::now();
 
 
 

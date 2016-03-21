@@ -1,5 +1,7 @@
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
+#include <iterator>
 
 #include "memory_network.hpp"
 
@@ -57,11 +59,24 @@ void MemoryNetwork::compute_internal_activations() {
     }
 }
 
-void MemoryNetwork::activate_unit(int id,
+void MemoryNetwork::activate_unit(const string& unit,
+                                  double level,
+                                  milliseconds duration) {
+    auto id = unit_id(unit);
+    if (id >= _units_names.size()) throw range_error(unit + ": Inexistant unit name!");
+
+    activate_unit(id, level, duration);
+}
+
+void MemoryNetwork::activate_unit(size_t id,
                                   double level,
                                   milliseconds duration) {
     external_activations(id) = level;
     external_activations_decay(id) = duration.count();
+}
+
+size_t MemoryNetwork::unit_id(const std::string& name) const {
+    return distance(find(_units_names.begin(), _units_names.end(), name), _units_names.begin());
 }
 
 void MemoryNetwork::start() {

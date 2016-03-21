@@ -6,6 +6,7 @@
 #include "experiment.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 Experiment::Experiment() {
     activations[0] = {};
@@ -28,7 +29,7 @@ void Experiment::add_activation(const string& unit, const timeperiod& period) {
     vector<string> active_units_before_start;
     vector<string> active_units_before_stop;
 
-    activations[period.start].push_back({unit, period.stop - period.start});
+    activations[period.start].push_back({unit, milliseconds(period.stop - period.start)});
 }
 
 void Experiment::add_plot(const string& unit, const timeperiod& period) {
@@ -59,7 +60,7 @@ void Experiment::summary() const
     for (auto& kv : activations) {
         cout << "  - at " << kv.first << "ms: " << endl;
         for (auto& activation : kv.second) {
-            cout << "    - " << activation.first << " for " << activation.second << "ms" << endl;
+            cout << "    - " << activation.first << " for " << activation.second.count() << "ms" << endl;
         }
 
     }

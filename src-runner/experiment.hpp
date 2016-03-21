@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <tuple>
+#include <chrono>
 
 struct timeperiod
 {
@@ -21,8 +22,7 @@ struct parameter
 
 struct Experiment
 {
-
-    typedef std::pair<std::string, double> Activation;
+    typedef std::pair<std::string, std::chrono::milliseconds> Activation;
 
     std::map<std::string, double> parameters;
     std::set<std::string> units;

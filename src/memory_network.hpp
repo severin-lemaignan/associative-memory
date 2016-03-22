@@ -61,6 +61,7 @@ public:
     void max_frequency(float freq) {_max_freq = freq;}
 
     void set_parameter(const std::string& name, double value);
+    double get_parameter(const std::string& name) const;
 
     void start();
     void stop();

@@ -126,6 +126,18 @@ void MemoryNetwork::set_parameter(const std::string& name, double value) {
     if(name == "Winit") {Winit = value; return;}
 }
 
+double MemoryNetwork::get_parameter(const std::string& name) const {
+
+    if(name == "Dg") {return Dg;}
+    if(name == "Lg") {return Lg;}
+    if(name == "Eg") {return Eg;}
+    if(name == "Ig") {return Ig;}
+    if(name == "Amax") {return Amax;}
+    if(name == "Amin") {return Amin;}
+    if(name == "Arest") {return Arest;}
+    if(name == "Winit") {return Winit;}
+}
+
 void MemoryNetwork::start() {
 
     _network_thread = thread(&MemoryNetwork::run, this);

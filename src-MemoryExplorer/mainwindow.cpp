@@ -11,8 +11,26 @@
 #include "ui_mainwindow.h"
 #include "../src-runner/parser.hpp"
 
+#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory->set_parameter(PARAM, expe.parameters[PARAM]);}
+#define S(x) #x
+#define SX(x) S(x)
+#define set_ui_param(PARAM) ui->PARAM##_label->setText(SX(PARAM) ": " + QString::number(memory->get_parameter(SX(PARAM))));ui->PARAM##_slider->setValue(memory->get_parameter(SX(PARAM))*100);
+
+
 using namespace std;
 using namespace std::chrono;
+
+const vector<QColor> PALETTE = {QColor(242,146,70),
+                               QColor(242,214,70),
+                               QColor(101,156,27),
+                               QColor(27,156,154),
+                               QColor(37,68,171),
+                               QColor(110,37,171),
+                               QColor(171,37,124),
+                               QColor(204,58,26),
+                               QColor(191,180,163),
+                               QColor(80,88,89)
+                               };
 
 const int HISTORY_SAMPLING_RATE=500; //Hz
 
@@ -42,7 +60,22 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    QCoreApplication::setOrganizationName("Plymouth_University");
+    QCoreApplication::setApplicationName("MemoryExplorer");
+
     ui->setupUi(this);
+
+    ui->menuFile->addSeparator();
+    for (int i = 0; i < MaxRecentFiles; ++i) {
+
+        recentFileActs[i] = new QAction(this);
+        recentFileActs[i]->setVisible(false);
+        connect(recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
+        ui->menuFile->addAction(recentFileActs[i]);
+    }
+
+    // reload the list of recent files
+    updateRecentFileActions();
 
     // ensure selection of graphs and legend are synchronized
     connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
@@ -69,8 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QLinearGradient plotGradient;
     plotGradient.setStart(0, 0);
     plotGradient.setFinalStop(0, 350);
-    plotGradient.setColorAt(0, QColor(80, 80, 80));
-    plotGradient.setColorAt(1, QColor(50, 50, 50));
+    plotGradient.setColorAt(0, QColor(56, 60, 74));
+    plotGradient.setColorAt(1, QColor(56, 60, 74));
     ui->customPlot->setBackground(plotGradient);
     QLinearGradient axisRectGradient;
     axisRectGradient.setStart(0, 0);
@@ -98,12 +131,62 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setCurrentFile(const QString &fileName)
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+
+    settings.setValue("recentFileList", files);
+
+    foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+        MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
+        if (mainWin)
+            mainWin->updateRecentFileActions();
+    }
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = tr("&%1 %2").arg(i + 1).arg(strippedName(files[i]));
+        recentFileActs[i]->setText(text);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
+}
+
+QString MainWindow::strippedName(const QString &fullFileName)
+{
+    return QFileInfo(fullFileName).fileName();
+}
+
 void MainWindow::on_runButton_clicked()
 {
+
+   QApplication::setOverrideCursor(Qt::WaitCursor);
 
    ui->runButton->setText("Running...");
    ui->runButton->setToolTip("Experiment running...");
    ui->runButton->setDisabled(true);
+
+
+   timestamps.clear();
+   logs.clear();
+
+   _last_log = microseconds(0);
+
+   memory->reset();
 
    memory->start();
 
@@ -127,10 +210,6 @@ void MainWindow::on_runButton_clicked()
     memory->stop();
     cerr << endl << "EXPERIMENT COMPLETED. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
 
-    ui->runButton->setToolTip("Start the experiment");
-    ui->runButton->setText("Update");
-
-    ui->runButton->setDisabled(false);
 
 
     QVector<double> qTimestamps = QVector<double>::fromStdVector(timestamps);
@@ -141,14 +220,15 @@ void MainWindow::on_runButton_clicked()
 
     ui->customPlot->replot();
 
+    ui->runButton->setToolTip("Start the experiment");
+    ui->runButton->setText("Update");
+
+    ui->runButton->setDisabled(false);
 
 
-}
+    QApplication::restoreOverrideCursor();
 
-void MainWindow::on_Dg_slider_sliderMoved(int position)
-{
-    auto Dg = position * 1. / 100;
-    ui->Dg_label->setText(QString::fromStdString(std::string("Dg: ") + std::to_string(Dg)));
+
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -156,7 +236,19 @@ void MainWindow::on_actionOpen_triggered()
     auto conf = QFileDialog::getOpenFileName(this,
         tr("Open experiment"), "", tr("Experiment Files (*.md *.csv *.txt)"));
 
-    ifstream experiment(conf.toStdString());
+    loadExperiment(conf);
+}
+
+void MainWindow::openRecentFile()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action)
+        loadExperiment(action->data().toString());
+}
+
+void MainWindow::loadExperiment(const QString& filename) {
+
+    ifstream experiment(filename.toStdString());
 
 
     string str((istreambuf_iterator<char>(experiment)),
@@ -172,10 +264,11 @@ void MainWindow::on_actionOpen_triggered()
 
     if (r && iter == str.end()) {
         experiment_parser.expe.summary();
+        setCurrentFile(filename);
     } else {
         QMessageBox::critical(this,
                               "Invalid experiment file",
-                              QString("Parsing of ") + conf + " failed!");
+                              QString("Parsing of ") + filename + " failed!");
     }
 
     expe = experiment_parser.expe;
@@ -187,15 +280,20 @@ void MainWindow::on_actionOpen_triggered()
         memory->max_frequency(expe.parameters["MaxFreq"]);
     }
 
-#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory->set_parameter(PARAM, expe.parameters[PARAM]);}
-
     set_param("Dg")
+    set_ui_param(Dg)
     set_param("Lg")
+    set_ui_param(Lg)
     set_param("Eg")
+    set_ui_param(Eg)
     set_param("Ig")
+    set_ui_param(Ig)
     set_param("Amax")
+    set_ui_param(Amax)
     set_param("Amin")
+    set_ui_param(Amin)
     set_param("Arest")
+    set_ui_param(Arest)
     set_param("Winit")
 
     // create one graph per unit
@@ -204,7 +302,7 @@ void MainWindow::on_actionOpen_triggered()
         graph->setName(QString::fromStdString(memory->units_names()[i]));
 
         QPen graphPen;
-        graphPen.setColor(QColor(rand()%245+10, rand()%245+10, rand()%245+10));
+        graphPen.setColor(PALETTE[i % PALETTE.size()]);
         graphPen.setWidthF(3);
         graph->setPen(graphPen);
 
@@ -226,6 +324,7 @@ void MainWindow::on_actionOpen_triggered()
 
    ui->runButton->setToolTip("Start the experiment");
    ui->runButton->setDisabled(false);
+
 }
 
 void MainWindow::selectionChanged()
@@ -241,4 +340,74 @@ void MainWindow::selectionChanged()
         graph->setSelected(true);
       }
     }
+}
+
+void MainWindow::on_Dg_slider_sliderMoved(int position)
+{
+    if(memory) {
+        auto Dg = position * 1. / 100;
+        memory->set_parameter("Dg", Dg);
+        set_ui_param(Dg)
+    }
+}
+
+
+void MainWindow::on_Lg_slider_sliderMoved(int position)
+{
+     if(memory) {
+        auto Lg = position * 1. / 100;
+        memory->set_parameter("Lg", Lg);
+        set_ui_param(Lg)
+    }
+
+}
+
+void MainWindow::on_Eg_slider_sliderMoved(int position)
+{
+      if(memory) {
+        auto Eg = position * 1. / 100;
+        memory->set_parameter("Eg", Eg);
+        set_ui_param(Eg)
+    }
+
+}
+
+void MainWindow::on_Ig_slider_sliderMoved(int position)
+{
+     if(memory) {
+        auto Ig = position * 1. / 100;
+        memory->set_parameter("Ig", Ig);
+        set_ui_param(Ig)
+    }
+
+}
+
+void MainWindow::on_Amax_slider_sliderMoved(int position)
+{
+     if(memory) {
+        auto Amax = position * 1. / 100;
+        memory->set_parameter("Amax", Amax);
+        set_ui_param(Amax)
+    }
+
+}
+
+void MainWindow::on_Amin_slider_sliderMoved(int position)
+{
+     if(memory) {
+        auto Amin = position * 1. / 100;
+        memory->set_parameter("Amin", Amin);
+        set_ui_param(Amin)
+    }
+
+}
+
+void MainWindow::on_Arest_slider_sliderMoved(int position)
+{
+     if(memory) {
+        auto Arest = position * 1. / 100;
+        memory->set_parameter("Arest", Arest);
+        set_ui_param(Arest)
+    }
+
 }

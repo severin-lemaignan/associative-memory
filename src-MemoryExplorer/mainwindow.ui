@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>832</width>
-    <height>388</height>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@
        <item>
         <widget class="QSlider" name="Dg_slider">
          <property name="maximum">
-          <number>99</number>
+          <number>300</number>
          </property>
          <property name="pageStep">
           <number>10</number>
@@ -82,16 +82,139 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="Lg_label">
+         <property name="text">
+          <string>Lg</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="Lg_slider">
+         <property name="maximum">
+          <number>300</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="Eg_label">
          <property name="text">
           <string>Eg</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="horizontalSlider">
+        <widget class="QSlider" name="Eg_slider">
+         <property name="maximum">
+          <number>100</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="Ig_label">
+         <property name="text">
+          <string>Ig</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="Ig_slider">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="Amax_label">
+         <property name="text">
+          <string>Amax</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="Amax_slider">
+         <property name="minimum">
+          <number>-200</number>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="Amin_label">
+         <property name="text">
+          <string>Amin</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="Amin_slider">
+         <property name="minimum">
+          <number>-200</number>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="invertedControls">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="Arest_label">
+         <property name="text">
+          <string>Arest</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="Arest_slider">
+         <property name="minimum">
+          <number>-200</number>
+         </property>
+         <property name="maximum">
+          <number>200</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="MaxFreq_label">
+         <property name="text">
+          <string>Max. freq.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spinBox">
+         <property name="suffix">
+          <string>Hz</string>
+         </property>
+         <property name="maximum">
+          <number>300000</number>
          </property>
         </widget>
        </item>

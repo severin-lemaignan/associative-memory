@@ -44,6 +44,8 @@ private slots:
 
 private:
 
+    void prepareWeightPlot();
+
     void loadExperiment(const QString& filename);
 
     void setCurrentFile(const QString &fileName);

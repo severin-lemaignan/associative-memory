@@ -80,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // ensure selection of graphs and legend are synchronized
     connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
 
+    prepareWeightPlot();
+
     // set some pens, brushes and backgrounds:
     ui->customPlot->xAxis->setBasePen(QPen(Qt::white, 1));
     ui->customPlot->yAxis->setBasePen(QPen(Qt::white, 1));
@@ -102,8 +104,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QLinearGradient plotGradient;
     plotGradient.setStart(0, 0);
     plotGradient.setFinalStop(0, 350);
-    plotGradient.setColorAt(0, QColor(56, 60, 74));
-    plotGradient.setColorAt(1, QColor(56, 60, 74));
+    plotGradient.setColorAt(0, QApplication::palette().color(QPalette::Base));
+    plotGradient.setColorAt(1, QApplication::palette().color(QPalette::Base));
     ui->customPlot->setBackground(plotGradient);
     QLinearGradient axisRectGradient;
     axisRectGradient.setStart(0, 0);
@@ -129,6 +131,116 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+void MainWindow::prepareWeightPlot() {
+
+    // set some pens, brushes and backgrounds:
+    ui->weightPlot->xAxis->setBasePen(Qt::NoPen);
+    ui->weightPlot->yAxis->setBasePen(Qt::NoPen);
+    ui->weightPlot->xAxis->setTickPen(Qt::NoPen);
+    ui->weightPlot->yAxis->setTickPen(Qt::NoPen);
+    ui->weightPlot->xAxis->setSubTickPen(Qt::NoPen);
+    ui->weightPlot->yAxis->setSubTickPen(Qt::NoPen);
+    ui->weightPlot->xAxis->setTickLabelColor(Qt::white);
+    ui->weightPlot->yAxis->setTickLabelColor(Qt::white);
+    ui->weightPlot->xAxis->setAutoTickStep(false);
+    ui->weightPlot->yAxis->setAutoTickStep(false);
+
+    ui->weightPlot->xAxis->setTickStep(1);
+    ui->weightPlot->yAxis->setTickStep(1);
+    ui->weightPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->xAxis->grid()->setSubGridVisible(false);
+    ui->weightPlot->yAxis->grid()->setSubGridVisible(false);
+    ui->weightPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
+    ui->weightPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
+    QLinearGradient plotGradient;
+    plotGradient.setStart(0, 0);
+    plotGradient.setFinalStop(0, 350);
+    plotGradient.setColorAt(0, QApplication::palette().color(QPalette::Base));
+    plotGradient.setColorAt(1, QApplication::palette().color(QPalette::Base));
+    ui->weightPlot->setBackground(plotGradient);
+    QLinearGradient axisRectGradient;
+    axisRectGradient.setStart(0, 0);
+    axisRectGradient.setFinalStop(0, 350);
+    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+    ui->weightPlot->axisRect()->setBackground(axisRectGradient);
+
+    //ui->weightPlot->axisRect()->setupFullAxesBox(true);
+
+    // display the grid on top of the graph
+    ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"), QCustomPlot::limAbove);
+    ui->weightPlot->xAxis->grid()->setLayer("abovemain");
+    ui->weightPlot->yAxis->grid()->setLayer("abovemain");
+
+
+    if(!memory) return;
+
+    ui->weightPlot->xAxis->setAutoTicks(false);
+    ui->weightPlot->yAxis->setAutoTicks(false);
+    ui->weightPlot->xAxis->setAutoTickLabels(false);
+    ui->weightPlot->yAxis->setAutoTickLabels(false);
+
+    QVector<double> tickVector;
+    QVector<QString> tickLabels;
+    for(size_t i=0;i<memory->units_names().size();i++) {
+        tickVector << i;
+        tickLabels << QString::fromStdString(memory->units_names()[i]);
+    }
+    tickVector << memory->units_names().size();
+    tickLabels << "";
+
+    ui->weightPlot->xAxis->setTickVector(tickVector);
+    ui->weightPlot->yAxis->setTickVector(tickVector);
+    ui->weightPlot->xAxis->setTickVectorLabels(tickLabels);
+    ui->weightPlot->yAxis->setTickVectorLabels(tickLabels);
+
+    auto weights = memory->weights();
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
+    ui->weightPlot->addPlottable(colorMap);
+    colorMap->data()->setSize(weights.cols(), weights.rows()); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(0.5, weights.cols()-0.5), QCPRange(0.5, weights.rows()-0.5)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
+
+    for (int xIndex=0; xIndex<weights.cols(); xIndex++)
+    {
+      for (int yIndex=0; yIndex<weights.rows(); yIndex++)
+      {
+        colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
+      }
+    }
+
+    // add a color scale:
+    QCPColorScale *colorScale = new QCPColorScale(ui->weightPlot);
+    ui->weightPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    colorScale->axis()->setLabel("Weights");
+
+    // set the color gradient of the color map to one of the presets:
+    colorMap->setGradient(QCPColorGradient::gpPolar);
+    // we could have also created a QCPColorGradient instance and added own colors to
+    // the gradient, see the documentation of QCPColorGradient for what's possible.
+
+    // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
+    colorMap->rescaleDataRange();
+
+    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->weightPlot);
+    ui->weightPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    // rescale the key (x) and value (y) axes so the whole color map is visible:
+    //ui->weightPlot->rescaleAxes();
+    //ui->customPlot->xAxis->setRange(0, 6);
+    //ui->customPlot->yAxis->setRange(0, 6);
+
+    ui->weightPlot->replot();
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
@@ -219,6 +331,8 @@ void MainWindow::on_runButton_clicked()
     }
 
     ui->customPlot->replot();
+
+    prepareWeightPlot();
 
     ui->runButton->setToolTip("Start the experiment");
     ui->runButton->setText("Update");
@@ -320,6 +434,7 @@ void MainWindow::loadExperiment(const QString& filename) {
 
 
     ui->customPlot->replot();
+
 
 
    ui->runButton->setToolTip("Start the experiment");

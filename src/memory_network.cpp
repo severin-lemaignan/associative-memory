@@ -47,6 +47,11 @@ MemoryNetwork::MemoryNetwork(size_t size,
         _units_names.push_back(string("input") + to_string(i));
     }
 
+    reset();
+}
+
+void MemoryNetwork::reset() {
+
     rest_activations.fill(Arest);
 
     external_activations.fill(0);

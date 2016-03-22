@@ -33,6 +33,7 @@ public:
                   double Arest = -0.1, // rest activation
                   double Winit = 0.0); // initial weights
 
+    void reset();
 
     void activate_unit(size_t id, 
                     double level = 1.0, 
@@ -63,6 +64,13 @@ public:
     void set_parameter(const std::string& name, double value);
     double get_parameter(const std::string& name) const;
 
+    /** Starts the memory system
+     *
+     * Note that the current weights and activations are *not* reset: as such,
+     * one may call stop() then start() to pause/unpause the network.
+     * Call reset() to actually reset the network to its initial empty
+     * state.
+     */
     void start();
     void stop();
     bool isrunning() const {return _is_running;}

@@ -44,6 +44,12 @@ private slots:
 
     void on_experiment_editor_textChanged();
 
+    void on_actionSave_triggered();
+
+    void on_action_Save_as_triggered();
+
+    void on_actionQuit_triggered();
+
 private:
 
     void initializeWeightsPlot();
@@ -74,6 +80,9 @@ private:
     std::unique_ptr<MemoryNetwork> memory;
 
     Experiment expe;
+    void saveFile(const QString &fileName);
+
+    QString curFile;
 };
 
 #endif // MAINWINDOW_H

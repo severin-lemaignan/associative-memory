@@ -312,6 +312,10 @@ void MainWindow::prepareActivationsPlot() {
 
 void MainWindow::setCurrentFile(const QString &fileName)
 {
+    curFile = fileName;
+    QFileInfo f(curFile);
+    setWindowTitle("Associative Memory Explorer - " + f.fileName() + "[*]");
+
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
@@ -357,6 +361,7 @@ void MainWindow::on_runButton_clicked()
 
    ui->runButton->setText("Running...");
    ui->runButton->setToolTip("Experiment running...");
+   statusBar()->showMessage("Experiment running... - Total duration: " + QString::number(duration_cast<milliseconds>(expe.duration).count()) + "ms");
    ui->runButton->setDisabled(true);
 
 
@@ -390,6 +395,7 @@ void MainWindow::on_runButton_clicked()
     cerr << endl << "EXPERIMENT COMPLETED. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
 
 
+   statusBar()->showMessage("Experiment completed!",2000);
 
     QVector<double> qTimestamps = QVector<double>::fromStdVector(timestamps);
     for (const auto& kv : logs) {
@@ -447,6 +453,7 @@ void MainWindow::loadExperiment(const QString& filename) {
         experiment_parser.expe.summary();
         setCurrentFile(filename);
         ui->experiment_editor->setPlainText(QString::fromStdString(str));
+        setWindowModified(false);
     } else {
         QMessageBox::critical(this,
                               "Invalid experiment file",
@@ -490,6 +497,27 @@ void MainWindow::setupExperiment(const Experiment& _expe) {
    ui->runButton->setToolTip("Start the experiment");
    ui->runButton->setDisabled(false);
 
+}
+
+void MainWindow::saveFile(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("Saving experiment"),
+                             tr("Cannot write file %1:\n%2.")
+                             .arg(fileName)
+                             .arg(file.errorString()));
+        return;
+    }
+
+    QTextStream out(&file);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    out << ui->experiment_editor->toPlainText();
+    QApplication::restoreOverrideCursor();
+
+    setCurrentFile(fileName);
+    statusBar()->showMessage(tr("Experiment saved"), 2000);
+    setWindowModified(false);
 }
 
 void MainWindow::selectionChanged()
@@ -579,6 +607,8 @@ void MainWindow::on_Arest_slider_sliderMoved(int position)
 
 void MainWindow::on_experiment_editor_textChanged()
 {
+    setWindowModified(true);
+
     auto description = ui->experiment_editor->toPlainText().toStdString();
 
     string::const_iterator iter = description.begin();
@@ -597,4 +627,31 @@ void MainWindow::on_experiment_editor_textChanged()
     }
 
 
+}
+
+
+void MainWindow::on_actionSave_triggered()
+{
+    if (curFile.isEmpty())
+        on_action_Save_as_triggered();
+    else
+        saveFile(curFile);
+
+}
+
+void MainWindow::on_action_Save_as_triggered()
+{
+     QString fileName = QFileDialog::getSaveFileName(this,
+                                            tr("Save experiment"), "",
+                                            tr("Experiment Files (*.md *.txt)"));
+    if (fileName.isEmpty())
+        return;
+
+    saveFile(fileName);
+
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    QApplication::closeAllWindows();
 }

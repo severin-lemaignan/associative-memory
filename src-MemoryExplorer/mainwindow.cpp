@@ -137,8 +137,8 @@ MainWindow::~MainWindow()
 void MainWindow::prepareWeightPlot() {
 
     // set some pens, brushes and backgrounds:
-    ui->weightPlot->xAxis->setBasePen(Qt::NoPen);
-    ui->weightPlot->yAxis->setBasePen(Qt::NoPen);
+    ui->weightPlot->xAxis->setBasePen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->yAxis->setBasePen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
     ui->weightPlot->xAxis->setTickPen(Qt::NoPen);
     ui->weightPlot->yAxis->setTickPen(Qt::NoPen);
     ui->weightPlot->xAxis->setSubTickPen(Qt::NoPen);
@@ -147,13 +147,20 @@ void MainWindow::prepareWeightPlot() {
     ui->weightPlot->yAxis->setTickLabelColor(Qt::white);
     ui->weightPlot->xAxis->setAutoTickStep(false);
     ui->weightPlot->yAxis->setAutoTickStep(false);
+    ui->weightPlot->xAxis->setAutoSubTicks(false);
+    ui->weightPlot->yAxis->setAutoSubTicks(false);
 
     ui->weightPlot->xAxis->setTickStep(1);
     ui->weightPlot->yAxis->setTickStep(1);
-    ui->weightPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
-    ui->weightPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
-    ui->weightPlot->xAxis->grid()->setSubGridVisible(false);
-    ui->weightPlot->yAxis->grid()->setSubGridVisible(false);
+    ui->weightPlot->xAxis->setSubTickCount(1);
+    ui->weightPlot->yAxis->setSubTickCount(1);
+    ui->weightPlot->yAxis->setTickLabelRotation(-90);
+    ui->weightPlot->xAxis->grid()->setPen(Qt::NoPen);
+    ui->weightPlot->yAxis->grid()->setPen(Qt::NoPen);
+    ui->weightPlot->xAxis->grid()->setSubGridVisible(true);
+    ui->weightPlot->yAxis->grid()->setSubGridVisible(true);
+    ui->weightPlot->xAxis->grid()->setSubGridPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->yAxis->grid()->setSubGridPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
     ui->weightPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     ui->weightPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
     QLinearGradient plotGradient;
@@ -169,10 +176,13 @@ void MainWindow::prepareWeightPlot() {
     axisRectGradient.setColorAt(1, QColor(30, 30, 30));
     ui->weightPlot->axisRect()->setBackground(axisRectGradient);
 
-    //ui->weightPlot->axisRect()->setupFullAxesBox(true);
+    //ui->weightPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+
 
     // display the grid on top of the graph
-    ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"), QCustomPlot::limAbove);
+    if (!ui->weightPlot->layer("abovemain")) {
+        ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"), QCustomPlot::limAbove);
+    }
     ui->weightPlot->xAxis->grid()->setLayer("abovemain");
     ui->weightPlot->yAxis->grid()->setLayer("abovemain");
 
@@ -203,8 +213,9 @@ void MainWindow::prepareWeightPlot() {
     // set up the QCPColorMap:
     QCPColorMap *colorMap = new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
     ui->weightPlot->addPlottable(colorMap);
+    colorMap->setInterpolate(false);
     colorMap->data()->setSize(weights.cols(), weights.rows()); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(0.5, weights.cols()-0.5), QCPRange(0.5, weights.rows()-0.5)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    colorMap->data()->setRange(QCPRange(0, weights.cols()-1), QCPRange(0, weights.rows()-1)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
     // now we assign some data, by accessing the QCPColorMapData instance of the color map:
 
     for (int xIndex=0; xIndex<weights.cols(); xIndex++)
@@ -212,6 +223,9 @@ void MainWindow::prepareWeightPlot() {
       for (int yIndex=0; yIndex<weights.rows(); yIndex++)
       {
         colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
+//        colorMap->data()->setCell(xIndex*2+1, yIndex*2, weights(xIndex, yIndex));
+//        colorMap->data()->setCell(xIndex*2, yIndex*2+1, weights(xIndex, yIndex));
+//        colorMap->data()->setCell(xIndex*2+1, yIndex*2+1, weights(xIndex, yIndex));
       }
     }
 
@@ -223,7 +237,7 @@ void MainWindow::prepareWeightPlot() {
     colorScale->axis()->setLabel("Weights");
 
     // set the color gradient of the color map to one of the presets:
-    colorMap->setGradient(QCPColorGradient::gpPolar);
+    colorMap->setGradient(QCPColorGradient::gpJet);
     // we could have also created a QCPColorGradient instance and added own colors to
     // the gradient, see the documentation of QCPColorGradient for what's possible.
 
@@ -237,8 +251,8 @@ void MainWindow::prepareWeightPlot() {
 
     // rescale the key (x) and value (y) axes so the whole color map is visible:
     //ui->weightPlot->rescaleAxes();
-    //ui->customPlot->xAxis->setRange(0, 6);
-    //ui->customPlot->yAxis->setRange(0, 6);
+    ui->weightPlot->xAxis->setRange(-0.5, memory->units_names().size() - 0.5);
+    ui->weightPlot->yAxis->setRange(-0.5, memory->units_names().size() - 0.5);
 
     ui->weightPlot->replot();
 }

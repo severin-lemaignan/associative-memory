@@ -68,6 +68,9 @@ MainWindow::MainWindow(QWidget *parent)
     const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     ui->experiment_editor->document()->setDefaultFont(fixedFont);
 
+    // enable syntax highlighting
+    highlighter = make_unique<SimpleMarkdownHighlighter>(ui->experiment_editor->document());
+
     ///// RECENT FILES
     //////////////////////////////////////
     ui->menuFile->addSeparator();
@@ -774,4 +777,53 @@ void MainWindow::on_export_weights_plot_clicked() {
                                 QString::fromStdString(expe.name) + ">");
     QFileInfo f(fileName);
     statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
+}
+
+
+SimpleMarkdownHighlighter::SimpleMarkdownHighlighter(QTextDocument *parent)
+    : QSyntaxHighlighter(parent)
+{
+    HighlightingRule rule;
+
+    QTextCharFormat lineFormat;
+    lineFormat.setForeground(Qt::darkBlue);
+    lineFormat.setFontWeight(QFont::Bold);
+
+    QTextCharFormat paramFormat;
+    paramFormat.setForeground(Qt::darkGreen);
+    paramFormat.setFontWeight(QFont::Bold);
+
+    QTextCharFormat unitFormat;
+    unitFormat.setForeground(Qt::darkYellow);
+    unitFormat.setFontWeight(QFont::Bold);
+
+    QTextCharFormat errorFormat;
+    errorFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+    errorFormat.setUnderlineColor(Qt::red);
+    errorFormat.setFontUnderline(true);
+
+    rule.pattern = QRegExp("^[\\-=]{2,}");
+    rule.format = lineFormat;
+    highlightingRules.append(rule);
+
+    rule.pattern = QRegExp("^\\-\\s[A-Za-z0-9\\-_]+:\\s*\\-?[\\.0-9]+");
+    rule.format = paramFormat;
+    highlightingRules.append(rule);
+
+    rule.pattern = QRegExp("^\\-\\s[A-Za-z0-9\\-_]+:?\\s*$");
+    rule.format = unitFormat;
+    highlightingRules.append(rule);
+}
+
+void SimpleMarkdownHighlighter::highlightBlock(const QString &text)
+{
+    for(const auto& rule : highlightingRules) {
+        QRegExp expression(rule.pattern);
+        int index = expression.indexIn(text);
+        while (index >= 0) {
+            int length = expression.matchedLength();
+            setFormat(index, length, rule.format);
+            index = expression.indexIn(text, index + length);
+        }
+    }
 }

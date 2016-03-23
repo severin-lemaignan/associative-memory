@@ -12,6 +12,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class SimpleMarkdownHighlighter;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -94,6 +96,28 @@ class MainWindow : public QMainWindow {
     void saveFile(const QString &fileName);
 
     QString curFile;
+    std::unique_ptr<SimpleMarkdownHighlighter> highlighter;
 };
+
+class SimpleMarkdownHighlighter : public QSyntaxHighlighter
+{
+    Q_OBJECT
+
+public:
+    SimpleMarkdownHighlighter(QTextDocument *parent = 0);
+
+protected:
+    void highlightBlock(const QString &text) Q_DECL_OVERRIDE;
+
+private:
+    struct HighlightingRule
+    {
+        QRegExp pattern;
+        QTextCharFormat format;
+    };
+    QVector<HighlightingRule> highlightingRules;
+
+};
+
 
 #endif  // MAINWINDOW_H

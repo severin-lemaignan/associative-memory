@@ -23,7 +23,8 @@ class MemoryNetwork
 public:
 
     MemoryNetwork(size_t size,
-                  LoggingFunction logging_function = nullptr, // user-defined callback used to store activation history
+                  LoggingFunction activations_log_fn = nullptr, // user-defined callback used to store activation history
+                  LoggingFunction external_activations_log_fn = nullptr, // user-defined callback used to store external activation history
                   double Dg = 0.2,     // activation decay (per ms)
                   double Lg = 0.01,    // learning rate (per ms)
                   double Eg = 0.6,     // external influence
@@ -97,6 +98,7 @@ private:
     MemoryMatrix _weights;
 
     LoggingFunction _log_activation;
+    LoggingFunction _log_external_activation;
 
     std::random_device rd;
     std::default_random_engine gen;

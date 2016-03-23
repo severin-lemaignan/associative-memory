@@ -13,7 +13,8 @@ using namespace std::chrono;
 
 
 MemoryNetwork::MemoryNetwork(size_t size,
-                             LoggingFunction logging_function,
+                             LoggingFunction activations_log_fn,
+                             LoggingFunction external_activations_log_fn,
                              double Dg,   
                              double Lg,   
                              double Eg,   
@@ -30,7 +31,8 @@ MemoryNetwork::MemoryNetwork(size_t size,
                 Amin(Amin), 
                 Arest(Arest),
                 Winit(Winit),
-                _log_activation(logging_function),
+                _log_activation(activations_log_fn),
+                _log_external_activation(external_activations_log_fn),
                 gen(rd())
 {
 
@@ -243,12 +245,14 @@ void MemoryNetwork::step()
         _activations(i) = min(Amax, max(Amin, _activations(i)));
     }
 
-    // if necessary, log the activations
+    // if necessary, log the activations and external stimulations
     if(_log_activation) {
-        for (size_t i = 0; i < size(); i++) {
-            _log_activation(duration_cast<microseconds>(now - _start_time),
-                            _activations);
-        }
+        _log_activation(duration_cast<microseconds>(now - _start_time),
+                        _activations);
+    }
+    if(_log_external_activation) {
+        _log_external_activation(duration_cast<microseconds>(now - _start_time),
+                                 external_activations);
     }
 
     // Weights update

@@ -42,11 +42,25 @@ private slots:
 
     void openRecentFile();
 
+    void on_experiment_editor_textChanged();
+
 private:
 
-    void prepareWeightPlot();
+    void initializeWeightsPlot();
+    void initializeActivationsPlot();
+
+    /** Set up the plots size and captions.
+     *
+     * Typically called once an experiment is loaded,
+     * but before the experiment ran.
+     */
+    void prepareActivationsPlot();
+    void prepareWeightsPlot();
+
+    void updateWeightsPlot();
 
     void loadExperiment(const QString& filename);
+    void setupExperiment(const Experiment& expe);
 
     void setCurrentFile(const QString &fileName);
     void updateRecentFileActions();

@@ -11,7 +11,7 @@
 #include "ui_mainwindow.h"
 #include "../src-runner/parser.hpp"
 
-#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory->set_parameter(PARAM, expe.parameters[PARAM]);}
+#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory->set_parameter(PARAM, expe.parameters.at(PARAM));}
 #define S(x) #x
 #define SX(x) S(x)
 #define set_ui_param(PARAM) ui->PARAM##_label->setText(SX(PARAM) ": " + QString::number(memory->get_parameter(SX(PARAM))));ui->PARAM##_slider->setValue(memory->get_parameter(SX(PARAM))*100);
@@ -65,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    ///// RECENT FILES
+    //////////////////////////////////////
     ui->menuFile->addSeparator();
     for (int i = 0; i < MaxRecentFiles; ++i) {
 
@@ -73,59 +75,18 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
         ui->menuFile->addAction(recentFileActs[i]);
     }
-
     // reload the list of recent files
     updateRecentFileActions();
 
-    // ensure selection of graphs and legend are synchronized
-    connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
-
-    prepareWeightPlot();
-
-    // set some pens, brushes and backgrounds:
-    ui->customPlot->xAxis->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis->setSubTickPen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis->setTickLabelColor(Qt::white);
-    ui->customPlot->yAxis->setTickLabelColor(Qt::white);
-    ui->customPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->customPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->customPlot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-    ui->customPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-    ui->customPlot->xAxis->grid()->setSubGridVisible(true);
-    ui->customPlot->yAxis->grid()->setSubGridVisible(true);
-    ui->customPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
-    ui->customPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
-    ui->customPlot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    ui->customPlot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    QLinearGradient plotGradient;
-    plotGradient.setStart(0, 0);
-    plotGradient.setFinalStop(0, 350);
-    plotGradient.setColorAt(0, QApplication::palette().color(QPalette::Base));
-    plotGradient.setColorAt(1, QApplication::palette().color(QPalette::Base));
-    ui->customPlot->setBackground(plotGradient);
-    QLinearGradient axisRectGradient;
-    axisRectGradient.setStart(0, 0);
-    axisRectGradient.setFinalStop(0, 350);
-    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
-    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
-    ui->customPlot->axisRect()->setBackground(axisRectGradient);
-
-    // give the axes some labels:
-    ui->customPlot->xAxis->setLabel("Time (ms)");
-    ui->customPlot->yAxis->setLabel("Activation level");
-    // set axes ranges, so we see all data:
-    ui->customPlot->xAxis->setRange(0, 100);
-    ui->customPlot->yAxis->setRange(-0.2, 1);
-
-    ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
-                                      QCP::iSelectLegend | QCP::iSelectPlottables);
+    //////////////////////////////////////
 
 
-    ui->customPlot->replot();
+    ///// PLOTS
+    //////////////////////////////////////
+
+    initializeWeightsPlot();
+    initializeActivationsPlot();
+    //////////////////////////////////////
 }
 
 MainWindow::~MainWindow()
@@ -134,7 +95,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::prepareWeightPlot() {
+void MainWindow::initializeWeightsPlot() {
 
     // set some pens, brushes and backgrounds:
     ui->weightPlot->xAxis->setBasePen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
@@ -176,9 +137,6 @@ void MainWindow::prepareWeightPlot() {
     axisRectGradient.setColorAt(1, QColor(30, 30, 30));
     ui->weightPlot->axisRect()->setBackground(axisRectGradient);
 
-    //ui->weightPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
-
     // display the grid on top of the graph
     if (!ui->weightPlot->layer("abovemain")) {
         ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"), QCustomPlot::limAbove);
@@ -187,12 +145,38 @@ void MainWindow::prepareWeightPlot() {
     ui->weightPlot->yAxis->grid()->setLayer("abovemain");
 
 
-    if(!memory) return;
-
     ui->weightPlot->xAxis->setAutoTicks(false);
     ui->weightPlot->yAxis->setAutoTicks(false);
     ui->weightPlot->xAxis->setAutoTickLabels(false);
     ui->weightPlot->yAxis->setAutoTickLabels(false);
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
+    ui->weightPlot->addPlottable(colorMap);
+    colorMap->setInterpolate(false);
+
+    // add a color scale:
+    QCPColorScale *colorScale = new QCPColorScale(ui->weightPlot);
+    ui->weightPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    colorScale->axis()->setLabel("Weights");
+
+    // set the color gradient of the color map to one of the presets:
+    colorMap->setGradient(QCPColorGradient::gpJet);
+    // we could have also created a QCPColorGradient instance and added own colors to
+    // the gradient, see the documentation of QCPColorGradient for what's possible.
+
+    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->weightPlot);
+    ui->weightPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    ui->weightPlot->replot();
+}
+
+void MainWindow::prepareWeightsPlot() {
+
 
     QVector<double> tickVector;
     QVector<QString> tickLabels;
@@ -211,50 +195,119 @@ void MainWindow::prepareWeightPlot() {
     auto weights = memory->weights();
 
     // set up the QCPColorMap:
-    QCPColorMap *colorMap = new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
-    ui->weightPlot->addPlottable(colorMap);
-    colorMap->setInterpolate(false);
+    QCPColorMap *colorMap = dynamic_cast<QCPColorMap*>(ui->weightPlot->plottable());
+
     colorMap->data()->setSize(weights.cols(), weights.rows()); // we want the color map to have nx * ny data points
     colorMap->data()->setRange(QCPRange(0, weights.cols()-1), QCPRange(0, weights.rows()-1)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
-    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
+
+    ui->weightPlot->xAxis->setRange(-0.5, memory->units_names().size() - 0.5);
+    ui->weightPlot->yAxis->setRange(-0.5, memory->units_names().size() - 0.5);
+
+    ui->weightPlot->replot();
+}
+
+void MainWindow::updateWeightsPlot() {
+
+     auto weights = memory->weights();
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = dynamic_cast<QCPColorMap*>(ui->weightPlot->plottable());
+
 
     for (int xIndex=0; xIndex<weights.cols(); xIndex++)
     {
       for (int yIndex=0; yIndex<weights.rows(); yIndex++)
       {
         colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
-//        colorMap->data()->setCell(xIndex*2+1, yIndex*2, weights(xIndex, yIndex));
-//        colorMap->data()->setCell(xIndex*2, yIndex*2+1, weights(xIndex, yIndex));
-//        colorMap->data()->setCell(xIndex*2+1, yIndex*2+1, weights(xIndex, yIndex));
       }
     }
 
-    // add a color scale:
-    QCPColorScale *colorScale = new QCPColorScale(ui->weightPlot);
-    ui->weightPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
-    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-    colorMap->setColorScale(colorScale); // associate the color map with the color scale
-    colorScale->axis()->setLabel("Weights");
-
-    // set the color gradient of the color map to one of the presets:
-    colorMap->setGradient(QCPColorGradient::gpJet);
-    // we could have also created a QCPColorGradient instance and added own colors to
-    // the gradient, see the documentation of QCPColorGradient for what's possible.
-
-    // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
     colorMap->rescaleDataRange();
 
-    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
-    QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->weightPlot);
-    ui->weightPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-
-    // rescale the key (x) and value (y) axes so the whole color map is visible:
-    //ui->weightPlot->rescaleAxes();
-    ui->weightPlot->xAxis->setRange(-0.5, memory->units_names().size() - 0.5);
-    ui->weightPlot->yAxis->setRange(-0.5, memory->units_names().size() - 0.5);
-
     ui->weightPlot->replot();
+}
+
+void MainWindow::initializeActivationsPlot() {
+
+    // ensure selection of graphs and legend are synchronized
+    connect(ui->activationPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
+     // set some pens, brushes and backgrounds:
+    ui->activationPlot->xAxis->setBasePen(QPen(Qt::white, 1));
+    ui->activationPlot->yAxis->setBasePen(QPen(Qt::white, 1));
+    ui->activationPlot->xAxis->setTickPen(QPen(Qt::white, 1));
+    ui->activationPlot->yAxis->setTickPen(QPen(Qt::white, 1));
+    ui->activationPlot->xAxis->setSubTickPen(QPen(Qt::white, 1));
+    ui->activationPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
+    ui->activationPlot->xAxis->setTickLabelColor(Qt::white);
+    ui->activationPlot->yAxis->setTickLabelColor(Qt::white);
+    ui->activationPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    ui->activationPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    ui->activationPlot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    ui->activationPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    ui->activationPlot->xAxis->grid()->setSubGridVisible(true);
+    ui->activationPlot->yAxis->grid()->setSubGridVisible(true);
+    ui->activationPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
+    ui->activationPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
+    ui->activationPlot->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    ui->activationPlot->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+    QLinearGradient plotGradient;
+    plotGradient.setStart(0, 0);
+    plotGradient.setFinalStop(0, 350);
+    plotGradient.setColorAt(0, QApplication::palette().color(QPalette::Base));
+    plotGradient.setColorAt(1, QApplication::palette().color(QPalette::Base));
+    ui->activationPlot->setBackground(plotGradient);
+    QLinearGradient axisRectGradient;
+    axisRectGradient.setStart(0, 0);
+    axisRectGradient.setFinalStop(0, 350);
+    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+    ui->activationPlot->axisRect()->setBackground(axisRectGradient);
+
+    // give the axes some labels:
+    ui->activationPlot->xAxis->setLabel("Time (ms)");
+    ui->activationPlot->yAxis->setLabel("Activation level");
+    // set axes ranges, so we see all data:
+    ui->activationPlot->xAxis->setRange(0, 100);
+    ui->activationPlot->yAxis->setRange(-0.2, 1);
+
+    ui->activationPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
+                                      QCP::iSelectLegend | QCP::iSelectPlottables);
+
+
+    ui->activationPlot->replot();
+
+
+}
+
+void MainWindow::prepareActivationsPlot() {
+
+    // create one graph per unit
+    ui->activationPlot->clearGraphs();
+    for(size_t i=0;i<memory->units_names().size();i++) {
+        auto graph = ui->activationPlot->addGraph();
+        graph->setName(QString::fromStdString(memory->units_names()[i]));
+
+        QPen graphPen;
+        graphPen.setColor(PALETTE[i % PALETTE.size()]);
+        graphPen.setWidthF(3);
+        graph->setPen(graphPen);
+
+    }
+
+    ui->activationPlot->xAxis->setRange(0, duration_cast<milliseconds>(expe.duration).count());
+    ui->activationPlot->yAxis->setRange(memory->get_parameter("Amin"), memory->get_parameter("Amax"));
+
+    ui->activationPlot->legend->setVisible(true);
+    QFont legendFont = font();
+    legendFont.setPointSize(10);
+    ui->activationPlot->legend->setFont(legendFont);
+    ui->activationPlot->legend->setSelectedFont(legendFont);
+    ui->activationPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+
+
+    ui->activationPlot->replot();
+
+
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
@@ -341,12 +394,12 @@ void MainWindow::on_runButton_clicked()
     QVector<double> qTimestamps = QVector<double>::fromStdVector(timestamps);
     for (const auto& kv : logs) {
         QVector<double> data = QVector<double>::fromStdVector(kv.second);
-        ui->customPlot->graph(kv.first)->setData(qTimestamps, data);
+        ui->activationPlot->graph(kv.first)->setData(qTimestamps, data);
     }
 
-    ui->customPlot->replot();
+    ui->activationPlot->replot();
 
-    prepareWeightPlot();
+    updateWeightsPlot();
 
     ui->runButton->setToolTip("Start the experiment");
     ui->runButton->setText("Update");
@@ -399,13 +452,18 @@ void MainWindow::loadExperiment(const QString& filename) {
                               QString("Parsing of ") + filename + " failed!");
     }
 
-    expe = experiment_parser.expe;
+    setupExperiment(experiment_parser.expe);
+
+}
+void MainWindow::setupExperiment(const Experiment& _expe) {
+
+    expe = _expe;
 
     memory = make_unique<MemoryNetwork>(expe.units.size(), &logging);
     memory->units_names(expe.units);
 
     if (expe.parameters.count("MaxFreq")) {
-        memory->max_frequency(expe.parameters["MaxFreq"]);
+        memory->max_frequency(expe.parameters.at("MaxFreq"));
     }
 
     set_param("Dg")
@@ -424,32 +482,9 @@ void MainWindow::loadExperiment(const QString& filename) {
     set_ui_param(Arest)
     set_param("Winit")
 
-    // create one graph per unit
-    for(size_t i=0;i<memory->units_names().size();i++) {
-        auto graph = ui->customPlot->addGraph();
-        graph->setName(QString::fromStdString(memory->units_names()[i]));
 
-        QPen graphPen;
-        graphPen.setColor(PALETTE[i % PALETTE.size()]);
-        graphPen.setWidthF(3);
-        graph->setPen(graphPen);
-
-    }
-
-    ui->customPlot->xAxis->setRange(0, duration_cast<milliseconds>(expe.duration).count());
-    ui->customPlot->yAxis->setRange(memory->get_parameter("Amin"), memory->get_parameter("Amax"));
-
-    ui->customPlot->legend->setVisible(true);
-    QFont legendFont = font();
-    legendFont.setPointSize(10);
-    ui->customPlot->legend->setFont(legendFont);
-    ui->customPlot->legend->setSelectedFont(legendFont);
-    ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
-
-    ui->customPlot->replot();
-
-
+    prepareActivationsPlot();
+    prepareWeightsPlot();
 
    ui->runButton->setToolTip("Start the experiment");
    ui->runButton->setDisabled(false);
@@ -459,10 +494,10 @@ void MainWindow::loadExperiment(const QString& filename) {
 void MainWindow::selectionChanged()
 {
     // synchronize selection of graphs with selection of corresponding legend items:
-    for (int i=0; i<ui->customPlot->graphCount(); ++i)
+    for (int i=0; i<ui->activationPlot->graphCount(); ++i)
     {
-      QCPGraph *graph = ui->customPlot->graph(i);
-      QCPPlottableLegendItem *item = ui->customPlot->legend->itemWithPlottable(graph);
+      QCPGraph *graph = ui->activationPlot->graph(i);
+      QCPPlottableLegendItem *item = ui->activationPlot->legend->itemWithPlottable(graph);
       if (item->selected() || graph->selected())
       {
         item->setSelected(true);

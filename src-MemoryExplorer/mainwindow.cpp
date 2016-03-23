@@ -4,6 +4,7 @@
 #include <chrono>
 #include <map>
 #include <vector>
+#include <functional>
 
 #include <QMessageBox>
 
@@ -34,19 +35,25 @@ const vector<QColor> PALETTE = {QColor(242,146,70),
 
 const int HISTORY_SAMPLING_RATE=500; //Hz
 
-vector<double> timestamps;
-map<size_t, vector<double>> logs;
+vector<double> activations_timestamps;
+vector<double> external_activations_timestamps;
+map<size_t, vector<double>> activations_logs;
+map<size_t, vector<double>> external_activations_logs;
 
-microseconds _last_log;
+microseconds _last_activations_log;
+microseconds _last_external_activations_log;
 
-void logging(microseconds time_from_start,
+void logging(map<size_t, vector<double>>& logs,
+             vector<double>& timestamps,
+             microseconds& last_log,
+             microseconds time_from_start,
              const MemoryVector& levels)
 {
 
     // if necessary, store the activation level
-    auto us_since_last_log = time_from_start - _last_log;
-    if(us_since_last_log.count() > (1000000./HISTORY_SAMPLING_RATE)) {
-        _last_log = time_from_start;
+    microseconds us_since_last_log = time_from_start - last_log;
+    if(us_since_last_log.count() > (std::micro::den * 1./HISTORY_SAMPLING_RATE)) {
+        last_log = time_from_start;
         timestamps.push_back(duration_cast<milliseconds>(time_from_start).count());
         for(size_t i = 0; i < levels.size(); i++) {
             logs[i].push_back(levels[i]);
@@ -237,6 +244,26 @@ void MainWindow::updateWeightsPlot() {
     ui->weightPlot->replot();
 }
 
+void MainWindow::updateActivationsPlot() {
+
+    QVector<double> qTimestamps = QVector<double>::fromStdVector(activations_timestamps);
+    for (const auto& kv : activations_logs) {
+        QVector<double> data = QVector<double>::fromStdVector(kv.second);
+        ui->activationPlot->graph(kv.first)->setData(qTimestamps, data);
+    }
+
+
+    QVector<double> qExternalTimestamps = QVector<double>::fromStdVector(external_activations_timestamps);
+    for (const auto& kv : external_activations_logs) {
+        QVector<double> data = QVector<double>::fromStdVector(kv.second);
+        ui->activationPlot->graph(kv.first + external_activations_logs.size())->setData(qExternalTimestamps, data);
+    }
+
+    ui->activationPlot->replot();
+
+
+}
+
 void MainWindow::initializeActivationsPlot() {
 
     // ensure selection of graphs and legend are synchronized
@@ -304,6 +331,24 @@ void MainWindow::prepareActivationsPlot() {
 
     }
 
+    // create graphs for external activations
+    for(size_t i=0;i<memory->units_names().size();i++) {
+        auto graph = ui->activationPlot->addGraph();
+        graph->setName(QString::fromStdString(memory->units_names()[i]) + " (ext.)");
+
+        graph->setBrush(QColor(200, 200, 200, 20));
+        QPen graphPen;
+        graphPen.setColor(PALETTE[i % PALETTE.size()]);
+        graphPen.setWidthF(3);
+        graph->setPen(graphPen);
+        graph->setChannelFillGraph(ui->activationPlot->graph(i));
+
+        // initially hidden!
+        graph->setVisible(false);
+        ui->activationPlot->legend->itemWithPlottable(graph)->setTextColor(QColor(100,100,100));
+    }
+
+
     ui->activationPlot->xAxis->setRange(0, duration_cast<milliseconds>(expe.duration).count());
     ui->activationPlot->yAxis->setRange(memory->get_parameter("Amin"), memory->get_parameter("Amax"));
 
@@ -314,10 +359,39 @@ void MainWindow::prepareActivationsPlot() {
     ui->activationPlot->legend->setSelectedFont(legendFont);
     ui->activationPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
+    connect(ui->activationPlot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)), this, SLOT(activationsLegendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
 
     ui->activationPlot->replot();
 
 
+}
+
+void MainWindow::activationsLegendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item)
+{
+  // Rename a graph by double clicking on its legend item
+  Q_UNUSED(legend)
+  if (item) // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
+  {
+    QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem*>(item);
+
+    for (int i=0; i<ui->activationPlot->graphCount(); ++i)
+    {
+      QCPGraph *graph = ui->activationPlot->graph(i);
+      if (plItem == ui->activationPlot->legend->itemWithPlottable(graph)) {
+          if(graph->visible()) {
+              plItem->setTextColor(QColor(100,100,100));
+              graph->setVisible(false);
+          }
+          else {
+              plItem->setTextColor(QColor(0,0,0));
+              graph->setVisible(true);
+          }
+
+          ui->activationPlot->replot();
+          return;
+      }
+    }
+  }
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
@@ -375,10 +449,14 @@ void MainWindow::on_runButton_clicked()
    ui->runButton->setDisabled(true);
 
 
-   timestamps.clear();
-   logs.clear();
+   // reset logs
+   activations_logs.clear();
+   activations_timestamps.clear();
+   external_activations_logs.clear();
+   external_activations_timestamps.clear();
 
-   _last_log = microseconds(0);
+   _last_activations_log = microseconds(0);
+   _last_external_activations_log = microseconds(0);
 
    memory->reset();
 
@@ -405,16 +483,9 @@ void MainWindow::on_runButton_clicked()
     cerr << endl << "EXPERIMENT COMPLETED. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
 
 
-   statusBar()->showMessage("Experiment completed!",2000);
+    statusBar()->showMessage("Experiment completed!",2000);
 
-    QVector<double> qTimestamps = QVector<double>::fromStdVector(timestamps);
-    for (const auto& kv : logs) {
-        QVector<double> data = QVector<double>::fromStdVector(kv.second);
-        ui->activationPlot->graph(kv.first)->setData(qTimestamps, data);
-    }
-
-    ui->activationPlot->replot();
-
+    updateActivationsPlot();
     updateWeightsPlot();
 
     ui->runButton->setToolTip("Start the experiment");
@@ -477,7 +548,22 @@ void MainWindow::setupExperiment(const Experiment& _expe) {
 
     expe = _expe;
 
-    memory = make_unique<MemoryNetwork>(expe.units.size(), &logging);
+    auto activations_logging = std::bind(logging,
+                                         ref(activations_logs),
+                                         ref(activations_timestamps),
+                                         ref(_last_activations_log),
+                                        std::placeholders::_1, std::placeholders::_2);
+
+    auto external_activations_logging = std::bind(logging,
+                                                  ref(external_activations_logs),
+                                                  ref(external_activations_timestamps),
+                                                  ref(_last_external_activations_log),
+                                                  std::placeholders::_1, std::placeholders::_2);
+
+    memory = make_unique<MemoryNetwork>(expe.units.size(),
+                                        activations_logging,
+                                        external_activations_logging);
+
     memory->units_names(expe.units);
 
     set_param("Dg")

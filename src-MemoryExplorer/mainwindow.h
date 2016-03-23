@@ -4,6 +4,7 @@
 #include <memory>
 #include <QMainWindow>
 
+#include "qcustomplot.h"
 #include "../src/memory_network.hpp"
 #include "../src-runner/experiment.hpp"
 
@@ -56,6 +57,8 @@ private slots:
 
     void on_MaxFreq_spinBox_valueChanged();
 
+    void activationsLegendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
+
 private:
 
     void initializeWeightsPlot();
@@ -69,6 +72,7 @@ private:
     void prepareActivationsPlot();
     void prepareWeightsPlot();
 
+    void updateActivationsPlot();
     void updateWeightsPlot();
 
     void loadExperiment(const QString& filename);

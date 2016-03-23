@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Read the template experiment and update accordingly the interface
     on_experiment_editor_textChanged();
+    setWindowModified(false);
 }
 
 MainWindow::~MainWindow()
@@ -479,10 +480,6 @@ void MainWindow::setupExperiment(const Experiment& _expe) {
     memory = make_unique<MemoryNetwork>(expe.units.size(), &logging);
     memory->units_names(expe.units);
 
-    if (expe.parameters.count("MaxFreq")) {
-        memory->max_frequency(expe.parameters.at("MaxFreq"));
-    }
-
     set_param("Dg")
     set_ui_param(Dg)
     set_param("Lg")
@@ -498,6 +495,12 @@ void MainWindow::setupExperiment(const Experiment& _expe) {
     set_param("Arest")
     set_ui_param(Arest)
     set_param("Winit")
+
+    if (expe.parameters.count("MaxFreq")) {
+        memory->max_frequency(expe.parameters.at("MaxFreq"));
+        ui->MaxFreq_spinBox->setValue(expe.parameters.at("MaxFreq"));
+    }
+
 
 
     prepareActivationsPlot();
@@ -544,74 +547,116 @@ void MainWindow::selectionChanged()
     }
 }
 
+void MainWindow::update_expe_description_parameter(const QString& name, double value)
+{
+
+     auto expe_desc = ui->experiment_editor->toPlainText();
+     auto init_text = expe_desc;
+     expe_desc.replace(QRegExp(name + ": [0-9\\.\\-]*"), name + ": " + QString::number(value));
+
+     if (init_text != expe_desc) {
+        ui->experiment_editor->setPlainText(expe_desc);
+        setWindowModified(true);
+     }
+
+
+}
+
 void MainWindow::on_Dg_slider_sliderMoved(int position)
 {
+    auto Dg = position * 1. / 100;
+    set_ui_param(Dg)
+
     if(memory) {
-        auto Dg = position * 1. / 100;
         memory->set_parameter("Dg", Dg);
-        set_ui_param(Dg)
     }
+
+    update_expe_description_parameter("Dg", Dg);
 }
 
 
 void MainWindow::on_Lg_slider_sliderMoved(int position)
 {
+     auto Lg = position * 1. / 100;
+     set_ui_param(Lg)
+
      if(memory) {
-        auto Lg = position * 1. / 100;
         memory->set_parameter("Lg", Lg);
-        set_ui_param(Lg)
     }
+
+    update_expe_description_parameter("Lg", Lg);
 
 }
 
 void MainWindow::on_Eg_slider_sliderMoved(int position)
 {
-      if(memory) {
-        auto Eg = position * 1. / 100;
+    auto Eg = position * 1. / 100;
+    set_ui_param(Eg)
+
+    if(memory) {
         memory->set_parameter("Eg", Eg);
-        set_ui_param(Eg)
     }
 
+    update_expe_description_parameter("Eg", Eg);
 }
 
 void MainWindow::on_Ig_slider_sliderMoved(int position)
 {
-     if(memory) {
-        auto Ig = position * 1. / 100;
+    auto Ig = position * 1. / 100;
+    set_ui_param(Ig)
+
+    if(memory) {
         memory->set_parameter("Ig", Ig);
-        set_ui_param(Ig)
     }
 
+    update_expe_description_parameter("Ig", Ig);
 }
 
 void MainWindow::on_Amax_slider_sliderMoved(int position)
 {
-     if(memory) {
-        auto Amax = position * 1. / 100;
+    auto Amax = position * 1. / 100;
+    set_ui_param(Amax)
+
+    if(memory) {
         memory->set_parameter("Amax", Amax);
-        set_ui_param(Amax)
     }
 
+    update_expe_description_parameter("Amax", Amax);
 }
 
 void MainWindow::on_Amin_slider_sliderMoved(int position)
 {
-     if(memory) {
-        auto Amin = position * 1. / 100;
+    auto Amin = position * 1. / 100;
+    set_ui_param(Amin)
+
+    if(memory) {
         memory->set_parameter("Amin", Amin);
-        set_ui_param(Amin)
     }
 
+    update_expe_description_parameter("Amin", Amin);
 }
 
 void MainWindow::on_Arest_slider_sliderMoved(int position)
 {
-     if(memory) {
-        auto Arest = position * 1. / 100;
+    auto Arest = position * 1. / 100;
+    set_ui_param(Arest)
+
+    if(memory) {
         memory->set_parameter("Arest", Arest);
-        set_ui_param(Arest)
     }
 
+    update_expe_description_parameter("Arest", Arest);
+}
+
+void MainWindow::on_MaxFreq_spinBox_valueChanged()
+{
+    auto MaxFreq = ui->MaxFreq_spinBox->value();
+
+    if(memory) {
+       memory->max_frequency(MaxFreq);
+    }
+
+    update_expe_description_parameter("MaxFreq", MaxFreq);
 }
 
 void MainWindow::on_experiment_editor_textChanged()
@@ -690,3 +735,4 @@ void MainWindow::on_export_weights_plot_clicked()
     QFileInfo f(fileName);
     statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
 }
+

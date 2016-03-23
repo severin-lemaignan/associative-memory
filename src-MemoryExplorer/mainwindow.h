@@ -54,6 +54,8 @@ private slots:
 
     void on_export_weights_plot_clicked();
 
+    void on_MaxFreq_spinBox_valueChanged();
+
 private:
 
     void initializeWeightsPlot();
@@ -71,6 +73,8 @@ private:
 
     void loadExperiment(const QString& filename);
     void setupExperiment(const Experiment& expe);
+
+    void update_expe_description_parameter(const QString& name, double value);
 
     void setCurrentFile(const QString &fileName);
     void updateRecentFileActions();

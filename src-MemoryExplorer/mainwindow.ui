@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Associative Memory Explorer</string>
+   <string>Associative Memory Explorer[*]</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -408,7 +408,7 @@ Plots
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox">
+        <widget class="QSpinBox" name="MaxFreq_spinBox">
          <property name="suffix">
           <string>Hz</string>
          </property>
@@ -505,7 +505,7 @@ Plots
   <tabstop>tabWidget</tabstop>
   <tabstop>Amin_slider</tabstop>
   <tabstop>Arest_slider</tabstop>
-  <tabstop>spinBox</tabstop>
+  <tabstop>MaxFreq_spinBox</tabstop>
   <tabstop>runButton</tabstop>
   <tabstop>export_weights_plot</tabstop>
   <tabstop>export_activation_plot</tabstop>

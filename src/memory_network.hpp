@@ -37,11 +37,11 @@ public:
 
     void activate_unit(size_t id, 
                     double level = 1.0, 
-                    std::chrono::milliseconds duration = std::chrono::milliseconds(200));
+                    std::chrono::microseconds duration = std::chrono::milliseconds(200));
 
     void activate_unit(const std::string& name, 
                     double level = 1.0, 
-                    std::chrono::milliseconds duration = std::chrono::milliseconds(200));
+                    std::chrono::microseconds duration = std::chrono::milliseconds(200));
 
     std::vector<std::string> units_names() const {return _units_names;}
     size_t unit_id(const std::string& name) const;
@@ -116,9 +116,9 @@ private:
     float _max_freq = 0.f;
     int _steps_since_last_frequency_update = 0;
 
-    std::chrono::system_clock::time_point _start_time;
-    std::chrono::system_clock::time_point _last_timestamp;
-    std::chrono::system_clock::time_point _last_freq_computation;
+    std::chrono::high_resolution_clock::time_point _start_time;
+    std::chrono::high_resolution_clock::time_point _last_timestamp;
+    std::chrono::high_resolution_clock::time_point _last_freq_computation;
 };
 
 

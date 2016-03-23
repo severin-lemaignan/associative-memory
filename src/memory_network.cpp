@@ -2,6 +2,8 @@
 #include <iomanip>
 #include <algorithm>
 #include <iterator>
+#include <ratio>
+#include <thread>
 
 #include "memory_network.hpp"
 
@@ -79,7 +81,7 @@ void MemoryNetwork::compute_internal_activations() {
 
 void MemoryNetwork::activate_unit(const string& unit,
                                   double level,
-                                  milliseconds duration) {
+                                  microseconds duration) {
     auto id = unit_id(unit);
     if (id >= _units_names.size()) throw range_error(unit + ": Inexistant unit name!");
 
@@ -88,7 +90,7 @@ void MemoryNetwork::activate_unit(const string& unit,
 
 void MemoryNetwork::activate_unit(size_t id,
                                   double level,
-                                  milliseconds duration) {
+                                  microseconds duration) {
     external_activations(id) = level;
     external_activations_decay(id) = duration.count();
 }
@@ -175,20 +177,19 @@ void MemoryNetwork::step()
 
     // Compute dt
     auto now = high_resolution_clock::now();
-    duration<double, std::milli> dt = now - _last_timestamp; // fractional duration
+    auto dt = now - _last_timestamp;
     _last_timestamp = now;
 
     if (_max_freq != 0.f) {
-        duration<double, std::milli> target_period(1000./_max_freq);
-        std::this_thread::sleep_for(target_period);
+        this_thread::sleep_for(microseconds(int(std::micro::den * 1./_max_freq)));
     }
 
 
     // If needed, compute frequency + optional printout network values
     _steps_since_last_frequency_update++;
-    duration<double, std::milli> ms_since_last_freq = now - _last_freq_computation;
-    if(ms_since_last_freq.count() > 200) {
-        _frequency = _steps_since_last_frequency_update * 1000./ms_since_last_freq.count();
+    auto time_since_last_freq = now - _last_freq_computation;
+    if(time_since_last_freq > milliseconds(200)) {
+        _frequency = _steps_since_last_frequency_update * std::micro::den * 1./duration_cast<microseconds>(time_since_last_freq).count();
         _last_freq_computation = now;
         _steps_since_last_frequency_update = 0;
 
@@ -230,8 +231,11 @@ void MemoryNetwork::step()
 
     }
     
+    // dt since last update, in (floating) milliseconds
+    double dt_ms = duration_cast<duration<double, std::milli>>(dt).count();
+
     // decay
-    _activations -= Dg * dt.count() * (_activations - rest_activations);
+    _activations -= Dg * dt_ms * (_activations - rest_activations);
 
     for (size_t i = 0; i < size(); i++)
     {
@@ -260,11 +264,11 @@ void MemoryNetwork::step()
 
             if (_activations(i) * _activations(j) > 0)
             {
-            _weights(i,j) += Lg * dt.count() * _activations(i) * _activations(j) * (1 - _weights(i,j));
+            _weights(i,j) += Lg * dt_ms * _activations(i) * _activations(j) * (1 - _weights(i,j));
             }
             else
             {
-            _weights(i,j) += Lg * dt.count() * _activations(i) * _activations(j) * (1 + _weights(i,j));
+            _weights(i,j) += Lg * dt_ms * _activations(i) * _activations(j) * (1 + _weights(i,j));
             }
         }
     }
@@ -274,7 +278,7 @@ void MemoryNetwork::step()
     for (size_t i = 0; i < external_activations.size(); i++) {
 
         if (external_activations_decay(i) > 0) {
-            external_activations_decay(i) -= dt.count();
+            external_activations_decay(i) -= duration_cast<microseconds>(dt).count();
         }
         else {
             external_activations(i) = 0;

@@ -12,15 +12,14 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+   public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
+   private slots:
     void on_Dg_slider_sliderMoved(int position);
 
     void on_actionOpen_triggered();
@@ -57,10 +56,10 @@ private slots:
 
     void on_MaxFreq_spinBox_valueChanged();
 
-    void activationsLegendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
+    void activationsLegendDoubleClick(QCPLegend *legend,
+                                      QCPAbstractLegendItem *item);
 
-private:
-
+   private:
     void initializeWeightsPlot();
     void initializeActivationsPlot();
 
@@ -75,14 +74,14 @@ private:
     void updateActivationsPlot();
     void updateWeightsPlot();
 
-    void loadExperiment(const QString& filename);
-    void setupExperiment(const Experiment& expe);
+    void loadExperiment(const QString &filename);
+    void setupExperiment(const Experiment &expe);
 
-    void update_expe_description_parameter(const QString& name, double value);
+    void update_expe_description_parameter(const QString &name, double value);
 
     void setCurrentFile(const QString &fileName);
     void updateRecentFileActions();
-    QString strippedName(const QString& filename);
+    QString strippedName(const QString &filename);
 
     enum { MaxRecentFiles = 5 };
     QAction *recentFileActs[MaxRecentFiles];
@@ -97,4 +96,4 @@ private:
     QString curFile;
 };
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

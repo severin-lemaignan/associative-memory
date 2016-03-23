@@ -12,28 +12,27 @@
 #include "ui_mainwindow.h"
 #include "../src-runner/parser.hpp"
 
-#define set_param(PARAM) if(expe.parameters.count(PARAM)) {memory->set_parameter(PARAM, expe.parameters.at(PARAM));}
+#define set_param(PARAM)                                         \
+    if (expe.parameters.count(PARAM)) {                          \
+        memory->set_parameter(PARAM, expe.parameters.at(PARAM)); \
+    }
 #define S(x) #x
 #define SX(x) S(x)
-#define set_ui_param(PARAM) ui->PARAM##_label->setText(SX(PARAM) ": " + QString::number(memory->get_parameter(SX(PARAM))));ui->PARAM##_slider->setValue(memory->get_parameter(SX(PARAM))*100);
-
+#define set_ui_param(PARAM)                                                  \
+    ui->PARAM##_label->setText(                                              \
+        SX(PARAM) ": " + QString::number(memory->get_parameter(SX(PARAM)))); \
+    ui->PARAM##_slider->setValue(memory->get_parameter(SX(PARAM)) * 100);
 
 using namespace std;
 using namespace std::chrono;
 
-const vector<QColor> PALETTE = {QColor(242,146,70),
-                               QColor(242,214,70),
-                               QColor(101,156,27),
-                               QColor(27,156,154),
-                               QColor(37,68,171),
-                               QColor(110,37,171),
-                               QColor(171,37,124),
-                               QColor(204,58,26),
-                               QColor(191,180,163),
-                               QColor(80,88,89)
-                               };
+const vector<QColor> PALETTE = {QColor(242, 146, 70),  QColor(242, 214, 70),
+                                QColor(101, 156, 27),  QColor(27, 156, 154),
+                                QColor(37, 68, 171),   QColor(110, 37, 171),
+                                QColor(171, 37, 124),  QColor(204, 58, 26),
+                                QColor(191, 180, 163), QColor(80, 88, 89)};
 
-const int HISTORY_SAMPLING_RATE=500; //Hz
+const int HISTORY_SAMPLING_RATE = 500;  // Hz
 
 vector<double> activations_timestamps;
 vector<double> external_activations_timestamps;
@@ -43,30 +42,24 @@ map<size_t, vector<double>> external_activations_logs;
 microseconds _last_activations_log;
 microseconds _last_external_activations_log;
 
-void logging(map<size_t, vector<double>>& logs,
-             vector<double>& timestamps,
-             microseconds& last_log,
-             microseconds time_from_start,
-             const MemoryVector& levels)
-{
-
+void logging(map<size_t, vector<double>> &logs, vector<double> &timestamps,
+             microseconds &last_log, microseconds time_from_start,
+             const MemoryVector &levels) {
     // if necessary, store the activation level
     microseconds us_since_last_log = time_from_start - last_log;
-    if(us_since_last_log.count() > (std::micro::den * 1./HISTORY_SAMPLING_RATE)) {
+    if (us_since_last_log.count() >
+        (std::micro::den * 1. / HISTORY_SAMPLING_RATE)) {
         last_log = time_from_start;
-        timestamps.push_back(duration_cast<milliseconds>(time_from_start).count());
-        for(size_t i = 0; i < levels.size(); i++) {
+        timestamps.push_back(
+            duration_cast<milliseconds>(time_from_start).count());
+        for (size_t i = 0; i < levels.size(); i++) {
             logs[i].push_back(levels[i]);
         }
     }
-
-
 }
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
     QCoreApplication::setOrganizationName("Plymouth_University");
     QCoreApplication::setApplicationName("MemoryExplorer");
 
@@ -75,23 +68,20 @@ MainWindow::MainWindow(QWidget *parent) :
     const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     ui->experiment_editor->document()->setDefaultFont(fixedFont);
 
-
-
     ///// RECENT FILES
     //////////////////////////////////////
     ui->menuFile->addSeparator();
     for (int i = 0; i < MaxRecentFiles; ++i) {
-
         recentFileActs[i] = new QAction(this);
         recentFileActs[i]->setVisible(false);
-        connect(recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
+        connect(recentFileActs[i], SIGNAL(triggered()), this,
+                SLOT(openRecentFile()));
         ui->menuFile->addAction(recentFileActs[i]);
     }
     // reload the list of recent files
     updateRecentFileActions();
 
     //////////////////////////////////////
-
 
     ///// PLOTS
     //////////////////////////////////////
@@ -100,23 +90,19 @@ MainWindow::MainWindow(QWidget *parent) :
     initializeActivationsPlot();
     //////////////////////////////////////
 
-
     // Read the template experiment and update accordingly the interface
     on_experiment_editor_textChanged();
     setWindowModified(false);
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::initializeWeightsPlot() {
-
     // set some pens, brushes and backgrounds:
-    ui->weightPlot->xAxis->setBasePen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
-    ui->weightPlot->yAxis->setBasePen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->xAxis->setBasePen(
+        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->yAxis->setBasePen(
+        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
     ui->weightPlot->xAxis->setTickPen(Qt::NoPen);
     ui->weightPlot->yAxis->setTickPen(Qt::NoPen);
     ui->weightPlot->xAxis->setSubTickPen(Qt::NoPen);
@@ -137,8 +123,10 @@ void MainWindow::initializeWeightsPlot() {
     ui->weightPlot->yAxis->grid()->setPen(Qt::NoPen);
     ui->weightPlot->xAxis->grid()->setSubGridVisible(true);
     ui->weightPlot->yAxis->grid()->setSubGridVisible(true);
-    ui->weightPlot->xAxis->grid()->setSubGridPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
-    ui->weightPlot->yAxis->grid()->setSubGridPen(QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->xAxis->grid()->setSubGridPen(
+        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+    ui->weightPlot->yAxis->grid()->setSubGridPen(
+        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
     ui->weightPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     ui->weightPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
     QLinearGradient plotGradient;
@@ -156,11 +144,11 @@ void MainWindow::initializeWeightsPlot() {
 
     // display the grid on top of the graph
     if (!ui->weightPlot->layer("abovemain")) {
-        ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"), QCustomPlot::limAbove);
+        ui->weightPlot->addLayer("abovemain", ui->weightPlot->layer("main"),
+                                 QCustomPlot::limAbove);
     }
     ui->weightPlot->xAxis->grid()->setLayer("abovemain");
     ui->weightPlot->yAxis->grid()->setLayer("abovemain");
-
 
     ui->weightPlot->xAxis->setAutoTicks(false);
     ui->weightPlot->yAxis->setAutoTicks(false);
@@ -168,36 +156,43 @@ void MainWindow::initializeWeightsPlot() {
     ui->weightPlot->yAxis->setAutoTickLabels(false);
 
     // set up the QCPColorMap:
-    QCPColorMap *colorMap = new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
+    QCPColorMap *colorMap =
+        new QCPColorMap(ui->weightPlot->xAxis, ui->weightPlot->yAxis);
     ui->weightPlot->addPlottable(colorMap);
     colorMap->setInterpolate(false);
 
     // add a color scale:
     QCPColorScale *colorScale = new QCPColorScale(ui->weightPlot);
-    ui->weightPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
-    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    ui->weightPlot->plotLayout()->addElement(
+        0, 1, colorScale);  // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight);  // scale shall be vertical bar with
+                                            // tick/axis labels right (actually
+                                            // atRight is already the default)
+    colorMap->setColorScale(
+        colorScale);  // associate the color map with the color scale
     colorScale->axis()->setLabel("Weights");
 
     // set the color gradient of the color map to one of the presets:
     colorMap->setGradient(QCPColorGradient::gpJet);
-    // we could have also created a QCPColorGradient instance and added own colors to
-    // the gradient, see the documentation of QCPColorGradient for what's possible.
+    // we could have also created a QCPColorGradient instance and added own
+    // colors to
+    // the gradient, see the documentation of QCPColorGradient for what's
+    // possible.
 
-    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    // make sure the axis rect and color scale synchronize their bottom and top
+    // margins (so they line up):
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->weightPlot);
-    ui->weightPlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    ui->weightPlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop,
+                                               marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 
     ui->weightPlot->replot();
 }
 
 void MainWindow::prepareWeightsPlot() {
-
-
     QVector<double> tickVector;
     QVector<QString> tickLabels;
-    for(size_t i=0;i<memory->units_names().size();i++) {
+    for (size_t i = 0; i < memory->units_names().size(); i++) {
         tickVector << i;
         tickLabels << QString::fromStdString(memory->units_names()[i]);
     }
@@ -212,10 +207,17 @@ void MainWindow::prepareWeightsPlot() {
     auto weights = memory->weights();
 
     // set up the QCPColorMap:
-    QCPColorMap *colorMap = dynamic_cast<QCPColorMap*>(ui->weightPlot->plottable());
+    QCPColorMap *colorMap =
+        dynamic_cast<QCPColorMap *>(ui->weightPlot->plottable());
 
-    colorMap->data()->setSize(weights.cols(), weights.rows()); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(0, weights.cols()-1), QCPRange(0, weights.rows()-1)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    colorMap->data()->setSize(
+        weights.cols(),
+        weights.rows());  // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(
+        QCPRange(0, weights.cols() - 1),
+        QCPRange(0, weights.rows() - 1));  // and span the coordinate range
+                                           // -4..4 in both key (x) and value
+                                           // (y) dimensions
 
     ui->weightPlot->xAxis->setRange(-0.5, memory->units_names().size() - 0.5);
     ui->weightPlot->yAxis->setRange(-0.5, memory->units_names().size() - 0.5);
@@ -224,19 +226,16 @@ void MainWindow::prepareWeightsPlot() {
 }
 
 void MainWindow::updateWeightsPlot() {
-
-     auto weights = memory->weights();
+    auto weights = memory->weights();
 
     // set up the QCPColorMap:
-    QCPColorMap *colorMap = dynamic_cast<QCPColorMap*>(ui->weightPlot->plottable());
+    QCPColorMap *colorMap =
+        dynamic_cast<QCPColorMap *>(ui->weightPlot->plottable());
 
-
-    for (int xIndex=0; xIndex<weights.cols(); xIndex++)
-    {
-      for (int yIndex=0; yIndex<weights.rows(); yIndex++)
-      {
-        colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
-      }
+    for (int xIndex = 0; xIndex < weights.cols(); xIndex++) {
+        for (int yIndex = 0; yIndex < weights.rows(); yIndex++) {
+            colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
+        }
     }
 
     colorMap->rescaleDataRange();
@@ -245,30 +244,29 @@ void MainWindow::updateWeightsPlot() {
 }
 
 void MainWindow::updateActivationsPlot() {
-
-    QVector<double> qTimestamps = QVector<double>::fromStdVector(activations_timestamps);
-    for (const auto& kv : activations_logs) {
+    QVector<double> qTimestamps =
+        QVector<double>::fromStdVector(activations_timestamps);
+    for (const auto &kv : activations_logs) {
         QVector<double> data = QVector<double>::fromStdVector(kv.second);
         ui->activationPlot->graph(kv.first)->setData(qTimestamps, data);
     }
 
-
-    QVector<double> qExternalTimestamps = QVector<double>::fromStdVector(external_activations_timestamps);
-    for (const auto& kv : external_activations_logs) {
+    QVector<double> qExternalTimestamps =
+        QVector<double>::fromStdVector(external_activations_timestamps);
+    for (const auto &kv : external_activations_logs) {
         QVector<double> data = QVector<double>::fromStdVector(kv.second);
-        ui->activationPlot->graph(kv.first + external_activations_logs.size())->setData(qExternalTimestamps, data);
+        ui->activationPlot->graph(kv.first + external_activations_logs.size())
+            ->setData(qExternalTimestamps, data);
     }
 
     ui->activationPlot->replot();
-
-
 }
 
 void MainWindow::initializeActivationsPlot() {
-
     // ensure selection of graphs and legend are synchronized
-    connect(ui->activationPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
-     // set some pens, brushes and backgrounds:
+    connect(ui->activationPlot, SIGNAL(selectionChangedByUser()), this,
+            SLOT(selectionChanged()));
+    // set some pens, brushes and backgrounds:
     ui->activationPlot->xAxis->setBasePen(QPen(Qt::white, 1));
     ui->activationPlot->yAxis->setBasePen(QPen(Qt::white, 1));
     ui->activationPlot->xAxis->setTickPen(QPen(Qt::white, 1));
@@ -277,10 +275,14 @@ void MainWindow::initializeActivationsPlot() {
     ui->activationPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
     ui->activationPlot->xAxis->setTickLabelColor(Qt::white);
     ui->activationPlot->yAxis->setTickLabelColor(Qt::white);
-    ui->activationPlot->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->activationPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->activationPlot->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-    ui->activationPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    ui->activationPlot->xAxis->grid()->setPen(
+        QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    ui->activationPlot->yAxis->grid()->setPen(
+        QPen(QColor(140, 140, 140), 1, Qt::DotLine));
+    ui->activationPlot->xAxis->grid()->setSubGridPen(
+        QPen(QColor(80, 80, 80), 1, Qt::DotLine));
+    ui->activationPlot->yAxis->grid()->setSubGridPen(
+        QPen(QColor(80, 80, 80), 1, Qt::DotLine));
     ui->activationPlot->xAxis->grid()->setSubGridVisible(true);
     ui->activationPlot->yAxis->grid()->setSubGridVisible(true);
     ui->activationPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
@@ -307,20 +309,17 @@ void MainWindow::initializeActivationsPlot() {
     ui->activationPlot->xAxis->setRange(0, 100);
     ui->activationPlot->yAxis->setRange(-0.2, 1);
 
-    ui->activationPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
-                                      QCP::iSelectLegend | QCP::iSelectPlottables);
-
+    ui->activationPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
+                                        QCP::iSelectAxes | QCP::iSelectLegend |
+                                        QCP::iSelectPlottables);
 
     ui->activationPlot->replot();
-
-
 }
 
 void MainWindow::prepareActivationsPlot() {
-
     // create one graph per unit
     ui->activationPlot->clearGraphs();
-    for(size_t i=0;i<memory->units_names().size();i++) {
+    for (size_t i = 0; i < memory->units_names().size(); i++) {
         auto graph = ui->activationPlot->addGraph();
         graph->setName(QString::fromStdString(memory->units_names()[i]));
 
@@ -328,74 +327,82 @@ void MainWindow::prepareActivationsPlot() {
         graphPen.setColor(PALETTE[i % PALETTE.size()]);
         graphPen.setWidthF(3);
         graph->setPen(graphPen);
-
     }
 
     // create graphs for external activations
-    for(size_t i=0;i<memory->units_names().size();i++) {
+    for (size_t i = 0; i < memory->units_names().size(); i++) {
         auto graph = ui->activationPlot->addGraph();
-        graph->setName(QString::fromStdString(memory->units_names()[i]) + " (ext.)");
+        graph->setName(QString::fromStdString(memory->units_names()[i]) +
+                       " (ext.)");
 
         graph->setBrush(QColor(200, 200, 200, 20));
         QPen graphPen;
         graphPen.setColor(PALETTE[i % PALETTE.size()]);
-        graphPen.setWidthF(3);
+        graphPen.setWidthF(1);
+        graphPen.setStyle(Qt::DashLine);
         graph->setPen(graphPen);
         graph->setChannelFillGraph(ui->activationPlot->graph(i));
 
         // initially hidden!
         graph->setVisible(false);
-        ui->activationPlot->legend->itemWithPlottable(graph)->setTextColor(QColor(100,100,100));
+        ui->activationPlot->legend->itemWithPlottable(graph)
+            ->setTextColor(QColor(100, 100, 100));
     }
 
-
-    ui->activationPlot->xAxis->setRange(0, duration_cast<milliseconds>(expe.duration).count());
-    ui->activationPlot->yAxis->setRange(memory->get_parameter("Amin"), memory->get_parameter("Amax"));
+    ui->activationPlot->xAxis->setRange(
+        0, duration_cast<milliseconds>(expe.duration).count());
+    ui->activationPlot->yAxis->setRange(memory->get_parameter("Amin"),
+                                        memory->get_parameter("Amax"));
 
     ui->activationPlot->legend->setVisible(true);
     QFont legendFont = font();
     legendFont.setPointSize(10);
     ui->activationPlot->legend->setFont(legendFont);
     ui->activationPlot->legend->setSelectedFont(legendFont);
-    ui->activationPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+    ui->activationPlot->legend->setSelectableParts(
+        QCPLegend::spItems);  // legend box shall not be selectable, only legend
+                              // items
 
-    connect(ui->activationPlot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)), this, SLOT(activationsLegendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
+    connect(ui->activationPlot,
+            SIGNAL(legendDoubleClick(QCPLegend *, QCPAbstractLegendItem *,
+                                     QMouseEvent *)),
+            this, SLOT(activationsLegendDoubleClick(QCPLegend *,
+                                                    QCPAbstractLegendItem *)));
 
     ui->activationPlot->replot();
-
-
 }
 
-void MainWindow::activationsLegendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item)
-{
-  // Rename a graph by double clicking on its legend item
-  Q_UNUSED(legend)
-  if (item) // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
-  {
-    QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem*>(item);
-
-    for (int i=0; i<ui->activationPlot->graphCount(); ++i)
+void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
+                                              QCPAbstractLegendItem *item) {
+    // Rename a graph by double clicking on its legend item
+    Q_UNUSED(legend)
+    if (item)  // only react if item was clicked (user could have clicked on
+               // border padding of legend where there is no item, then item is
+               // 0)
     {
-      QCPGraph *graph = ui->activationPlot->graph(i);
-      if (plItem == ui->activationPlot->legend->itemWithPlottable(graph)) {
-          if(graph->visible()) {
-              plItem->setTextColor(QColor(100,100,100));
-              graph->setVisible(false);
-          }
-          else {
-              plItem->setTextColor(QColor(0,0,0));
-              graph->setVisible(true);
-          }
+        QCPPlottableLegendItem *plItem =
+            qobject_cast<QCPPlottableLegendItem *>(item);
 
-          ui->activationPlot->replot();
-          return;
-      }
+        for (int i = 0; i < ui->activationPlot->graphCount(); ++i) {
+            QCPGraph *graph = ui->activationPlot->graph(i);
+            if (plItem ==
+                ui->activationPlot->legend->itemWithPlottable(graph)) {
+                if (graph->visible()) {
+                    plItem->setTextColor(QColor(100, 100, 100));
+                    graph->setVisible(false);
+                } else {
+                    plItem->setTextColor(QColor(0, 0, 0));
+                    graph->setVisible(true);
+                }
+
+                ui->activationPlot->replot();
+                return;
+            }
+        }
     }
-  }
 }
 
-void MainWindow::setCurrentFile(const QString &fileName)
-{
+void MainWindow::setCurrentFile(const QString &fileName) {
     curFile = fileName;
     QFileInfo f(curFile);
     setWindowTitle("Associative Memory Explorer - " + f.fileName() + "[*]");
@@ -404,20 +411,17 @@ void MainWindow::setCurrentFile(const QString &fileName)
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
     files.prepend(fileName);
-    while (files.size() > MaxRecentFiles)
-        files.removeLast();
+    while (files.size() > MaxRecentFiles) files.removeLast();
 
     settings.setValue("recentFileList", files);
 
     foreach (QWidget *widget, QApplication::topLevelWidgets()) {
         MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
-        if (mainWin)
-            mainWin->updateRecentFileActions();
+        if (mainWin) mainWin->updateRecentFileActions();
     }
 }
 
-void MainWindow::updateRecentFileActions()
-{
+void MainWindow::updateRecentFileActions() {
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
 
@@ -433,57 +437,60 @@ void MainWindow::updateRecentFileActions()
         recentFileActs[j]->setVisible(false);
 }
 
-QString MainWindow::strippedName(const QString &fullFileName)
-{
+QString MainWindow::strippedName(const QString &fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
-void MainWindow::on_runButton_clicked()
-{
+void MainWindow::on_runButton_clicked() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
 
-   QApplication::setOverrideCursor(Qt::WaitCursor);
+    ui->runButton->setText("Running...");
+    ui->runButton->setToolTip("Experiment running...");
+    statusBar()->showMessage(
+        "Experiment running... - Total duration: " +
+        QString::number(duration_cast<milliseconds>(expe.duration).count()) +
+        "ms");
+    ui->runButton->setDisabled(true);
 
-   ui->runButton->setText("Running...");
-   ui->runButton->setToolTip("Experiment running...");
-   statusBar()->showMessage("Experiment running... - Total duration: " + QString::number(duration_cast<milliseconds>(expe.duration).count()) + "ms");
-   ui->runButton->setDisabled(true);
+    // reset logs
+    activations_logs.clear();
+    activations_timestamps.clear();
+    external_activations_logs.clear();
+    external_activations_timestamps.clear();
 
+    _last_activations_log = microseconds(0);
+    _last_external_activations_log = microseconds(0);
 
-   // reset logs
-   activations_logs.clear();
-   activations_timestamps.clear();
-   external_activations_logs.clear();
-   external_activations_timestamps.clear();
+    memory->reset();
 
-   _last_activations_log = microseconds(0);
-   _last_external_activations_log = microseconds(0);
-
-   memory->reset();
-
-   memory->start();
+    memory->start();
 
     int last_activation = 0;
     auto start = high_resolution_clock::now();
 
-    for (const auto& kv : expe.activations) {
+    for (const auto &kv : expe.activations) {
         this_thread::sleep_for(milliseconds(kv.first - last_activation));
 
-        for (auto& activation : kv.second) {
-            cerr << " - Activating " << activation.first << " for " << activation.second.count() << "ms" << endl;
+        for (auto &activation : kv.second) {
+            cerr << " - Activating " << activation.first << " for "
+                 << activation.second.count() << "ms" << endl;
             memory->activate_unit(activation.first, 1.0, activation.second);
         }
 
         last_activation = kv.first;
     }
 
-    auto remaining_time = expe.duration - (high_resolution_clock::now() - start);
+    auto remaining_time =
+        expe.duration - (high_resolution_clock::now() - start);
     this_thread::sleep_for(remaining_time);
 
     memory->stop();
-    cerr << endl << "EXPERIMENT COMPLETED. Total duration: " << duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - start).count() << "ms" << endl;
+    cerr << endl
+         << "EXPERIMENT COMPLETED. Total duration: "
+         << duration_cast<std::chrono::milliseconds>(
+                high_resolution_clock::now() - start).count() << "ms" << endl;
 
-
-    statusBar()->showMessage("Experiment completed!",2000);
+    statusBar()->showMessage("Experiment completed!", 2000);
 
     updateActivationsPlot();
     updateWeightsPlot();
@@ -493,42 +500,34 @@ void MainWindow::on_runButton_clicked()
 
     ui->runButton->setDisabled(false);
 
-
     QApplication::restoreOverrideCursor();
-
-
 }
 
-void MainWindow::on_actionOpen_triggered()
-{
-    auto conf = QFileDialog::getOpenFileName(this,
-        tr("Open experiment"), "", tr("Experiment Files (*.md *.csv *.txt)"));
+void MainWindow::on_actionOpen_triggered() {
+    auto conf =
+        QFileDialog::getOpenFileName(this, tr("Open experiment"), "",
+                                     tr("Experiment Files (*.md *.csv *.txt)"));
 
     loadExperiment(conf);
 }
 
-void MainWindow::openRecentFile()
-{
+void MainWindow::openRecentFile() {
     QAction *action = qobject_cast<QAction *>(sender());
-    if (action)
-        loadExperiment(action->data().toString());
+    if (action) loadExperiment(action->data().toString());
 }
 
-void MainWindow::loadExperiment(const QString& filename) {
-
+void MainWindow::loadExperiment(const QString &filename) {
     ifstream experiment(filename.toStdString());
 
-
     string str((istreambuf_iterator<char>(experiment)),
-                istreambuf_iterator<char>());
+               istreambuf_iterator<char>());
 
     string::const_iterator iter = str.begin();
     string::const_iterator end = str.end();
 
     experiment_grammar<string::const_iterator> experiment_parser;
 
-    bool r = qi::phrase_parse(iter, end, experiment_parser,ascii::space);
-
+    bool r = qi::phrase_parse(iter, end, experiment_parser, ascii::space);
 
     if (r && iter == str.end()) {
         experiment_parser.expe.summary();
@@ -536,75 +535,56 @@ void MainWindow::loadExperiment(const QString& filename) {
         ui->experiment_editor->setPlainText(QString::fromStdString(str));
         setWindowModified(false);
     } else {
-        QMessageBox::critical(this,
-                              "Invalid experiment file",
+        QMessageBox::critical(this, "Invalid experiment file",
                               QString("Parsing of ") + filename + " failed!");
     }
 
     setupExperiment(experiment_parser.expe);
-
 }
-void MainWindow::setupExperiment(const Experiment& _expe) {
-
+void MainWindow::setupExperiment(const Experiment &_expe) {
     expe = _expe;
 
-    auto activations_logging = std::bind(logging,
-                                         ref(activations_logs),
-                                         ref(activations_timestamps),
-                                         ref(_last_activations_log),
-                                        std::placeholders::_1, std::placeholders::_2);
+    auto activations_logging =
+        std::bind(logging, ref(activations_logs), ref(activations_timestamps),
+                  ref(_last_activations_log), std::placeholders::_1,
+                  std::placeholders::_2);
 
-    auto external_activations_logging = std::bind(logging,
-                                                  ref(external_activations_logs),
-                                                  ref(external_activations_timestamps),
-                                                  ref(_last_external_activations_log),
-                                                  std::placeholders::_1, std::placeholders::_2);
+    auto external_activations_logging =
+        std::bind(logging, ref(external_activations_logs),
+                  ref(external_activations_timestamps),
+                  ref(_last_external_activations_log), std::placeholders::_1,
+                  std::placeholders::_2);
 
-    memory = make_unique<MemoryNetwork>(expe.units.size(),
-                                        activations_logging,
+    memory = make_unique<MemoryNetwork>(expe.units.size(), activations_logging,
                                         external_activations_logging);
 
     memory->units_names(expe.units);
 
-    set_param("Dg")
-    set_ui_param(Dg)
-    set_param("Lg")
-    set_ui_param(Lg)
-    set_param("Eg")
-    set_ui_param(Eg)
-    set_param("Ig")
-    set_ui_param(Ig)
-    set_param("Amax")
-    set_ui_param(Amax)
-    set_param("Amin")
-    set_ui_param(Amin)
-    set_param("Arest")
-    set_ui_param(Arest)
-    set_param("Winit")
+    set_param("Dg") set_ui_param(Dg) set_param("Lg") set_ui_param(Lg)
+        set_param("Eg") set_ui_param(Eg) set_param("Ig") set_ui_param(Ig)
+            set_param("Amax") set_ui_param(Amax) set_param("Amin")
+                set_ui_param(Amin) set_param("Arest") set_ui_param(Arest)
+                    set_param("Winit")
 
-    if (expe.parameters.count("MaxFreq")) {
+                        if (expe.parameters.count("MaxFreq")) {
         memory->max_frequency(expe.parameters.at("MaxFreq"));
         ui->MaxFreq_spinBox->setValue(expe.parameters.at("MaxFreq"));
     }
 
-
-
     prepareActivationsPlot();
     prepareWeightsPlot();
 
-   ui->runButton->setToolTip("Start the experiment");
-   ui->runButton->setDisabled(false);
-
+    ui->runButton->setToolTip("Start the experiment");
+    ui->runButton->setDisabled(false);
 }
 
-void MainWindow::saveFile(const QString &fileName)
-{
+void MainWindow::saveFile(const QString &fileName) {
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, tr("Saving experiment"),
                              tr("Cannot write file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString()));
+                                 .arg(fileName)
+                                 .arg(file.errorString()));
         return;
     }
 
@@ -618,135 +598,121 @@ void MainWindow::saveFile(const QString &fileName)
     setWindowModified(false);
 }
 
-void MainWindow::selectionChanged()
-{
-    // synchronize selection of graphs with selection of corresponding legend items:
-    for (int i=0; i<ui->activationPlot->graphCount(); ++i)
-    {
-      QCPGraph *graph = ui->activationPlot->graph(i);
-      QCPPlottableLegendItem *item = ui->activationPlot->legend->itemWithPlottable(graph);
-      if (item->selected() || graph->selected())
-      {
-        item->setSelected(true);
-        graph->setSelected(true);
-      }
+void MainWindow::selectionChanged() {
+    // synchronize selection of graphs with selection of corresponding legend
+    // items:
+    for (int i = 0; i < ui->activationPlot->graphCount(); ++i) {
+        QCPGraph *graph = ui->activationPlot->graph(i);
+        QCPPlottableLegendItem *item =
+            ui->activationPlot->legend->itemWithPlottable(graph);
+        if (item->selected() || graph->selected()) {
+            item->setSelected(true);
+            graph->setSelected(true);
+        }
     }
 }
 
-void MainWindow::update_expe_description_parameter(const QString& name, double value)
-{
+void MainWindow::update_expe_description_parameter(const QString &name,
+                                                   double value) {
+    auto expe_desc = ui->experiment_editor->toPlainText();
+    auto init_text = expe_desc;
+    expe_desc.replace(QRegExp(name + ": [0-9\\.\\-]*"),
+                      name + ": " + QString::number(value));
 
-     auto expe_desc = ui->experiment_editor->toPlainText();
-     auto init_text = expe_desc;
-     expe_desc.replace(QRegExp(name + ": [0-9\\.\\-]*"), name + ": " + QString::number(value));
-
-     if (init_text != expe_desc) {
+    if (init_text != expe_desc) {
         ui->experiment_editor->setPlainText(expe_desc);
         setWindowModified(true);
-     }
-
-
+    }
 }
 
-void MainWindow::on_Dg_slider_sliderMoved(int position)
-{
+void MainWindow::on_Dg_slider_sliderMoved(int position) {
     auto Dg = position * 1. / 100;
     set_ui_param(Dg)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Dg", Dg);
     }
 
     update_expe_description_parameter("Dg", Dg);
 }
 
+void MainWindow::on_Lg_slider_sliderMoved(int position) {
+    auto Lg = position * 1. / 100;
+    set_ui_param(Lg)
 
-void MainWindow::on_Lg_slider_sliderMoved(int position)
-{
-     auto Lg = position * 1. / 100;
-     set_ui_param(Lg)
-
-     if(memory) {
+        if (memory) {
         memory->set_parameter("Lg", Lg);
     }
 
     update_expe_description_parameter("Lg", Lg);
-
 }
 
-void MainWindow::on_Eg_slider_sliderMoved(int position)
-{
+void MainWindow::on_Eg_slider_sliderMoved(int position) {
     auto Eg = position * 1. / 100;
     set_ui_param(Eg)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Eg", Eg);
     }
 
     update_expe_description_parameter("Eg", Eg);
 }
 
-void MainWindow::on_Ig_slider_sliderMoved(int position)
-{
+void MainWindow::on_Ig_slider_sliderMoved(int position) {
     auto Ig = position * 1. / 100;
     set_ui_param(Ig)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Ig", Ig);
     }
 
     update_expe_description_parameter("Ig", Ig);
 }
 
-void MainWindow::on_Amax_slider_sliderMoved(int position)
-{
+void MainWindow::on_Amax_slider_sliderMoved(int position) {
     auto Amax = position * 1. / 100;
     set_ui_param(Amax)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Amax", Amax);
     }
 
     update_expe_description_parameter("Amax", Amax);
 }
 
-void MainWindow::on_Amin_slider_sliderMoved(int position)
-{
+void MainWindow::on_Amin_slider_sliderMoved(int position) {
     auto Amin = position * 1. / 100;
     set_ui_param(Amin)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Amin", Amin);
     }
 
     update_expe_description_parameter("Amin", Amin);
 }
 
-void MainWindow::on_Arest_slider_sliderMoved(int position)
-{
+void MainWindow::on_Arest_slider_sliderMoved(int position) {
     auto Arest = position * 1. / 100;
     set_ui_param(Arest)
 
-    if(memory) {
+        if (memory) {
         memory->set_parameter("Arest", Arest);
     }
 
     update_expe_description_parameter("Arest", Arest);
 }
 
-void MainWindow::on_MaxFreq_spinBox_valueChanged()
-{
+void MainWindow::on_MaxFreq_spinBox_valueChanged() {
     auto MaxFreq = ui->MaxFreq_spinBox->value();
 
-    if(memory) {
-       memory->max_frequency(MaxFreq);
+    if (memory) {
+        memory->max_frequency(MaxFreq);
     }
 
     update_expe_description_parameter("MaxFreq", MaxFreq);
 }
 
-void MainWindow::on_experiment_editor_textChanged()
-{
+void MainWindow::on_experiment_editor_textChanged() {
     setWindowModified(true);
 
     auto description = ui->experiment_editor->toPlainText().toStdString();
@@ -756,69 +722,56 @@ void MainWindow::on_experiment_editor_textChanged()
 
     experiment_grammar<string::const_iterator> experiment_parser;
 
-    bool r = qi::phrase_parse(iter, end, experiment_parser,ascii::space);
-
+    bool r = qi::phrase_parse(iter, end, experiment_parser, ascii::space);
 
     if (r && iter == description.end()) {
         ui->experiment_parsing_status->setText("ok");
         setupExperiment(experiment_parser.expe);
     } else {
-        ui->experiment_parsing_status->setText("invalid experiment description");
+        ui->experiment_parsing_status->setText(
+            "invalid experiment description");
     }
-
-
 }
 
-
-void MainWindow::on_actionSave_triggered()
-{
+void MainWindow::on_actionSave_triggered() {
     if (curFile.isEmpty())
         on_action_Save_as_triggered();
     else
         saveFile(curFile);
-
 }
 
-void MainWindow::on_action_Save_as_triggered()
-{
-     QString fileName = QFileDialog::getSaveFileName(this,
-                                            tr("Save experiment"), "",
-                                            tr("Experiment Files (*.md *.txt)"));
-    if (fileName.isEmpty())
-        return;
+void MainWindow::on_action_Save_as_triggered() {
+    QString fileName = QFileDialog::getSaveFileName(
+        this, tr("Save experiment"), "", tr("Experiment Files (*.md *.txt)"));
+    if (fileName.isEmpty()) return;
 
     saveFile(fileName);
-
 }
 
-void MainWindow::on_actionQuit_triggered()
-{
-    QApplication::closeAllWindows();
-}
+void MainWindow::on_actionQuit_triggered() { QApplication::closeAllWindows(); }
 
-void MainWindow::on_export_activation_plot_clicked()
-{
-     QString fileName = QFileDialog::getSaveFileName(this,
-                                            tr("Export activations plot to PDF"), "",
-                                            tr("PDF Document (*.pdf)"));
-    if (fileName.isEmpty())
-        return;
+void MainWindow::on_export_activation_plot_clicked() {
+    QString fileName =
+        QFileDialog::getSaveFileName(this, tr("Export activations plot to PDF"),
+                                     "", tr("PDF Document (*.pdf)"));
+    if (fileName.isEmpty()) return;
 
-    ui->activationPlot->savePdf(fileName, true, 0,0,"Associative Memory Explorer", "Activations plot for experiment <" + QString::fromStdString(expe.name) + ">");
+    ui->activationPlot->savePdf(fileName, true, 0, 0,
+                                "Associative Memory Explorer",
+                                "Activations plot for experiment <" +
+                                    QString::fromStdString(expe.name) + ">");
     QFileInfo f(fileName);
     statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
 }
 
-void MainWindow::on_export_weights_plot_clicked()
-{
-      QString fileName = QFileDialog::getSaveFileName(this,
-                                            tr("Export weights plot to PDF"), "",
-                                            tr("PDF Document (*.pdf)"));
-    if (fileName.isEmpty())
-        return;
+void MainWindow::on_export_weights_plot_clicked() {
+    QString fileName = QFileDialog::getSaveFileName(
+        this, tr("Export weights plot to PDF"), "", tr("PDF Document (*.pdf)"));
+    if (fileName.isEmpty()) return;
 
-    ui->weightPlot->savePdf(fileName, true, 0,0,"Associative Memory Explorer", "Weights plot for experiment <" + QString::fromStdString(expe.name) + ">");
+    ui->weightPlot->savePdf(fileName, true, 0, 0, "Associative Memory Explorer",
+                            "Weights plot for experiment <" +
+                                QString::fromStdString(expe.name) + ">");
     QFileInfo f(fileName);
     statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
 }
-

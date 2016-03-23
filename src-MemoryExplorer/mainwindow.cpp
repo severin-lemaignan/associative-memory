@@ -655,3 +655,29 @@ void MainWindow::on_actionQuit_triggered()
 {
     QApplication::closeAllWindows();
 }
+
+void MainWindow::on_export_activation_plot_clicked()
+{
+     QString fileName = QFileDialog::getSaveFileName(this,
+                                            tr("Export activations plot to PDF"), "",
+                                            tr("PDF Document (*.pdf)"));
+    if (fileName.isEmpty())
+        return;
+
+    ui->activationPlot->savePdf(fileName, true, 0,0,"Associative Memory Explorer", "Activations plot for experiment <" + QString::fromStdString(expe.name) + ">");
+    QFileInfo f(fileName);
+    statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
+}
+
+void MainWindow::on_export_weights_plot_clicked()
+{
+      QString fileName = QFileDialog::getSaveFileName(this,
+                                            tr("Export weights plot to PDF"), "",
+                                            tr("PDF Document (*.pdf)"));
+    if (fileName.isEmpty())
+        return;
+
+    ui->weightPlot->savePdf(fileName, true, 0,0,"Associative Memory Explorer", "Weights plot for experiment <" + QString::fromStdString(expe.name) + ">");
+    QFileInfo f(fileName);
+    statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
+}

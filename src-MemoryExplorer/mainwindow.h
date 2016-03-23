@@ -50,6 +50,10 @@ private slots:
 
     void on_actionQuit_triggered();
 
+    void on_export_activation_plot_clicked();
+
+    void on_export_weights_plot_clicked();
+
 private:
 
     void initializeWeightsPlot();

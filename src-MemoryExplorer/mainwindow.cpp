@@ -446,6 +446,7 @@ void MainWindow::loadExperiment(const QString& filename) {
     if (r && iter == str.end()) {
         experiment_parser.expe.summary();
         setCurrentFile(filename);
+        ui->experiment_editor->setPlainText(QString::fromStdString(str));
     } else {
         QMessageBox::critical(this,
                               "Invalid experiment file",
@@ -573,5 +574,27 @@ void MainWindow::on_Arest_slider_sliderMoved(int position)
         memory->set_parameter("Arest", Arest);
         set_ui_param(Arest)
     }
+
+}
+
+void MainWindow::on_experiment_editor_textChanged()
+{
+    auto description = ui->experiment_editor->toPlainText().toStdString();
+
+    string::const_iterator iter = description.begin();
+    string::const_iterator end = description.end();
+
+    experiment_grammar<string::const_iterator> experiment_parser;
+
+    bool r = qi::phrase_parse(iter, end, experiment_parser,ascii::space);
+
+
+    if (r && iter == description.end()) {
+        ui->experiment_parsing_status->setText("ok");
+        setupExperiment(experiment_parser.expe);
+    } else {
+        ui->experiment_parsing_status->setText("invalid experiment description");
+    }
+
 
 }

@@ -65,6 +65,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    ui->experiment_editor->document()->setDefaultFont(fixedFont);
+
+
+
     ///// RECENT FILES
     //////////////////////////////////////
     ui->menuFile->addSeparator();
@@ -87,6 +92,10 @@ MainWindow::MainWindow(QWidget *parent) :
     initializeWeightsPlot();
     initializeActivationsPlot();
     //////////////////////////////////////
+
+
+    // Read the template experiment and update accordingly the interface
+    on_experiment_editor_textChanged();
 }
 
 MainWindow::~MainWindow()

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>832</width>
-    <height>510</height>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,106 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
+      <property name="movable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="experiment_tab">
+       <attribute name="title">
+        <string>Experiment description</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QPlainTextEdit" name="experiment_editor">
+            <property name="plainText">
+             <string>Experiment Name
+===============
+
+[Description of the experiment]
+
+Network Parameters
+------------------
+
+- Dg: 0.6       (activation decay per ms)
+- Lg: 0.1       (learning rate per ms)
+- Eg: 0.6       (external influence)
+- Ig: 0.1       (internal influence)
+- Amax: 1.0     (maximum activation)
+- Amin: -0.2    (minimum activation)
+- Arest: -0.1   (rest activation)
+- Winit: 0.0    (initial weights)
+- MaxFreq: 10000    (maximum network update frequency -- 0 means no limit)
+
+
+Units
+-----
+
+- unit0
+- unit1
+- unit2
+- unit3
+
+Activations
+-----------
+
+- unit0:
+    - [0,120]
+    - [500,550]
+
+- unit1:
+    - [20,100]
+
+- unit2:
+    - [120, 300]
+    - [450,525]
+
+- unit3:
+   - [0,300]
+   - [450,550]
+
+Plots
+-----
+
+- unit0:
+    - [0,600]
+- unit3:
+    - [0,600]
+
+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="experiment_parsing_status">
+              <property name="text">
+               <string>Valid</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="activations_tab">
        <attribute name="title">
         <string>Activations</string>
@@ -58,7 +156,9 @@
                <string notr="true">Export to PDF</string>
               </property>
               <property name="icon">
-               <iconset theme="document-export"/>
+               <iconset theme="document-export">
+                <normaloff/>
+               </iconset>
               </property>
               <property name="toolButtonStyle">
                <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -102,48 +202,12 @@
                <string>Export to PDF</string>
               </property>
               <property name="icon">
-               <iconset theme="document-export"/>
+               <iconset theme="document-export">
+                <normaloff/>
+               </iconset>
               </property>
               <property name="toolButtonStyle">
                <enum>Qt::ToolButtonTextBesideIcon</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="experiment_tab">
-       <attribute name="title">
-        <string>Experiment description</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QPlainTextEdit" name="experiment_editor"/>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QLabel" name="experiment_parsing_status">
-              <property name="text">
-               <string>Valid</string>
               </property>
              </widget>
             </item>
@@ -373,7 +437,9 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open"/>
+    <iconset theme="document-open">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>&amp;Open experiment...</string>
@@ -384,7 +450,9 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save"/>
+    <iconset theme="document-save">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>&amp;Save experiment</string>
@@ -395,7 +463,9 @@
   </action>
   <action name="action_Save_as">
    <property name="icon">
-    <iconset theme="document-save-as"/>
+    <iconset theme="document-save-as">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Save experiment &amp;as...</string>
@@ -406,7 +476,9 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="exit"/>
+    <iconset theme="exit">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -425,6 +497,21 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>Eg_slider</tabstop>
+  <tabstop>Ig_slider</tabstop>
+  <tabstop>Dg_slider</tabstop>
+  <tabstop>Lg_slider</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>Amin_slider</tabstop>
+  <tabstop>Arest_slider</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>runButton</tabstop>
+  <tabstop>export_weights_plot</tabstop>
+  <tabstop>export_activation_plot</tabstop>
+  <tabstop>Amax_slider</tabstop>
+  <tabstop>experiment_editor</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

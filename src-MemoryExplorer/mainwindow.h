@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow {
 
     void on_export_weights_plot_clicked();
 
-    void on_MaxFreq_spinBox_valueChanged();
+    void on_MaxFreq_spinBox_valueChanged(int value);
 
     void activationsLegendDoubleClick(QCPLegend *legend,
                                       QCPAbstractLegendItem *item);

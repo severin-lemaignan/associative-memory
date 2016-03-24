@@ -298,6 +298,12 @@ void MainWindow::initializeActivationsPlot() {
     ui->activationPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
                                         QCP::iSelectLegend | QCP::iSelectPlottables);
 
+    connect(ui->activationPlot,
+            SIGNAL(legendDoubleClick(QCPLegend *, QCPAbstractLegendItem *,
+                                     QMouseEvent *)),
+            this, SLOT(activationsLegendDoubleClick(QCPLegend *,
+                                                    QCPAbstractLegendItem *)));
+
     ui->activationPlot->replot();
 }
 
@@ -355,12 +361,6 @@ void MainWindow::prepareActivationsPlot() {
     ui->activationPlot->legend->setSelectableParts(
         QCPLegend::spItems);  // legend box shall not be selectable, only legend
                               // items
-
-    connect(ui->activationPlot,
-            SIGNAL(legendDoubleClick(QCPLegend *, QCPAbstractLegendItem *,
-                                     QMouseEvent *)),
-            this, SLOT(activationsLegendDoubleClick(QCPLegend *,
-                                                    QCPAbstractLegendItem *)));
 
     ui->activationPlot->replot();
 }
@@ -750,8 +750,7 @@ void MainWindow::on_Arest_slider_sliderMoved(int position) {
     update_expe_description_parameter("Arest", Arest);
 }
 
-void MainWindow::on_MaxFreq_spinBox_valueChanged() {
-    auto MaxFreq = ui->MaxFreq_spinBox->value();
+void MainWindow::on_MaxFreq_spinBox_valueChanged(int MaxFreq) {
 
     if (memory) {
         memory->max_frequency(MaxFreq);

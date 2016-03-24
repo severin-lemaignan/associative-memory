@@ -386,25 +386,13 @@ void MainWindow::updateActivationsPlot() {
     ui->activationPlot->replot();
 }
 
-
-/** Hide/show a graph by double clicking on the legend
- */
-void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
-                                              QCPAbstractLegendItem *item) {
-
-    Q_UNUSED(legend)
-    if (item)  // only react if item was clicked (user could have clicked on
-               // border padding of legend where there is no item, then item is
-               // 0)
-    {
-        QCPPlottableLegendItem *plItem =
-            qobject_cast<QCPPlottableLegendItem *>(item);
-
+void MainWindow::toggleGraph(QCPPlottableLegendItem* plItem, bool only_hide, bool only_show)
+{
         for (int i = 0; i < ui->activationPlot->graphCount(); ++i) {
             QCPGraph *graph = ui->activationPlot->graph(i);
             if (plItem ==
                 ui->activationPlot->legend->itemWithPlottable(graph)) {
-                if (graph->visible()) {
+                if (graph->visible() && !only_show) {
                     plItem->setTextColor(QColor(100, 100, 100));
                     graph->setVisible(false);
 
@@ -416,7 +404,7 @@ void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
                         ui->activationPlot->graph(ui->activationPlot->graphCount() / 2 + i)->setSelectedBrush(Qt::NoBrush);
                     }
 
-                } else {
+                } else if (!graph->visible() && !only_hide) {
                     plItem->setTextColor(QColor(0, 0, 0));
                     graph->setVisible(true);
 
@@ -433,10 +421,27 @@ void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
                 graph->setSelected(false); // does not seem to do anything... :(
 
 
-                ui->activationPlot->replot();
                 return;
             }
         }
+
+}
+
+/** Hide/show a graph by double clicking on the legend
+ */
+void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
+                                              QCPAbstractLegendItem *item) {
+
+    Q_UNUSED(legend)
+    if (item)  // only react if item was clicked (user could have clicked on
+               // border padding of legend where there is no item, then item is
+               // 0)
+    {
+        QCPPlottableLegendItem *plItem =
+            qobject_cast<QCPPlottableLegendItem *>(item);
+
+        toggleGraph(plItem);
+        ui->activationPlot->replot();
     }
 }
 
@@ -812,6 +817,25 @@ void MainWindow::on_export_activation_plot_clicked() {
     statusBar()->showMessage(tr("Plot exported to ") + f.fileName(), 2000);
 }
 
+void MainWindow::on_show_all_activations_plots_clicked()
+{
+        for (int i = 0; i < ui->activationPlot->graphCount(); ++i) {
+                QCPGraph *graph = ui->activationPlot->graph(i);
+                toggleGraph(ui->activationPlot->legend->itemWithPlottable(graph), false, true);
+        }
+        ui->activationPlot->replot();
+
+}
+void MainWindow::on_hide_all_activations_plots_clicked()
+{
+        for (int i = 0; i < ui->activationPlot->graphCount(); ++i) {
+                QCPGraph *graph = ui->activationPlot->graph(i);
+                toggleGraph(ui->activationPlot->legend->itemWithPlottable(graph), true, false);
+        }
+        ui->activationPlot->replot();
+
+}
+
 void MainWindow::on_export_weights_plot_clicked() {
     QString fileName = QFileDialog::getSaveFileName(
         this, tr("Export weights plot to PDF"), "", tr("PDF Document (*.pdf)"));
@@ -872,3 +896,4 @@ void SimpleMarkdownHighlighter::highlightBlock(const QString &text)
         }
     }
 }
+

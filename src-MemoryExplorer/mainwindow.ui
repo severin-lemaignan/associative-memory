@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>832</width>
-    <height>537</height>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -151,6 +151,32 @@ Plots
              </spacer>
             </item>
             <item>
+             <widget class="QToolButton" name="hide_all_activations_plots">
+              <property name="text">
+               <string>Hide all plots</string>
+              </property>
+              <property name="icon">
+               <iconset theme="dialog-no"/>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="show_all_activations_plots">
+              <property name="text">
+               <string>Show all plots</string>
+              </property>
+              <property name="icon">
+               <iconset theme="dialog-ok"/>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="export_activation_plot">
               <property name="text">
                <string notr="true">Export to PDF</string>
@@ -227,7 +253,7 @@ Plots
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

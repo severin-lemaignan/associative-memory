@@ -61,7 +61,11 @@ class MainWindow : public QMainWindow {
     void activationsLegendDoubleClick(QCPLegend *legend,
                                       QCPAbstractLegendItem *item);
 
-   private:
+    void on_show_all_activations_plots_clicked();
+
+    void on_hide_all_activations_plots_clicked();
+
+private:
     void initializeWeightsPlot();
     void initializeActivationsPlot();
 
@@ -75,6 +79,11 @@ class MainWindow : public QMainWindow {
 
     void updateActivationsPlot();
     void updateWeightsPlot();
+
+    /** Pass a legend item and toggle the visibility of the corresponding
+     * graph.
+     */
+    void toggleGraph(QCPPlottableLegendItem* item, bool only_hide = false, bool only_show = false);
 
     void loadExperiment(const QString &filename);
     void setupExperiment(const Experiment &expe);

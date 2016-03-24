@@ -144,7 +144,10 @@ void MemoryNetwork::max_frequency(double freq) {
         return;
     }
 
-    _min_period = microseconds(int(std::micro::den / freq));
+    if (freq == 0) 
+        _min_period = microseconds::zero();
+    else 
+        _min_period = microseconds(int(std::micro::den / freq));
 
     cerr << "Setting the internal minimal period to " << duration_cast<microseconds>(_min_period).count() << "us" << endl;
 }

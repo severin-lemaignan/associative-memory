@@ -515,30 +515,49 @@ void MainWindow::on_runButton_clicked() {
 
     memory->start();
 
-    int last_activation = 0;
-    auto start = high_resolution_clock::now();
+    if(memory->is_using_physical_time())
+    {
 
-    for (const auto &kv : expe.activations) {
-        this_thread::sleep_for(milliseconds(kv.first - last_activation));
+        int last_activation = 0;
+        auto start = high_resolution_clock::now();
 
-        for (auto &activation : kv.second) {
-            cerr << " - Activating " << activation.first << " for "
-                 << activation.second.count() << "ms" << endl;
-            memory->activate_unit(activation.first, 1.0, activation.second);
+        for (const auto &kv : expe.activations) {
+            this_thread::sleep_for(milliseconds(kv.first - last_activation));
+
+            for (auto &activation : kv.second) {
+                cerr << " - Activating " << activation.first << " for "
+                    << activation.second.count() << "ms" << endl;
+                memory->activate_unit(activation.first, 1.0, activation.second);
+            }
+
+            last_activation = kv.first;
+        }
+        auto remaining_time =
+            expe.duration - (high_resolution_clock::now() - start);
+        this_thread::sleep_for(remaining_time);
+    }
+    else
+    {
+        for (const auto &kv : expe.activations) {
+
+            while(memory->elapsed_time() < milliseconds(kv.first)) {
+                this_thread::sleep_for(microseconds(1));
+            }
+            for (auto &activation : kv.second) {
+                memory->activate_unit(activation.first, 1.0, activation.second);
+            }
         }
 
-        last_activation = kv.first;
+        while(memory->elapsed_time() < expe.duration) {
+            this_thread::sleep_for(milliseconds(1));
+        }
     }
-
-    auto remaining_time =
-        expe.duration - (high_resolution_clock::now() - start);
-    this_thread::sleep_for(remaining_time);
 
     memory->stop();
     cerr << endl
          << "EXPERIMENT COMPLETED. Total duration: "
          << duration_cast<std::chrono::milliseconds>(
-                high_resolution_clock::now() - start).count() << "ms" << endl;
+                memory->elapsed_time()).count() << "ms" << endl;
 
     statusBar()->showMessage("Experiment completed!", 2000);
 
@@ -608,6 +627,7 @@ void MainWindow::setupExperiment(const Experiment &_expe) {
     memory = make_unique<MemoryNetwork>(expe.units.size(), activations_logging,
                                         external_activations_logging);
 
+    memory->use_physical_time(!ui->simulated_time_checkbox->isChecked());
     memory->units_names(expe.units);
 
     set_param("Dg")
@@ -765,6 +785,15 @@ void MainWindow::on_MaxFreq_spinBox_valueChanged(int MaxFreq) {
     }
 
     update_expe_description_parameter("MaxFreq", MaxFreq);
+}
+
+void MainWindow::on_simulated_time_checkbox_toggled(bool checked)
+{
+    if(memory) {
+        memory->use_physical_time(!checked);
+    }
+
+    autoupdateActivationsPlot();
 }
 
 void MainWindow::on_experiment_editor_textChanged() {

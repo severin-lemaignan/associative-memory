@@ -67,6 +67,8 @@ class MainWindow : public QMainWindow {
 
     void autoupdateActivationsPlot();
 
+    void on_simulated_time_checkbox_toggled(bool checked);
+
 private:
     void initializeWeightsPlot();
     void initializeActivationsPlot();

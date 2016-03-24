@@ -465,6 +465,16 @@ Plots
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="simulated_time_checkbox">
+         <property name="text">
+          <string>simulated time</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -488,6 +498,9 @@ Plots
         <widget class="QCheckBox" name="autoupdate_checkbox">
          <property name="text">
           <string>auto-update</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

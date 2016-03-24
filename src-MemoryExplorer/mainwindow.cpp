@@ -233,6 +233,7 @@ void MainWindow::prepareWeightsPlot() {
                                            // -4..4 in both key (x) and value
                                            // (y) dimensions
 
+    colorMap->setDataRange(QCPRange(memory->Winit,2));
     ui->weightPlot->xAxis->setRange(-0.5, memory->units_names().size() - 0.5);
     ui->weightPlot->yAxis->setRange(-0.5, memory->units_names().size() - 0.5);
 
@@ -251,9 +252,6 @@ void MainWindow::updateWeightsPlot() {
             colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
         }
     }
-
-    colorMap->rescaleDataRange();
-
     ui->weightPlot->replot();
 }
 

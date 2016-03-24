@@ -263,7 +263,7 @@ Plots
        <item>
         <widget class="QLabel" name="Dg_label">
          <property name="text">
-          <string>Dg</string>
+          <string>Decay</string>
          </property>
         </widget>
        </item>
@@ -283,7 +283,7 @@ Plots
        <item>
         <widget class="QLabel" name="Lg_label">
          <property name="text">
-          <string>Lg</string>
+          <string>Learning</string>
          </property>
         </widget>
        </item>
@@ -300,7 +300,7 @@ Plots
        <item>
         <widget class="QLabel" name="Eg_label">
          <property name="text">
-          <string>Eg</string>
+          <string>Ext. influence</string>
          </property>
         </widget>
        </item>
@@ -317,7 +317,7 @@ Plots
        <item>
         <widget class="QLabel" name="Ig_label">
          <property name="text">
-          <string>Ig</string>
+          <string>Int. influence</string>
          </property>
         </widget>
        </item>
@@ -334,7 +334,7 @@ Plots
        <item>
         <widget class="QLabel" name="Amax_label">
          <property name="text">
-          <string>Amax</string>
+          <string>Act. max</string>
          </property>
         </widget>
        </item>
@@ -357,7 +357,7 @@ Plots
        <item>
         <widget class="QLabel" name="Amin_label">
          <property name="text">
-          <string>Amin</string>
+          <string>Act. min</string>
          </property>
         </widget>
        </item>
@@ -383,7 +383,7 @@ Plots
        <item>
         <widget class="QLabel" name="Arest_label">
          <property name="text">
-          <string>Arest</string>
+          <string>Act. rest</string>
          </property>
         </widget>
        </item>
@@ -395,6 +395,13 @@ Plots
          <property name="maximum">
           <number>200</number>
          </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -414,6 +421,20 @@ Plots
          </property>
          <property name="maximum">
           <number>300000</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="period_label">
+         <property name="text">
+          <string>dt:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>

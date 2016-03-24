@@ -18,9 +18,9 @@
     }
 #define S(x) #x
 #define SX(x) S(x)
-#define set_ui_param(PARAM)                                                  \
+#define set_ui_param(PARAM, NAME)                                                  \
     ui->PARAM##_label->setText(                                              \
-        SX(PARAM) ": " + QString::number(memory->get_parameter(SX(PARAM)))); \
+        NAME ": " + QString::number(memory->get_parameter(SX(PARAM)))); \
     ui->PARAM##_slider->setValue(memory->get_parameter(SX(PARAM)) * 100);
 
 using namespace std;
@@ -599,24 +599,25 @@ void MainWindow::setupExperiment(const Experiment &_expe) {
     memory->units_names(expe.units);
 
     set_param("Dg")
-    set_ui_param(Dg)
+    set_ui_param(Dg, "Decay")
     set_param("Lg")
-    set_ui_param(Lg)
+    set_ui_param(Lg, "Learning")
     set_param("Eg")
-    set_ui_param(Eg)
+    set_ui_param(Eg, "Ext. influence")
     set_param("Ig")
-    set_ui_param(Ig)
+    set_ui_param(Ig, "Int. influence")
     set_param("Amax")
-    set_ui_param(Amax)
+    set_ui_param(Amax, "Act. max")
     set_param("Amin")
-    set_ui_param(Amin)
+    set_ui_param(Amin, "Act. min")
     set_param("Arest")
-    set_ui_param(Arest)
+    set_ui_param(Arest, "Act. rest")
     set_param("Winit")
 
     if (expe.parameters.count("MaxFreq")) {
         memory->max_frequency(expe.parameters.at("MaxFreq"));
         ui->MaxFreq_spinBox->setValue(expe.parameters.at("MaxFreq"));
+        ui->period_label->setText("dt: " + QString::number(duration_cast<microseconds>(memory->internal_period()).count()) + "us");
     }
 
     prepareActivationsPlot();
@@ -675,7 +676,7 @@ void MainWindow::update_expe_description_parameter(const QString &name,
 
 void MainWindow::on_Dg_slider_sliderMoved(int position) {
     auto Dg = position * 1. / 100;
-    set_ui_param(Dg)
+    set_ui_param(Dg, "Decay")
 
         if (memory) {
         memory->set_parameter("Dg", Dg);
@@ -686,7 +687,7 @@ void MainWindow::on_Dg_slider_sliderMoved(int position) {
 
 void MainWindow::on_Lg_slider_sliderMoved(int position) {
     auto Lg = position * 1. / 100;
-    set_ui_param(Lg)
+    set_ui_param(Lg, "Learning")
 
         if (memory) {
         memory->set_parameter("Lg", Lg);
@@ -697,7 +698,7 @@ void MainWindow::on_Lg_slider_sliderMoved(int position) {
 
 void MainWindow::on_Eg_slider_sliderMoved(int position) {
     auto Eg = position * 1. / 100;
-    set_ui_param(Eg)
+    set_ui_param(Eg, "Ext. influence")
 
         if (memory) {
         memory->set_parameter("Eg", Eg);
@@ -708,7 +709,7 @@ void MainWindow::on_Eg_slider_sliderMoved(int position) {
 
 void MainWindow::on_Ig_slider_sliderMoved(int position) {
     auto Ig = position * 1. / 100;
-    set_ui_param(Ig)
+    set_ui_param(Ig, "Int. influence")
 
         if (memory) {
         memory->set_parameter("Ig", Ig);
@@ -719,7 +720,7 @@ void MainWindow::on_Ig_slider_sliderMoved(int position) {
 
 void MainWindow::on_Amax_slider_sliderMoved(int position) {
     auto Amax = position * 1. / 100;
-    set_ui_param(Amax)
+    set_ui_param(Amax, "Act. max")
 
         if (memory) {
         memory->set_parameter("Amax", Amax);
@@ -730,7 +731,7 @@ void MainWindow::on_Amax_slider_sliderMoved(int position) {
 
 void MainWindow::on_Amin_slider_sliderMoved(int position) {
     auto Amin = position * 1. / 100;
-    set_ui_param(Amin)
+    set_ui_param(Amin, "Act. min")
 
         if (memory) {
         memory->set_parameter("Amin", Amin);
@@ -741,7 +742,7 @@ void MainWindow::on_Amin_slider_sliderMoved(int position) {
 
 void MainWindow::on_Arest_slider_sliderMoved(int position) {
     auto Arest = position * 1. / 100;
-    set_ui_param(Arest)
+    set_ui_param(Arest, "Act. rest")
 
         if (memory) {
         memory->set_parameter("Arest", Arest);

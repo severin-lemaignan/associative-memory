@@ -152,6 +152,18 @@ void MemoryNetwork::max_frequency(double freq) {
     cerr << "Setting the internal minimal period to " << duration_cast<microseconds>(_min_period).count() << "us" << endl;
 }
 
+microseconds MemoryNetwork::elapsed_time() const
+{
+    if (!_is_running) return microseconds::zero();
+
+    if(_use_physical_time) {
+        return duration_cast<microseconds>(high_resolution_clock::now() - _start_time);
+    }
+    else {
+        return _elapsed_time;
+    }
+}
+
 double MemoryNetwork::get_parameter(const std::string& name) const {
 
     if(name == "Dg") {return Dg;}
@@ -184,7 +196,9 @@ void MemoryNetwork::run() {
 
 
     cerr << "Memory network thread started." << endl;
-    now = _start_time = _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+    _start_time = _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+
+    _elapsed_time = microseconds::zero();
 
     _is_running = true;
     while(_is_running) step();
@@ -200,24 +214,16 @@ void MemoryNetwork::step()
     if (_use_physical_time)
     {
         // Compute dt
-        now = high_resolution_clock::now();
+        auto now = high_resolution_clock::now();
         dt = duration_cast<microseconds>(now - _last_timestamp);
         _last_timestamp = now;
 
         if (   _min_period != microseconds::zero()
-            && dt < _min_period) {
+                && dt < _min_period) {
             this_thread::sleep_for(_min_period - dt);
         }
-    }
-    else
-    {
-        dt = _min_period;
-        now += dt;
-    }
 
-    // If needed, compute actual update frequency
-    if (_use_physical_time)
-    {
+        // If needed, compute actual update frequency
         _steps_since_last_frequency_update++;
         auto time_since_last_freq = now - _last_freq_computation;
         if(time_since_last_freq > milliseconds(200)) {
@@ -228,8 +234,13 @@ void MemoryNetwork::step()
             // print out the network activations + weights
             //printout();
         }
-    }
 
+    }
+    else
+    {
+        dt = _min_period;
+        _elapsed_time += dt;
+    }
 
     // Establish connections
     // *********************
@@ -277,12 +288,12 @@ void MemoryNetwork::step()
     }
 
     // if necessary, log the activations and external stimulations
+    auto elapsed_time_so_far = elapsed_time();
     if(_log_activation) {
-        _log_activation(duration_cast<microseconds>(now - _start_time),
-                        _activations);
+        _log_activation(elapsed_time_so_far, _activations);
     }
     if(_log_external_activation) {
-        _log_external_activation(duration_cast<microseconds>(now - _start_time),
+        _log_external_activation(elapsed_time_so_far,
                                  external_activations);
     }
 

@@ -65,6 +65,7 @@ public:
 
     void use_physical_time(bool use) {_use_physical_time = use;}
     bool is_using_physical_time() const {return _use_physical_time;}
+    std::chrono::microseconds elapsed_time() const;
 
     void set_parameter(const std::string& name, double value);
     double get_parameter(const std::string& name) const;
@@ -127,7 +128,9 @@ private:
     std::chrono::high_resolution_clock::time_point _start_time;
     std::chrono::high_resolution_clock::time_point _last_timestamp;
     std::chrono::high_resolution_clock::time_point _last_freq_computation;
-    std::chrono::high_resolution_clock::time_point now;
+
+    // only used when _use_physical_time = false
+    std::chrono::microseconds _elapsed_time;
 };
 
 

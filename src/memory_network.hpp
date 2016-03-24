@@ -63,6 +63,9 @@ public:
     void max_frequency(double freq);
     std::chrono::microseconds internal_period() const {return _min_period;}
 
+    void use_physical_time(bool use) {_use_physical_time = use;}
+    bool is_using_physical_time() const {return _use_physical_time;}
+
     void set_parameter(const std::string& name, double value);
     double get_parameter(const std::string& name) const;
 
@@ -116,6 +119,7 @@ private:
     void printout();
 
     std::chrono::microseconds _min_period = std::chrono::microseconds::zero();
+    bool _use_physical_time = true;
 
     int _frequency = 0;
     int _steps_since_last_frequency_update = 0;
@@ -123,6 +127,7 @@ private:
     std::chrono::high_resolution_clock::time_point _start_time;
     std::chrono::high_resolution_clock::time_point _last_timestamp;
     std::chrono::high_resolution_clock::time_point _last_freq_computation;
+    std::chrono::high_resolution_clock::time_point now;
 };
 
 

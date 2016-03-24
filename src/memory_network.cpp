@@ -137,6 +137,13 @@ void MemoryNetwork::set_parameter(const std::string& name, double value) {
 
 void MemoryNetwork::max_frequency(double freq) {
 
+    if (_is_running) throw runtime_error("Can not change the network parameters once the network is running.");
+
+    if ( freq == 0 && !_use_physical_time) {
+        cerr << "Can not set the frequency to infinite when not using physical time! Ignoring." << endl;
+        return;
+    }
+
     _min_period = microseconds(int(std::micro::den / freq));
 
     cerr << "Setting the internal minimal period to " << duration_cast<microseconds>(_min_period).count() << "us" << endl;
@@ -174,7 +181,8 @@ void MemoryNetwork::run() {
 
 
     cerr << "Memory network thread started." << endl;
-    _start_time = _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+    now = _start_time = _last_timestamp = _last_freq_computation = high_resolution_clock::now();
+
     _is_running = true;
     while(_is_running) step();
     cerr << "Memory network finished." << endl;
@@ -184,27 +192,39 @@ void MemoryNetwork::run() {
 void MemoryNetwork::step()
 {
 
-    // Compute dt
-    auto now = high_resolution_clock::now();
-    auto dt = now - _last_timestamp;
-    _last_timestamp = now;
+    microseconds dt;
 
-    if (   _min_period != microseconds::zero()
-        && dt < _min_period) {
-        this_thread::sleep_for(_min_period - dt);
+    if (_use_physical_time)
+    {
+        // Compute dt
+        now = high_resolution_clock::now();
+        dt = duration_cast<microseconds>(now - _last_timestamp);
+        _last_timestamp = now;
+
+        if (   _min_period != microseconds::zero()
+            && dt < _min_period) {
+            this_thread::sleep_for(_min_period - dt);
+        }
+    }
+    else
+    {
+        dt = _min_period;
+        now += dt;
     }
 
+    // If needed, compute actual update frequency
+    if (_use_physical_time)
+    {
+        _steps_since_last_frequency_update++;
+        auto time_since_last_freq = now - _last_freq_computation;
+        if(time_since_last_freq > milliseconds(200)) {
+            _frequency = _steps_since_last_frequency_update * std::micro::den * 1./duration_cast<microseconds>(time_since_last_freq).count();
+            _last_freq_computation = now;
+            _steps_since_last_frequency_update = 0;
 
-    // If needed, compute frequency + optional printout network values
-    _steps_since_last_frequency_update++;
-    auto time_since_last_freq = now - _last_freq_computation;
-    if(time_since_last_freq > milliseconds(200)) {
-        _frequency = _steps_since_last_frequency_update * std::micro::den * 1./duration_cast<microseconds>(time_since_last_freq).count();
-        _last_freq_computation = now;
-        _steps_since_last_frequency_update = 0;
-
-        // print out the network activations + weights
-        //printout();
+            // print out the network activations + weights
+            //printout();
+        }
     }
 
 

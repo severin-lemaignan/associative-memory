@@ -32,6 +32,8 @@ const vector<QColor> PALETTE = {QColor(242, 146, 70),  QColor(242, 214, 70),
                                 QColor(171, 37, 124),  QColor(204, 58, 26),
                                 QColor(191, 180, 163), QColor(80, 88, 89)};
 
+const QColor fillColor = QColor(200,200,200,20);
+
 const int HISTORY_SAMPLING_RATE = 500;  // Hz
 
 vector<double> activations_timestamps;
@@ -313,13 +315,17 @@ void MainWindow::initializeActivationsPlot() {
     ui->activationPlot->yAxis->setRange(-0.2, 1);
 
     ui->activationPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
-                                        QCP::iSelectAxes | QCP::iSelectLegend |
-                                        QCP::iSelectPlottables);
+                                        QCP::iSelectLegend | QCP::iSelectPlottables);
 
     ui->activationPlot->replot();
 }
 
 void MainWindow::prepareActivationsPlot() {
+
+    QPen graphSelectedPen;
+    graphSelectedPen.setColor(Qt::darkRed);
+    graphSelectedPen.setWidthF(3);
+
     // create one graph per unit
     ui->activationPlot->clearGraphs();
     for (size_t i = 0; i < memory->units_names().size(); i++) {
@@ -328,8 +334,9 @@ void MainWindow::prepareActivationsPlot() {
 
         QPen graphPen;
         graphPen.setColor(PALETTE[i % PALETTE.size()]);
-        graphPen.setWidthF(3);
+        graphPen.setWidthF(2);
         graph->setPen(graphPen);
+        graph->setSelectedPen(graphSelectedPen);
     }
 
     // create graphs for external activations
@@ -338,12 +345,14 @@ void MainWindow::prepareActivationsPlot() {
         graph->setName(QString::fromStdString(memory->units_names()[i]) +
                        " (ext.)");
 
-        graph->setBrush(QColor(200, 200, 200, 20));
+        graph->setBrush(fillColor);
+        graph->setSelectedBrush(fillColor);
         QPen graphPen;
         graphPen.setColor(PALETTE[i % PALETTE.size()]);
         graphPen.setWidthF(1);
         graphPen.setStyle(Qt::DashLine);
         graph->setPen(graphPen);
+        graph->setSelectedPen(graphSelectedPen);
         graph->setChannelFillGraph(ui->activationPlot->graph(i));
 
         // initially hidden!
@@ -375,9 +384,11 @@ void MainWindow::prepareActivationsPlot() {
     ui->activationPlot->replot();
 }
 
+/** Hide/show a graph by double clicking on the legend
+ */
 void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
                                               QCPAbstractLegendItem *item) {
-    // Rename a graph by double clicking on its legend item
+
     Q_UNUSED(legend)
     if (item)  // only react if item was clicked (user could have clicked on
                // border padding of legend where there is no item, then item is
@@ -393,10 +404,31 @@ void MainWindow::activationsLegendDoubleClick(QCPLegend *legend,
                 if (graph->visible()) {
                     plItem->setTextColor(QColor(100, 100, 100));
                     graph->setVisible(false);
+
+                    // if the graph is an activation graph, hide
+                    // the fill on the corresponding external activation
+                    if(i < ui->activationPlot->graphCount() / 2)
+                    {
+                        ui->activationPlot->graph(ui->activationPlot->graphCount() / 2 + i)->setBrush(Qt::NoBrush);
+                        ui->activationPlot->graph(ui->activationPlot->graphCount() / 2 + i)->setSelectedBrush(Qt::NoBrush);
+                    }
+
                 } else {
                     plItem->setTextColor(QColor(0, 0, 0));
                     graph->setVisible(true);
+
+                    // if the graph is an activation graph, show
+                    // the fill on the corresponding external activation
+                    if(i < ui->activationPlot->graphCount() / 2)
+                    {
+                        ui->activationPlot->graph(ui->activationPlot->graphCount() / 2 + i)->setBrush(fillColor);
+                        ui->activationPlot->graph(ui->activationPlot->graphCount() / 2 + i)->setSelectedBrush(fillColor);
+                    }
+
                 }
+                plItem->setSelected(false); // does not seem to do anything... :(
+                graph->setSelected(false); // does not seem to do anything... :(
+
 
                 ui->activationPlot->replot();
                 return;

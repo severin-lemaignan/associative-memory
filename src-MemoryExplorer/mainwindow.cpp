@@ -248,25 +248,6 @@ void MainWindow::updateWeightsPlot() {
     ui->weightPlot->replot();
 }
 
-void MainWindow::updateActivationsPlot() {
-    QVector<double> qTimestamps =
-        QVector<double>::fromStdVector(activations_timestamps);
-    for (const auto &kv : activations_logs) {
-        QVector<double> data = QVector<double>::fromStdVector(kv.second);
-        ui->activationPlot->graph(kv.first)->setData(qTimestamps, data);
-    }
-
-    QVector<double> qExternalTimestamps =
-        QVector<double>::fromStdVector(external_activations_timestamps);
-    for (const auto &kv : external_activations_logs) {
-        QVector<double> data = QVector<double>::fromStdVector(kv.second);
-        ui->activationPlot->graph(kv.first + external_activations_logs.size())
-            ->setData(qExternalTimestamps, data);
-    }
-
-    ui->activationPlot->replot();
-}
-
 void MainWindow::initializeActivationsPlot() {
     // ensure selection of graphs and legend are synchronized
     connect(ui->activationPlot, SIGNAL(selectionChangedByUser()), this,
@@ -383,6 +364,28 @@ void MainWindow::prepareActivationsPlot() {
 
     ui->activationPlot->replot();
 }
+
+void MainWindow::updateActivationsPlot() {
+
+    auto qTimestamps = QVector<double>::fromStdVector(activations_timestamps);
+
+    for (const auto &kv : activations_logs) {
+        auto data = QVector<double>::fromStdVector(kv.second);
+        ui->activationPlot->graph(kv.first)
+                          ->setData(qTimestamps, data);
+    }
+
+    auto qExternalTimestamps = QVector<double>::fromStdVector(external_activations_timestamps);
+
+    for (const auto &kv : external_activations_logs) {
+        auto data = QVector<double>::fromStdVector(kv.second);
+        ui->activationPlot->graph(kv.first + external_activations_logs.size())
+                          ->setData(qExternalTimestamps, data);
+    }
+
+    ui->activationPlot->replot();
+}
+
 
 /** Hide/show a graph by double clicking on the legend
  */
@@ -595,13 +598,23 @@ void MainWindow::setupExperiment(const Experiment &_expe) {
 
     memory->units_names(expe.units);
 
-    set_param("Dg") set_ui_param(Dg) set_param("Lg") set_ui_param(Lg)
-        set_param("Eg") set_ui_param(Eg) set_param("Ig") set_ui_param(Ig)
-            set_param("Amax") set_ui_param(Amax) set_param("Amin")
-                set_ui_param(Amin) set_param("Arest") set_ui_param(Arest)
-                    set_param("Winit")
+    set_param("Dg")
+    set_ui_param(Dg)
+    set_param("Lg")
+    set_ui_param(Lg)
+    set_param("Eg")
+    set_ui_param(Eg)
+    set_param("Ig")
+    set_ui_param(Ig)
+    set_param("Amax")
+    set_ui_param(Amax)
+    set_param("Amin")
+    set_ui_param(Amin)
+    set_param("Arest")
+    set_ui_param(Arest)
+    set_param("Winit")
 
-                        if (expe.parameters.count("MaxFreq")) {
+    if (expe.parameters.count("MaxFreq")) {
         memory->max_frequency(expe.parameters.at("MaxFreq"));
         ui->MaxFreq_spinBox->setValue(expe.parameters.at("MaxFreq"));
     }

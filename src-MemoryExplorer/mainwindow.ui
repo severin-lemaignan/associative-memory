@@ -156,7 +156,9 @@ Plots
                <string>Hide all plots</string>
               </property>
               <property name="icon">
-               <iconset theme="dialog-no"/>
+               <iconset theme="dialog-no">
+                <normaloff/>
+               </iconset>
               </property>
               <property name="toolButtonStyle">
                <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -169,7 +171,9 @@ Plots
                <string>Show all plots</string>
               </property>
               <property name="icon">
-               <iconset theme="dialog-ok"/>
+               <iconset theme="dialog-ok">
+                <normaloff/>
+               </iconset>
               </property>
               <property name="toolButtonStyle">
                <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -253,7 +257,7 @@ Plots
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>26</height>
+     <height>16</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -448,6 +452,9 @@ Plots
          <property name="maximum">
           <number>300000</number>
          </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
         </widget>
        </item>
        <item>
@@ -473,7 +480,14 @@ Plots
           <string>You must first load an experiment</string>
          </property>
          <property name="text">
-          <string>Update</string>
+          <string>Run!</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="autoupdate_checkbox">
+         <property name="text">
+          <string>auto-update</string>
          </property>
         </widget>
        </item>

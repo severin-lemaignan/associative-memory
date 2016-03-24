@@ -73,6 +73,15 @@ MainWindow::MainWindow(QWidget *parent)
     // enable syntax highlighting
     highlighter = make_unique<SimpleMarkdownHighlighter>(ui->experiment_editor->document());
 
+    connect(ui->Dg_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Lg_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Eg_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Ig_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Amax_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Amin_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->Arest_slider, SIGNAL(sliderReleased()), this, SLOT(autoupdateActivationsPlot()));
+    connect(ui->MaxFreq_spinBox, SIGNAL(editingFinished()), this, SLOT(autoupdateActivationsPlot()));
+
     ///// RECENT FILES
     //////////////////////////////////////
     ui->menuFile->addSeparator();
@@ -178,7 +187,7 @@ void MainWindow::initializeWeightsPlot() {
     colorScale->axis()->setLabel("Weights");
 
     // set the color gradient of the color map to one of the presets:
-    colorMap->setGradient(QCPColorGradient::gpJet);
+    colorMap->setGradient(QCPColorGradient::gpHot);
     // we could have also created a QCPColorGradient instance and added own
     // colors to
     // the gradient, see the documentation of QCPColorGradient for what's
@@ -539,7 +548,7 @@ void MainWindow::on_runButton_clicked() {
     updateWeightsPlot();
 
     ui->runButton->setToolTip("Start the experiment");
-    ui->runButton->setText("Update");
+    ui->runButton->setText("Run!");
 
     ui->runButton->setDisabled(false);
 
@@ -679,81 +688,76 @@ void MainWindow::update_expe_description_parameter(const QString &name,
     }
 }
 
+void MainWindow::updateParameter(const string& name, double value) {
+
+    if (memory) {
+        memory->set_parameter(name, value);
+    }
+
+    update_expe_description_parameter(QString::fromStdString(name), value);
+
+
+}
+
 void MainWindow::on_Dg_slider_sliderMoved(int position) {
     auto Dg = position * 1. / 100;
     set_ui_param(Dg, "Decay")
+    updateParameter("Dg", Dg);
 
-        if (memory) {
-        memory->set_parameter("Dg", Dg);
+ }
+
+
+void MainWindow::autoupdateActivationsPlot()
+{
+     if(ui->autoupdate_checkbox->isChecked()) {
+        on_runButton_clicked();
     }
 
-    update_expe_description_parameter("Dg", Dg);
 }
 
 void MainWindow::on_Lg_slider_sliderMoved(int position) {
     auto Lg = position * 1. / 100;
     set_ui_param(Lg, "Learning")
 
-        if (memory) {
-        memory->set_parameter("Lg", Lg);
-    }
-
-    update_expe_description_parameter("Lg", Lg);
+    updateParameter("Lg", Lg);
 }
 
 void MainWindow::on_Eg_slider_sliderMoved(int position) {
     auto Eg = position * 1. / 100;
     set_ui_param(Eg, "Ext. influence")
 
-        if (memory) {
-        memory->set_parameter("Eg", Eg);
-    }
+    updateParameter("Eg", Eg);
 
-    update_expe_description_parameter("Eg", Eg);
 }
 
 void MainWindow::on_Ig_slider_sliderMoved(int position) {
     auto Ig = position * 1. / 100;
     set_ui_param(Ig, "Int. influence")
 
-        if (memory) {
-        memory->set_parameter("Ig", Ig);
-    }
+    updateParameter("Ig", Ig);
 
-    update_expe_description_parameter("Ig", Ig);
 }
 
 void MainWindow::on_Amax_slider_sliderMoved(int position) {
     auto Amax = position * 1. / 100;
     set_ui_param(Amax, "Act. max")
 
-        if (memory) {
-        memory->set_parameter("Amax", Amax);
-    }
+    updateParameter("Amax", Amax);
 
-    update_expe_description_parameter("Amax", Amax);
 }
 
 void MainWindow::on_Amin_slider_sliderMoved(int position) {
     auto Amin = position * 1. / 100;
     set_ui_param(Amin, "Act. min")
 
-        if (memory) {
-        memory->set_parameter("Amin", Amin);
-    }
-
-    update_expe_description_parameter("Amin", Amin);
+    updateParameter("Amin", Amin);
 }
 
 void MainWindow::on_Arest_slider_sliderMoved(int position) {
     auto Arest = position * 1. / 100;
     set_ui_param(Arest, "Act. rest")
 
-        if (memory) {
-        memory->set_parameter("Arest", Arest);
-    }
-
-    update_expe_description_parameter("Arest", Arest);
+    updateParameter("Arest", Arest);
 }
 
 void MainWindow::on_MaxFreq_spinBox_valueChanged(int MaxFreq) {
@@ -896,4 +900,3 @@ void SimpleMarkdownHighlighter::highlightBlock(const QString &text)
         }
     }
 }
-

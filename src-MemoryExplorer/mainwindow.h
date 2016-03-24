@@ -65,6 +65,8 @@ class MainWindow : public QMainWindow {
 
     void on_hide_all_activations_plots_clicked();
 
+    void autoupdateActivationsPlot();
+
 private:
     void initializeWeightsPlot();
     void initializeActivationsPlot();
@@ -88,6 +90,7 @@ private:
     void loadExperiment(const QString &filename);
     void setupExperiment(const Experiment &expe);
 
+    void updateParameter(const std::string &name, double value);
     void update_expe_description_parameter(const QString &name, double value);
 
     void setCurrentFile(const QString &fileName);

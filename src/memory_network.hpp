@@ -60,7 +60,8 @@ public:
      * The update frequency is set to max_freq.  Calling slowdown with
      * max_freq=0 removes any previously set limit.
      */
-    void max_frequency(float freq) {_max_freq = freq;}
+    void max_frequency(double freq);
+    std::chrono::microseconds internal_period() const {return _min_period;}
 
     void set_parameter(const std::string& name, double value);
     double get_parameter(const std::string& name) const;
@@ -114,8 +115,9 @@ private:
 
     void printout();
 
+    std::chrono::microseconds _min_period = std::chrono::microseconds::zero();
+
     int _frequency = 0;
-    float _max_freq = 0.f;
     int _steps_since_last_frequency_update = 0;
 
     std::chrono::high_resolution_clock::time_point _start_time;

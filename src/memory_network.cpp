@@ -135,6 +135,13 @@ void MemoryNetwork::set_parameter(const std::string& name, double value) {
     if(name == "Winit") {Winit = value; return;}
 }
 
+void MemoryNetwork::max_frequency(double freq) {
+
+    _min_period = microseconds(int(std::micro::den / freq));
+
+    cerr << "Setting the internal minimal period to " << duration_cast<microseconds>(_min_period).count() << "us" << endl;
+}
+
 double MemoryNetwork::get_parameter(const std::string& name) const {
 
     if(name == "Dg") {return Dg;}
@@ -182,8 +189,9 @@ void MemoryNetwork::step()
     auto dt = now - _last_timestamp;
     _last_timestamp = now;
 
-    if (_max_freq != 0.f) {
-        this_thread::sleep_for(microseconds(int(std::micro::den * 1./_max_freq)));
+    if (   _min_period != microseconds::zero()
+        && dt < _min_period) {
+        this_thread::sleep_for(_min_period - dt);
     }
 
 

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(AssociativeMemory)
 
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+
 add_definitions(-std=c++14)
 
 
@@ -28,6 +32,22 @@ install(FILES
     ${HEADERS}
     DESTINATION include/${PROJECT_NAME}
 )
+
+##########################################
+##       PKGCONFIG file                ###
+##########################################
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/associative-memory.pc.in")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/associative-memory.pc.in 
+                   ${CMAKE_CURRENT_BINARY_DIR}/associative-memory.pc
+                   @ONLY)
+    message(STATUS "configured ${CMAKE_CURRENT_SOURCE_DIR}/associative-memory.pc.in --> ${CMAKE_CURRENT_BINARY_DIR}/associative-memory.pc")
+
+    install(FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/associative-memory.pc
+            DESTINATION lib/pkgconfig)
+endif()
+
 
 ######################################################
 ##               experiment runner                  ##

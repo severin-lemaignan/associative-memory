@@ -20,6 +20,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/circular_buffer.hpp>
 
 #include <json/json.h>
 
@@ -35,10 +36,36 @@
 using namespace std;
 using namespace std::chrono;
 
+const int HISTORY_SAMPLING_RATE = 500;  // Hz
+const int HISTORY_LENGTH = 1000;  //samples
+
+map<size_t, boost::circular_buffer<double>> activations_logs;
+
+microseconds last_activations_log;
+
+void logging(microseconds time_from_start, const MemoryVector &levels) {
+
+    // at first call, initialize the circular buffers and set their capacity.
+    if (activations_logs.size() == 0) {
+        for (size_t i=0; i < NB_INPUT_UNITS; i++) {
+            activations_logs[i].set_capacity(HISTORY_LENGTH);
+        }
+    }
+
+    // if necessary, store the activation level
+    microseconds us_since_last_log = time_from_start - last_activations_log;
+    if (us_since_last_log.count() > (std::micro::den * 1. / HISTORY_SAMPLING_RATE)) {
+        last_activations_log = time_from_start;
+        for (size_t i = 0; i < levels.size(); i++) {
+            activations_logs[i].push_back(levels[i]);
+        }
+    }
+}
+
 MemoryView::MemoryView(const Json::Value& config, 
                        double decay_rate, double learning_rate):
     config(config),
-    memory(NB_INPUT_UNITS, nullptr, nullptr, decay_rate, learning_rate),
+    memory(NB_INPUT_UNITS, logging, nullptr, decay_rate, learning_rate),
     display_shadows(config.get("shadows", true).asBool()),
     display_labels(config.get("display_labels", true).asBool()),
     display_footer(config.get("display_footer", false).asBool())
@@ -495,21 +522,21 @@ void MemoryView::drawNodeDetails(Node* node, int offset, bool highlight) {
         glEnd();
 
         // graph itself
-        //glColor4f(1.f, .2f, 0.2f, 1.f);
-        //auto history = memory.activationHistory(node->getID());
+        glColor4f(1.f, .2f, 0.2f, 1.f);
+        auto history = activations_logs[node->getID()];
 
-        //glBegin(GL_LINE_STRIP);
-        //for(int i=0;i<history.size();i++) {
-        //    auto activity = history[i];
+        glBegin(GL_LINE_STRIP);
+        for(int i=0;i<history.size();i++) {
+            auto activity = history[i];
 
-        //    vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
-        //    vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
+            vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
+            vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
 
-        //    glVertex2fv(pos1);
-        //    glVertex2fv(pos2);
-        //}
+            glVertex2fv(pos1);
+            glVertex2fv(pos2);
+        }
 
-        //glEnd();
+        glEnd();
 
         glEnable(GL_TEXTURE_2D);
 

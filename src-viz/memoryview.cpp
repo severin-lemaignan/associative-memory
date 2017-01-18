@@ -38,7 +38,7 @@ using namespace std::chrono;
 MemoryView::MemoryView(const Json::Value& config, 
                        double decay_rate, double learning_rate):
     config(config),
-    memory(NB_INPUT_UNITS, decay_rate, learning_rate),
+    memory(NB_INPUT_UNITS, nullptr, nullptr, decay_rate, learning_rate),
     display_shadows(config.get("shadows", true).asBool()),
     display_labels(config.get("display_labels", true).asBool()),
     display_footer(config.get("display_footer", false).asBool())
@@ -495,21 +495,21 @@ void MemoryView::drawNodeDetails(Node* node, int offset, bool highlight) {
         glEnd();
 
         // graph itself
-        glColor4f(1.f, .2f, 0.2f, 1.f);
-        auto history = memory.activationHistory(node->getID());
+        //glColor4f(1.f, .2f, 0.2f, 1.f);
+        //auto history = memory.activationHistory(node->getID());
 
-        glBegin(GL_LINE_STRIP);
-        for(int i=0;i<history.size();i++) {
-            auto activity = history[i];
+        //glBegin(GL_LINE_STRIP);
+        //for(int i=0;i<history.size();i++) {
+        //    auto activity = history[i];
 
-            vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
-            vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
+        //    vec2f pos1(h_offset + i * width / history.size(), v_offset + height - activity * height);
+        //    vec2f pos2(h_offset + (i+1) * width / history.size(), v_offset + height - activity * height);
 
-            glVertex2fv(pos1);
-            glVertex2fv(pos2);
-        }
+        //    glVertex2fv(pos1);
+        //    glVertex2fv(pos2);
+        //}
 
-        glEnd();
+        //glEnd();
 
         glEnable(GL_TEXTURE_2D);
 

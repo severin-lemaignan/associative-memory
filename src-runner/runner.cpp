@@ -97,8 +97,10 @@ int main(int argc, char *argv[]) {
     cerr << "-------------------------------------------------" << endl << endl;
     auto& expe = experiment_parser.expe;
 
-    MemoryNetwork memory(expe.units.size(), &logging);
-    memory.units_names(expe.units);
+    MemoryNetwork memory(&logging);
+    for (const auto& unit : expe.units) {
+        memory.add_unit(unit);
+    }
 
     if (expe.parameters.count("MaxFreq")) {
         memory.max_frequency(expe.parameters["MaxFreq"]);

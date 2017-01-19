@@ -624,11 +624,14 @@ void MainWindow::setupExperiment(const Experiment &_expe) {
                   ref(_last_external_activations_log), std::placeholders::_1,
                   std::placeholders::_2);
 
-    memory = make_unique<MemoryNetwork>(expe.units.size(), activations_logging,
+    memory = make_unique<MemoryNetwork>(activations_logging,
                                         external_activations_logging);
 
     memory->use_physical_time(!ui->simulated_time_checkbox->isChecked());
-    memory->units_names(expe.units);
+
+    for(const auto& unit : expe.units) {
+        memory->add_unit(unit);
+    }
 
     set_param("Dg")
     set_ui_param(Dg, "Decay")

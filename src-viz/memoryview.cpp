@@ -46,8 +46,8 @@ microseconds last_activations_log;
 void logging(microseconds time_from_start, const MemoryVector &levels) {
 
     // at first call, initialize the circular buffers and set their capacity.
-    if (activations_logs.size() == 0) {
-        for (size_t i=0; i < NB_INPUT_UNITS; i++) {
+    if (activations_logs.size() != levels.size()) {
+        for (size_t i=0; i < levels.size(); i++) {
             activations_logs[i].set_capacity(HISTORY_LENGTH);
         }
     }
@@ -65,12 +65,15 @@ void logging(microseconds time_from_start, const MemoryVector &levels) {
 MemoryView::MemoryView(const Json::Value& config, 
                        double decay_rate, double learning_rate):
     config(config),
-    memory(NB_INPUT_UNITS, logging, nullptr, decay_rate, learning_rate),
+    memory(logging, nullptr, decay_rate, learning_rate),
     display_shadows(config.get("shadows", true).asBool()),
     display_labels(config.get("display_labels", true).asBool()),
     display_footer(config.get("display_footer", false).asBool())
 {
 
+    for(size_t i=0; i < NB_INPUT_UNITS; i++) {
+        memory.add_unit(string("input") + to_string(i));
+    }
 
     time_scale = 1.0f;
     runtime = 0.0f;
@@ -188,7 +191,6 @@ void MemoryView::init(){
 
     TRACE("*** Initialization ***");
 
-    initFromMemoryNetwork();
     memory.start();
 
     TRACE("*** Graph created and populated ***");
@@ -241,6 +243,10 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
 
         if(e->keysym.sym == SDLK_s) {
             g.saveToGraphViz(*this);
+        }
+
+        if(e->keysym.sym == SDLK_a) {
+            memory.add_unit(string("input") + to_string(memory.size()));
         }
     }
 }
@@ -886,13 +892,15 @@ void MemoryView::initFromMemoryNetwork() {
 
             auto& n1 = g.getNode(i);
             auto& n2 = g.getNode(j);
-            g.addEdge(n1, n2);
+            if(!g.getEdge(n1, n2)) g.addEdge(n1, n2);
         }
     }
 
 }
 
 void MemoryView::updateFromMemoryNetwork(const MemoryNetwork& memory) {
+
+    if (memory.size() > g.nodesCount()) initFromMemoryNetwork();
 
     for (size_t i = 0; i < memory.size(); i++) {
         g.getNode(i).activity = memory.activations()(i);

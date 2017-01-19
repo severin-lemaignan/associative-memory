@@ -12,8 +12,7 @@ using namespace std;
 using namespace std::chrono;
 
 
-MemoryNetwork::MemoryNetwork(size_t size,
-                             LoggingFunction activations_log_fn,
+MemoryNetwork::MemoryNetwork(LoggingFunction activations_log_fn,
                              LoggingFunction external_activations_log_fn,
                              double Dg,   
                              double Lg,   
@@ -35,21 +34,6 @@ MemoryNetwork::MemoryNetwork(size_t size,
                 _log_external_activation(external_activations_log_fn),
                 gen(rd())
 {
-
-    rest_activations.resize(size);
-    _units_names.resize(size);
-
-    external_activations.resize(size);
-    external_activations_decay.resize(size);
-    internal_activations.resize(size);
-    net_activations.resize(size);
-    _activations.resize(size);
-    _weights.resize(size, size);
-
-
-    for (size_t i = 0; i < size; i++) {
-        _units_names.push_back(string("input") + to_string(i));
-    }
 
     reset();
 }
@@ -102,17 +86,23 @@ size_t MemoryNetwork::unit_id(const std::string& name) const {
     for ( ; i < _units_names.size(); i++) {
         if (_units_names[i] == name) return i;
     }
-    return i;
+    throw range_error(name + ": Inexistant unit name!");
 }
 
-void MemoryNetwork::units_names(const std::set<std::string>& names) {
-    // input is a set as we do not want to identical unit name,
-    // but we internally store it as a vector as each unit must have
-    // a unique ID.
-    if (_is_running) throw runtime_error("Can not change the names of units once the network is running.");
+size_t MemoryNetwork::add_unit(const std::string& name) {
 
-    _units_names.clear();
-    copy(names.begin(), names.end(), std::back_inserter(_units_names));
+    cerr << "Adding unit " << name << endl;
+    if (has_unit(name)) {
+        throw runtime_error(name + " is already used. Two units can not have the same name.");
+    }
+
+    _units_names.push_back(name);
+
+    return _units_names.size();
+}
+
+bool MemoryNetwork::has_unit(const std::string& name) const {
+    return (find(_units_names.begin(), _units_names.end(), name) != _units_names.end());
 }
 
 void MemoryNetwork::set_parameter(const std::string& name, double value) {
@@ -174,6 +164,8 @@ double MemoryNetwork::get_parameter(const std::string& name) const {
     if(name == "Amin") {return Amin;}
     if(name == "Arest") {return Arest;}
     if(name == "Winit") {return Winit;}
+
+    throw range_error(name + " is not a valid parameter name");
 }
 
 void MemoryNetwork::start() {
@@ -241,6 +233,12 @@ void MemoryNetwork::step()
         dt = _min_period;
         _elapsed_time += dt;
     }
+
+    // If new units were added, resize the network
+    // *******************************************
+    
+    auto nbunits = _units_names.size();
+    for(size_t i=size();i<nbunits;i++) incrementsize();
 
     // Establish connections
     // *********************
@@ -350,4 +348,33 @@ void MemoryNetwork::printout() {
 
     }
     cerr << endl;
+}
+
+void MemoryNetwork::incrementsize() {
+
+    auto size = _size + 1;
+
+    rest_activations.conservativeResize(size);
+    rest_activations(size-1) = Arest;
+
+    external_activations.conservativeResize(size);
+    external_activations(size-1) = 0;
+
+    external_activations_decay.conservativeResize(size);
+    external_activations_decay(size-1) = 0;
+
+    internal_activations.conservativeResize(size);
+    internal_activations(size-1) = 0;
+
+    net_activations.conservativeResize(size);
+    net_activations(size-1) = 0;
+
+    _activations.conservativeResize(size);
+    _activations(size-1) = Arest;
+
+    _weights.conservativeResize(size, size);
+    _weights.row(size-1).fill(NAN);
+    _weights.col(size-1).fill(NAN);
+
+    _size = size;
 }

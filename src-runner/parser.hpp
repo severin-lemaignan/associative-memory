@@ -8,11 +8,13 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 
 #include <boost/bind.hpp>
 
+#include <iostream>
 #include <string>
 
 #include "experiment.hpp"
@@ -37,7 +39,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 template <typename Iterator>
 struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
 {
-    experiment_grammar() : experiment_grammar::base_type(start)
+    experiment_grammar() : experiment_grammar::base_type(start, "memoryexperiment")
     {
         using qi::eol;
         using qi::omit;
@@ -49,17 +51,29 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
         using ascii::space;
         using qi::lexeme;
 
+        // error handling
+        using qi::on_error;
+        using qi::fail;
+        using phx::construct;
+        using phx::val;
+
+
         double_ruler = lexeme[+(char_('='))] >> eol;
+        double_ruler.name("double_ruler");
         simple_ruler = lexeme[+(char_('-'))] >> eol;
+        simple_ruler.name("simple_ruler");
 
         text %= lexeme[+(char_ - eol)];
+        text.name("text");
         identifier %= lexeme[+(char_ - eol - char_(':'))];
+        identifier.name("identifier");
 
         listitem %= omit[   char_('-') 
                          >> space] 
                  >> identifier 
                  >> omit[ -char_(':')]
                  >> eol;
+        listitem.name("list");
 
         paramitem %= omit[   *space 
                           >> char_('-') 
@@ -71,6 +85,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                  >> omit[ -(  +space
                             >> text)]
                  >> eol;
+        paramitem.name("parameter");
 
         perioditem %= omit[   *space
                            >> char_('-')
@@ -82,24 +97,31 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                    >> long_ 
                    >> ']' 
                    >> eol;
+        perioditem.name("interval");
 
         title1 %= text >> omit[eol >> double_ruler];
+        title1.name("title1");
         title2 %= text >> omit[eol >> simple_ruler];
+        title2.name("title2");
 
         paramstitle = lit("Network Parameters") >> eol 
                   >> simple_ruler;
+        paramstitle.name("parameter section title");
 
         unitstitle = lit("Units") >> eol 
                   >> simple_ruler;
+        unitstitle.name("units section title");
 
         activationstitle = lit("Activations") >> eol 
                         >> simple_ruler;
+        activationstitle.name("activations section title");
 
         plotstitle = lit("Plots") >> eol 
                   >> simple_ruler;
+        plotstitle.name("plots section title");
 
         start = title1[boost::bind(&Experiment::set_name, &expe, _1)] >> *eol 
-             >> text >> *eol 
+             >> *text >> *eol
 
              >> paramstitle >> *eol
              >> *(paramitem[boost::bind(&Experiment::store_param, &expe, _1)]) 
@@ -117,7 +139,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                 )
 
              >> *eol
-             >> plotstitle >> *eol
+             >> *plotstitle >> *eol
              >> *(
                         listitem[_a = qi::_1]
                      >> +(perioditem[phx::bind(&Experiment::add_plot, &expe, qi::_a, qi::_1)])
@@ -125,10 +147,26 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                 )
 
                 ;
+        start.name("experiment");
 
-        //BOOST_SPIRIT_DEBUG_NODE(start);
-        //BOOST_SPIRIT_DEBUG_NODE(paramstitle);
-        //BOOST_SPIRIT_DEBUG_NODE(paramitem);
+
+        // TODO: never called for some reason...
+        on_error<fail>
+        (
+            start
+          , std::cout
+                << val("Error! Expecting ")
+             //   << _4                               // what failed?
+             //   << val(" here: \"")
+             //   << construct<std::string>(_3, _2)   // iterators to error-pos, end
+             //   << val("\"")
+                << std::endl
+        );
+
+        //debug(start);
+        //debug(title1);
+        //debug(paramstitle);
+        //debug(paramitem);
     }
 
     Experiment expe;

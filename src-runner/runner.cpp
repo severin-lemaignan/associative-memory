@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     if (r && iter == str.end()) {
         experiment_parser.expe.summary();
     } else {
-        cerr << "Parsing of " << conf << " failed!";
+        cerr << "Parsing of " << conf << " failed!" << endl;
         return 1;
     }
 

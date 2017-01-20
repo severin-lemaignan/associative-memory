@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <utility> // make_pair
 #include <iterator>
 #include <ratio>
 #include <thread>
@@ -69,14 +70,20 @@ void MemoryNetwork::activate_unit(const string& unit,
                                   double level,
                                   microseconds duration) {
     auto id = unit_id(unit);
-    if (id >= _units_names.size()) throw range_error(unit + ": Inexistant unit name!");
-
     activate_unit(id, level, duration);
 }
 
 void MemoryNetwork::activate_unit(size_t id,
                                   double level,
                                   microseconds duration) {
+
+    // the excited unit has recently been added, and the network update thread has not yet resized the network. Skip this excitation 
+    if (id >= size()) return;
+
+    if(_is_recording) {
+        _activations_history[id].push_back(make_pair(elapsed_time(), duration));
+    }
+
     external_activations(id) = level;
     external_activations_decay(id) = duration.count();
 }
@@ -240,6 +247,8 @@ void MemoryNetwork::step()
     auto nbunits = _units_names.size();
     for(size_t i=size();i<nbunits;i++) incrementsize();
 
+    if (size() == 0) return;
+
     // Establish connections
     // *********************
 
@@ -377,4 +386,59 @@ void MemoryNetwork::incrementsize() {
     _weights.col(size-1).fill(NAN);
 
     _size = size;
+}
+
+void MemoryNetwork::save_record() {
+
+    stringstream ss;
+
+    double period= chrono::duration<double>(_min_period).count(); 
+    std::time_t result = std::time(nullptr);
+
+    ss <<
+        "Experiment\n"
+        "==========\n"
+        "\n"
+        "Experiment recorded on " << std::asctime(std::localtime(&result)) << "\n"
+        "\n"
+        "Network Parameters\n"
+        "------------------\n"
+        "\n" <<
+        "- Dg: " << to_string(Dg) << " (activation decay per ms)\n" <<
+        "- Lg: " << to_string(Lg) << " (learning rate per ms)\n" << 
+        "- Eg: " << to_string(Eg) << " (external influence)\n" <<
+        "- Ig: " << to_string(Ig) << " (internal influence)\n" <<
+        "- Amax: " << to_string(Amax) << " (maximum activation)\n" <<
+        "- Amin: " << to_string(Amin) << " (minimum activation)\n" <<
+        "- Arest: " << to_string(Arest) << " (rest activation)\n" <<
+        "- Winit: " << to_string(Winit) << " (initial weights)\n" <<
+        "- MaxFreq: " << to_string(period == 0 ? 0 : 1/period) << " (maximum network update frequency -- 0 means no limit)\n" <<
+        "\n"
+        "Units\n"
+        "-----\n"
+        "\n";
+
+    for (const auto& unit: _units_names) {
+        ss << "- " << unit << "\n";
+    }
+
+    ss << "\n"
+          "Activations\n"
+          "-----------\n"
+          "\n";
+
+    for (const auto& unit: _units_names) {
+        if (_activations_history[unit_id(unit)].empty()) continue;
+
+        ss << "- " << unit << "\n";
+        for (const auto& interval : _activations_history[unit_id(unit)]) {
+            auto start = duration_cast<milliseconds>(interval.first);
+            auto duration = duration_cast<milliseconds>(interval.second);
+
+            ss << "    - [" << start.count() << "," << start.count() + duration.count() << "]\n";
+
+        }
+    }
+
+    cout << ss.str();
 }

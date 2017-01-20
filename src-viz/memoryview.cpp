@@ -191,6 +191,7 @@ void MemoryView::init(){
 
     TRACE("*** Initialization ***");
 
+    memory.record(true);
     memory.start();
 
     TRACE("*** Graph created and populated ***");
@@ -204,6 +205,7 @@ void MemoryView::keyPress(SDL_KeyboardEvent *e) {
     if (e->type == SDL_KEYDOWN) {
         if (e->keysym.sym == SDLK_ESCAPE) {
             memory.stop();
+            memory.save_record();
             appFinished=true;
         }
 

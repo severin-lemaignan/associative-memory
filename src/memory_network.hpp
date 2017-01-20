@@ -147,6 +147,10 @@ public:
     void stop();
     bool isrunning() const {return _is_running;}
 
+    void record(bool enabled) {_is_recording=enabled;}
+    bool isrecording() {return _is_recording;}
+    void save_record();
+
     double Dg;
     double Lg;
     double Eg;
@@ -183,12 +187,17 @@ private:
 
     /** Conservatively increment the size the network. Conserves the current
      * weights, activations.
+     *
+     * *Needs to be called from the network update thread!*
      */
     void incrementsize();
 
     std::thread _network_thread;
 
     bool _is_running = false;
+
+    bool _is_recording = false;
+    std::map<size_t, std::vector<std::pair<std::chrono::microseconds, std::chrono::microseconds>>> _activations_history;
 
     void printout();
 

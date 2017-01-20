@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace std::chrono;
+using namespace std::chrono_literals;
 
 const int HISTORY_SAMPLING_RATE = 500;  // Hz
 const int HISTORY_LENGTH = 1000;  //samples
@@ -379,7 +380,7 @@ void MemoryView::logic(float t, float dt) {
 
     // Activate units under the mouse
     if(hoverNode && _activate_on_hover) {
-        memory.activate_unit(hoverNode->getID(), 1.0);
+        memory.activate_unit(hoverNode->getID(), 1.0, 40000us );
     }
 
     updateFromMemoryNetwork(memory);

@@ -7,6 +7,7 @@
 #include <functional>
 
 #include <QMessageBox>
+#include <QFileInfo>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -464,6 +465,7 @@ void MainWindow::setCurrentFile(const QString &fileName) {
     while (files.size() > MaxRecentFiles) files.removeLast();
 
     settings.setValue("recentFileList", files);
+    settings.setValue("recentDirectory", QFileInfo(fileName).absolutePath());
 
     foreach (QWidget *widget, QApplication::topLevelWidgets()) {
         MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
@@ -573,11 +575,13 @@ void MainWindow::on_runButton_clicked() {
 }
 
 void MainWindow::on_actionOpen_triggered() {
+    QSettings settings;
+    QString dir = settings.value("recentDirectory").toString();
     auto conf =
-        QFileDialog::getOpenFileName(this, tr("Open experiment"), "",
+        QFileDialog::getOpenFileName(this, tr("Open experiment"), dir,
                                      tr("Experiment Files (*.md *.csv *.txt)"));
 
-    loadExperiment(conf);
+    if(!conf.isNull()) loadExperiment(conf);
 }
 
 void MainWindow::openRecentFile() {

@@ -494,6 +494,14 @@ QString MainWindow::strippedName(const QString &fullFileName) {
 }
 
 void MainWindow::on_runButton_clicked() {
+
+    if(ui->simulated_time_checkbox->isChecked() && ui->MaxFreq_spinBox->value() == 0) {
+        QMessageBox msgBox;
+        msgBox.setText("When using simulated time, you must specify a non-zero frequency for the main loop!");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+        return;
+    }
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     ui->runButton->setText("Running...");

@@ -197,7 +197,7 @@ private:
     bool _is_running = false;
 
     bool _is_recording = false;
-    std::map<size_t, std::vector<std::pair<std::chrono::microseconds, std::chrono::microseconds>>> _activations_history;
+    std::map<size_t, std::vector<std::tuple<float, std::chrono::microseconds, std::chrono::microseconds>>> _activations_history;
 
     void printout();
 

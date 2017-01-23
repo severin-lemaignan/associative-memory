@@ -81,8 +81,33 @@ void MemoryNetwork::activate_unit(size_t id,
     if (id >= size()) return;
 
     if(_is_recording) {
-        _activations_history[id].push_back(make_pair(elapsed_time(), duration));
+        auto now = elapsed_time();
+
+        if (_activations_history[id].empty()) {
+            _activations_history[id].push_back(make_tuple(level, now, duration));
+        }
+        else {
+            // check if we can merge with the last record
+
+            chrono::microseconds lasttime,lastduration;
+            float lastlevel;
+            tie(lastlevel, lasttime,lastduration) = _activations_history[id].back();
+
+            if (lasttime + lastduration < now) { // no overlap with previous, good.
+                _activations_history[id].push_back(make_tuple(level, now, duration));
+            }
+            else {
+                if (level != lastlevel) { // trim previous record, and add new one
+                    _activations_history[id].back() = make_tuple(lastlevel, lasttime, now - lasttime);
+                    _activations_history[id].push_back(make_tuple(level, now, duration));
+                }
+                else { // same levels: merge!
+                    _activations_history[id].back() = make_tuple(level, lasttime, now + duration - lasttime);
+                }
+            }
+        }
     }
+
 
     external_activations(id) = level;
     external_activations_decay(id) = duration.count();
@@ -430,12 +455,13 @@ void MemoryNetwork::save_record() {
     for (const auto& unit: _units_names) {
         if (_activations_history[unit_id(unit)].empty()) continue;
 
-        ss << "- " << unit << "\n";
+        ss << "- " << unit << ":\n";
         for (const auto& interval : _activations_history[unit_id(unit)]) {
-            auto start = duration_cast<milliseconds>(interval.first);
-            auto duration = duration_cast<milliseconds>(interval.second);
+            chrono::microseconds start,duration;
+            float level;
+            tie(level,start,duration) = interval;
 
-            ss << "    - [" << start.count() << "," << start.count() + duration.count() << "]\n";
+            ss << "    - [" << duration_cast<milliseconds>(start).count() << "," << duration_cast<milliseconds>(start + duration).count() << "] at " << level << "\n";
 
         }
     }

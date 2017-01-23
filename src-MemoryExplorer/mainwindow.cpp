@@ -535,9 +535,15 @@ void MainWindow::on_runButton_clicked() {
             this_thread::sleep_for(milliseconds(kv.first - last_activation));
 
             for (auto &activation : kv.second) {
-                cerr << " - Activating " << activation.first << " for "
-                    << activation.second.count() << "ms" << endl;
-                memory->activate_unit(activation.first, 1.0, activation.second);
+                string name;
+                float level;
+                chrono::milliseconds duration;
+                tie(name, level, duration) = activation;
+
+                cerr << "    - Activating " << name <<
+                     " at level " << level <<
+                    "	 for " << duration.count() << "ms" << endl;
+                memory->activate_unit(name, level, duration);
             }
 
             last_activation = kv.first;
@@ -554,7 +560,12 @@ void MainWindow::on_runButton_clicked() {
                 this_thread::sleep_for(microseconds(1));
             }
             for (auto &activation : kv.second) {
-                memory->activate_unit(activation.first, 1.0, activation.second);
+                string name;
+                float level;
+                chrono::milliseconds duration;
+                tie(name, level, duration) = activation;
+
+                memory->activate_unit(name, level, duration);
             }
         }
 

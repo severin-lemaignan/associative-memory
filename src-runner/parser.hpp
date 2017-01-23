@@ -30,6 +30,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+        activationperiod,
+        (long int, start)
+        (long int, stop)
+        (float, level)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
         parameter,
         (std::string, name)
         (double, value)
@@ -95,9 +102,22 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
                    >> ',' 
                    >> omit[*space]
                    >> long_ 
-                   >> ']' 
+                   >> ']'
                    >> eol;
-        perioditem.name("interval");
+        perioditem.name("time interval");
+
+        activationitem %= omit[   *space
+                           >> char_('-')
+                           >> space 
+                           >> '[' ]
+                   >> long_ 
+                   >> ',' 
+                   >> omit[*space]
+                   >> long_ 
+                   >> ']' >> omit[*space] >> lit("at") >> omit[*space]
+                   >> double_
+                   >> eol;
+        activationitem.name("activation interval");
 
         title1 %= text >> omit[eol >> double_ruler];
         title1.name("title1");
@@ -134,7 +154,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
              >> activationstitle >> *eol 
              >> *(
                         listitem[_a = qi::_1]
-                     >> +(perioditem[phx::bind(&Experiment::add_activation, &expe, qi::_a, qi::_1)])
+                     >> +(activationitem[phx::bind(&Experiment::add_activation, &expe, qi::_a, qi::_1)])
                      >> *eol
                 )
 
@@ -167,6 +187,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
         //debug(title1);
         //debug(paramstitle);
         //debug(paramitem);
+        //debug(paramitem);
     }
 
     Experiment expe;
@@ -178,6 +199,7 @@ struct experiment_grammar : qi::grammar<Iterator, qi::locals<std::string>>
     qi::rule<Iterator, std::string()> listitem;
     qi::rule<Iterator, parameter()> paramitem;
     qi::rule<Iterator, timeperiod()> perioditem;
+    qi::rule<Iterator, activationperiod()> activationitem;
     qi::rule<Iterator, std::string()> title1;
     qi::rule<Iterator, std::string()> title2;
     qi::rule<Iterator> paramstitle;

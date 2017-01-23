@@ -22,11 +22,11 @@ void Experiment::add_unit(string& unit) {
     units.insert(unit);
 }
 
-void Experiment::add_activation(const string& unit, const timeperiod& period) {
+void Experiment::add_activation(const string& unit, const activationperiod& period) {
 
     duration = milliseconds(max(duration.count(), period.stop));
 
-    activations[period.start].push_back({unit, milliseconds(period.stop - period.start)});
+    activations[period.start].push_back(make_tuple(unit, period.level, milliseconds(period.stop - period.start)));
 }
 
 void Experiment::add_plot(const string& unit, const timeperiod& period) {
@@ -57,7 +57,9 @@ void Experiment::summary() const
     for (auto& kv : activations) {
         cerr << "  - at " << kv.first << "ms: " << endl;
         for (auto& activation : kv.second) {
-            cerr << "    - " << activation.first << " for " << activation.second.count() << "ms" << endl;
+            cerr << "    - " << std::get<0>(activation) << 
+                " at level " << std::get<1>(activation) << 
+                     " for " << std::get<2>(activation).count() << "ms" << endl;
         }
 
     }

@@ -14,6 +14,13 @@ struct timeperiod
     long int stop;
 };
 
+struct activationperiod
+{
+    long int start;
+    long int stop;
+    float level;
+};
+
 struct parameter
 {
     std::string name;
@@ -22,11 +29,11 @@ struct parameter
 
 struct Experiment
 {
-    typedef std::pair<std::string, std::chrono::milliseconds> Duration;
+    typedef std::tuple<std::string, float, std::chrono::milliseconds> Activation;
 
     std::map<std::string, double> parameters;
     std::set<std::string> units;
-    std::map<int, std::vector<Duration>> activations;
+    std::map<int, std::vector<Activation>> activations;
     std::map<std::string, std::vector<timeperiod>> plots;
 
     std::string name;
@@ -40,7 +47,7 @@ struct Experiment
 
     void add_unit(std::string& unit);
 
-    void add_activation(const std::string& unit, const timeperiod& period);
+    void add_activation(const std::string& unit, const activationperiod& period);
    
     void add_plot(const std::string& unit, const timeperiod& period);
 

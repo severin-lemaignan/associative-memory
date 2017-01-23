@@ -862,8 +862,10 @@ void MainWindow::on_actionSave_triggered() {
 }
 
 void MainWindow::on_action_Save_as_triggered() {
+    QSettings settings;
+    QString dir = settings.value("recentDirectory").toString();
     QString fileName = QFileDialog::getSaveFileName(
-        this, tr("Save experiment"), "", tr("Experiment Files (*.md *.txt)"));
+        this, tr("Save experiment"), dir, tr("Experiment Files (*.md *.txt)"));
     if (fileName.isEmpty()) return;
 
     saveFile(fileName);
@@ -872,9 +874,11 @@ void MainWindow::on_action_Save_as_triggered() {
 void MainWindow::on_actionQuit_triggered() { QApplication::closeAllWindows(); }
 
 void MainWindow::on_export_activation_plot_clicked() {
+    QSettings settings;
+    QString dir = settings.value("recentDirectory").toString();
     QString fileName =
         QFileDialog::getSaveFileName(this, tr("Export activations plot to PDF"),
-                                     "", tr("PDF Document (*.pdf)"));
+                                     dir, tr("PDF Document (*.pdf)"));
     if (fileName.isEmpty()) return;
 
     ui->activationPlot->savePdf(fileName, true, 0, 0,
@@ -905,8 +909,10 @@ void MainWindow::on_hide_all_activations_plots_clicked()
 }
 
 void MainWindow::on_export_weights_plot_clicked() {
+    QSettings settings;
+    QString dir = settings.value("recentDirectory").toString();
     QString fileName = QFileDialog::getSaveFileName(
-        this, tr("Export weights plot to PDF"), "", tr("PDF Document (*.pdf)"));
+        this, tr("Export weights plot to PDF"), dir, tr("PDF Document (*.pdf)"));
     if (fileName.isEmpty()) return;
 
     ui->weightPlot->savePdf(fileName, true, 0, 0, "Associative Memory Explorer",

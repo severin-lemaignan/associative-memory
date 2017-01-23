@@ -139,9 +139,9 @@ void MainWindow::initializeWeightsPlot() {
     ui->weightPlot->xAxis->grid()->setSubGridVisible(true);
     ui->weightPlot->yAxis->grid()->setSubGridVisible(true);
     ui->weightPlot->xAxis->grid()->setSubGridPen(
-        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+        QPen(QColor(10, 10, 10), 1, Qt::SolidLine));
     ui->weightPlot->yAxis->grid()->setSubGridPen(
-        QPen(QColor(140, 140, 140), 2, Qt::SolidLine));
+        QPen(QColor(10, 10, 10), 1, Qt::SolidLine));
     ui->weightPlot->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     ui->weightPlot->yAxis->grid()->setZeroLinePen(Qt::NoPen);
     QLinearGradient plotGradient;
@@ -244,13 +244,24 @@ void MainWindow::prepareWeightsPlot() {
 void MainWindow::updateWeightsPlot() {
     auto weights = memory->weights();
 
+
+
     // set up the QCPColorMap:
     QCPColorMap *colorMap =
         dynamic_cast<QCPColorMap *>(ui->weightPlot->plottable());
 
+    colorMap->data()->setSize(
+        weights.cols(),
+        weights.rows());  // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(
+        QCPRange(0, weights.cols() - 1),
+        QCPRange(0, weights.rows() - 1));  // and span the coordinate range
+                                           // -4..4 in both key (x) and value
+                                           // (y) dimensions
+
     for (int xIndex = 0; xIndex < weights.cols(); xIndex++) {
         for (int yIndex = 0; yIndex < weights.rows(); yIndex++) {
-            colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex));
+            colorMap->data()->setCell(xIndex, yIndex, weights(xIndex, yIndex)); // NAN is interpreted as 0 by colorMap
         }
     }
     ui->weightPlot->replot();
